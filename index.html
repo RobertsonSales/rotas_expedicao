@@ -1957,6 +1957,53 @@ svg.route {
     margin-bottom: 12px
 }
 
+.unit-photos {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 12px
+}
+
+.unit-photos.single {
+    grid-template-columns: 1fr
+}
+
+.photo-slot {
+    position: relative
+}
+
+.photo-slot .unit-photo {
+    margin-bottom: 0
+}
+
+.photo-slot-label {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    z-index: 2;
+    background: rgba(10, 32, 40, .72);
+    color: #fff;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 99px
+}
+
+.modal.modal-lg .photo-slot .unit-photo {
+    height: 190px
+}
+
+@media (max-width:720px) {
+    .unit-photos {
+        grid-template-columns: 1fr
+    }
+    .modal.modal-lg .photo-slot .unit-photo {
+        height: 150px
+    }
+}
+
 .map-details {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -2282,6 +2329,7 @@ let gmap = null,
     gDirectionsRenderer = null,
     gFallbackPolyline = null,
     gMarkers = [],
+    gHoverInfo = null,
     placesService = null,
     geocoderG = null;
 const DARK_MAP_STYLE = [{
@@ -2597,23 +2645,61 @@ function fetchGooglePlacePhoto(item) {
             resolve('');
             return;
         }
+        const hasCoords = Number.isFinite(item.lat) && Number.isFinite(item.lng);
         const query = [item.name, item.city, item.address, 'Brasil'].filter(Boolean).join(', ');
+
+        function extractPhoto(results, status) {
+            if (status === google.maps.places.PlacesServiceStatus.OK && results && results[0] && results[0].photos && results[0].photos[0]) {
+                return results[0].photos[0].getUrl({
+                    maxWidth: 640,
+                    maxHeight: 420
+                });
+            }
+            return '';
+        }
+
         placesService.findPlaceFromQuery({
             query,
             fields: ['photos', 'place_id']
         }, function(results, status) {
+            let url = '';
             try {
-                if (status === google.maps.places.PlacesServiceStatus.OK && results && results[0] && results[0].photos && results[0].photos[0]) {
-                    resolve(results[0].photos[0].getUrl({
-                        maxWidth: 640,
-                        maxHeight: 420
-                    }));
-                    return;
-                }
+                url = extractPhoto(results, status);
             } catch (e) {}
-            resolve('');
+            if (url) {
+                resolve(url);
+                return;
+            }
+            if (status !== google.maps.places.PlacesServiceStatus.OK) {
+                console.warn('Google Places (findPlaceFromQuery) sem sucesso para "' + query + '": ' + status);
+            }
+            /* Fallback: busca mais abrangente (textSearch) — encontra o local
+               mesmo quando o nome/endereço da planilha não bate exatamente
+               com o nome cadastrado no Google Maps, ou quando o resultado do
+               findPlaceFromQuery existe mas não tem fotos associadas. */
+            placesService.textSearch({
+                query,
+                location: hasCoords ? {
+                    lat: item.lat,
+                    lng: item.lng
+                } : undefined,
+                radius: hasCoords ? 3000 : undefined
+            }, function(results2, status2) {
+                let url2 = '';
+                try {
+                    url2 = extractPhoto(results2, status2);
+                } catch (e) {}
+                if (!url2 && status2 !== google.maps.places.PlacesServiceStatus.OK) {
+                    console.warn('Google Places (textSearch) sem sucesso para "' + query + '": ' + status2);
+                }
+                resolve(url2);
+            });
         });
     });
+}
+
+function markerHoverContent(name, address, urgencyLabel) {
+    return '<div style="font:600 12px system-ui,sans-serif;color:#183345;margin-bottom:2px">' + escHtml(name) + '</div>' + '<div style="font:11px system-ui,sans-serif;color:#5c6d6f;max-width:220px">' + escHtml(address || '') + '</div>' + (urgencyLabel ? '<div style="margin-top:4px;font:700 10px system-ui,sans-serif;color:' + urgencyLabel.c + '">' + escHtml(urgencyLabel.label) + '</div>' : '');
 }
 
 function drawGoogleMap(arr, legs) {
@@ -2624,9 +2710,11 @@ function drawGoogleMap(arr, legs) {
     gMarkers.forEach(function(m) {
         m.setMap(null);
     });
+    if (!gHoverInfo) gHoverInfo = new google.maps.InfoWindow();
     gMarkers = all.map(function(p, i) {
         const isBase = i === 0,
-            color = isBase ? '#192d43' : urgency[(arr[i - 1] && arr[i - 1].urgency) || 'Média'].c;
+            unit = isBase ? null : arr[i - 1],
+            color = isBase ? '#192d43' : urgency[(unit && unit.urgency) || 'Média'].c;
         const marker = new google.maps.Marker({
             position: toLatLng(p),
             map: gmap,
@@ -2645,6 +2733,19 @@ function drawGoogleMap(arr, legs) {
                 strokeWeight: 2
             },
             title: p.name
+        });
+        marker.addListener('mouseover', function() {
+            gHoverInfo.setContent(markerHoverContent(p.name, p.address, unit ? {
+                c: color,
+                label: unit.urgency || 'Média'
+            } : null));
+            gHoverInfo.open({
+                map: gmap,
+                anchor: marker
+            });
+        });
+        marker.addListener('mouseout', function() {
+            gHoverInfo.close();
         });
         marker.addListener('click', function() {
             mapPointModal(isBase ? base : arr[i - 1], i, base);
@@ -2709,10 +2810,27 @@ function renderModalMiniMap(origin, destination) {
                 styles: document.documentElement.classList.contains('dark') ? DARK_MAP_STYLE : []
             });
             const bounds = new google.maps.LatLngBounds();
-            [origin, destination].forEach(function(p) {
-                new google.maps.Marker({
+            const miniHoverInfo = new google.maps.InfoWindow();
+            [
+                [origin, 'Origem'],
+                [destination, 'Destino']
+            ].forEach(function(pair) {
+                const p = pair[0],
+                    label = pair[1];
+                const marker = new google.maps.Marker({
                     position: toLatLng(p),
-                    map: miniMap
+                    map: miniMap,
+                    label: label[0]
+                });
+                marker.addListener('mouseover', function() {
+                    miniHoverInfo.setContent(markerHoverContent(label + ' · ' + p.name, p.address));
+                    miniHoverInfo.open({
+                        map: miniMap,
+                        anchor: marker
+                    });
+                });
+                marker.addListener('mouseout', function() {
+                    miniHoverInfo.close();
                 });
                 bounds.extend(toLatLng(p));
             });
@@ -2751,7 +2869,7 @@ function render() {
     const cc = stops.filter(s => s.urgency === 'Super' || s.urgency === 'Alta').length;
     $('sumCritical').textContent = cc;
     $('sumCriticalSub').textContent = `${stops.filter(s=>s.urgency==='Super').length} super · ${stops.filter(s=>s.urgency==='Alta').length} alta`;
-    $('sumDriver').textContent = $('driver').value;
+    $('sumDriver').textContent = driverValue();
     renderSelected();
     renderUnits();
     drawMap(route ? route.ordered : stops.filter(s => selected.has(s.id)), route?.legs || [])
@@ -3012,28 +3130,78 @@ async function fetchUnitPhoto(item) {
     }
 }
 
+function applyPhotoResult(box, url, name) {
+    if (!box || !box.isConnected) return;
+    if (url) box.outerHTML = '<img class="unit-photo" src="' + url + '" alt="Foto de ' + escHtml(name) + '">';
+    else box.outerHTML = '<div class="unit-photo" style="display:grid;place-items:center;color:var(--soft)">Foto não localizada</div>';
+}
+
+function attachStreetView(item, requestId) {
+    const slotAtOpen = $('streetViewSlot');
+    if (!slotAtOpen) return;
+    const unavailable = '<span class="outline" id="streetViewSlot" style="opacity:.55;cursor:default" title="Sem cobertura do Street View perto deste endereço">👁 Street View indisponível aqui</span>';
+    if (!(gmapsReady && window.google && google.maps && google.maps.StreetViewService && Number.isFinite(item.lat) && Number.isFinite(item.lng))) {
+        if (slotAtOpen.isConnected) slotAtOpen.outerHTML = unavailable;
+        return;
+    }
+    new google.maps.StreetViewService().getPanorama({
+        location: {
+            lat: item.lat,
+            lng: item.lng
+        },
+        radius: 120,
+        source: google.maps.StreetViewSource.OUTDOOR
+    }, function(data, status) {
+        if (requestId !== mapPointRequestSeq) return;
+        const slot = slotAtOpen.isConnected ? slotAtOpen : $('streetViewSlot');
+        if (!slot || !slot.isConnected) return;
+        /* Só vira link se o Google confirmar uma panorâmica real perto do
+           ponto — evita abrir a nova aba e mostrar "Não há imagens do
+           Street View disponíveis aqui", como acontecia antes ao montar a
+           URL direto a partir da coordenada da unidade sem checar cobertura. */
+        if (status === google.maps.StreetViewStatus.OK && data && data.location && data.location.latLng) {
+            const lat = data.location.latLng.lat(),
+                lng = data.location.latLng.lng();
+            const url = 'https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=' + lat + ',' + lng;
+            slot.outerHTML = '<a class="outline" id="streetViewSlot" href="' + url + '" target="_blank" rel="noopener">👁 Abrir Street View</a>';
+        } else {
+            slot.outerHTML = unavailable;
+        }
+    });
+}
+
 function mapPointModal(item, index, base) {
     const leg = index > 0 && route && route.legs[index - 1] ? route.legs[index - 1] : null;
     const origin = index > 0 && route && route.ordered[index - 2] ? route.ordered[index - 2] : base;
+    const isBaseModal = index === 0;
     const travel = leg ? leg.m + ' min' : '—';
     const distance = leg ? Number(leg.km).toFixed(1) + ' km' : '—';
     const originText = origin.name + ' · ' + origin.address,
         destinationText = item.name + ' · ' + item.address;
     const mapsUrl = 'https://www.google.com/maps/dir/?api=1&origin=' + encodeURIComponent(origin.searchText || origin.address || origin.name) + '&destination=' + encodeURIComponent(item.searchText || item.address || item.name) + '&travelmode=driving';
-    const streetViewUrl = 'https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=' + item.lat + ',' + item.lng;
-    openModal(index === 0 ? 'Base de partida' : 'Unidade da rota', '<div id="mapPointContent"><div class="unit-photo" id="unitPhotoBox" style="display:grid;place-items:center;color:var(--soft)">Buscando foto…</div><h4 style="margin:0;color:var(--ink)">' + escHtml(item.name) + '</h4><p style="margin:6px 0;color:var(--soft);font-size:11px">' + escHtml(item.address) + '</p><div class="map-details"><div class="map-detail"><small>Tempo desde o ponto anterior</small><b>' + travel + '</b></div><div class="map-detail"><small>Quilometragem calculada</small><b>' + distance + '</b></div></div><div id="modalGmap" class="gmap-mini"></div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px"><a class="outline" href="' + mapsUrl + '" target="_blank" rel="noopener">↗ Abrir rota no Google Maps</a><a class="outline" href="' + streetViewUrl + '" target="_blank" rel="noopener">👁 Abrir Street View</a></div><p style="font-size:9px;color:var(--soft);margin:8px 0 0">Origem: ' + escHtml(originText) + '<br>Destino: ' + escHtml(destinationText) + '</p></div>', 'modal-lg');
-    /* Foto é sempre da unidade de DESTINO (item), nunca da origem.
-       requestId + captura do nó agora (antes do await) evitam que uma busca
-       lenta de um modal aberto anteriormente sobrescreva o modal atual. */
+    /* Base de partida não tem "origem" própria (ela é o ponto de partida),
+       então mostra só uma foto; qualquer outra parada mostra origem e
+       destino lado a lado. */
+    const photosHtml = isBaseModal ? '<div class="unit-photos single"><div class="photo-slot"><div class="photo-slot-label">Base</div><div class="unit-photo" id="destPhotoBox" style="display:grid;place-items:center;color:var(--soft)">Buscando foto…</div></div></div>' : '<div class="unit-photos"><div class="photo-slot"><div class="photo-slot-label">Origem</div><div class="unit-photo" id="originPhotoBox" style="display:grid;place-items:center;color:var(--soft)">Buscando foto…</div></div><div class="photo-slot"><div class="photo-slot-label">Destino</div><div class="unit-photo" id="destPhotoBox" style="display:grid;place-items:center;color:var(--soft)">Buscando foto…</div></div></div>';
+    openModal(isBaseModal ? 'Base de partida' : 'Unidade da rota', '<div id="mapPointContent">' + photosHtml + '<h4 style="margin:0;color:var(--ink)">' + escHtml(item.name) + '</h4><p style="margin:6px 0;color:var(--soft);font-size:11px">' + escHtml(item.address) + '</p><div class="map-details"><div class="map-detail"><small>Tempo desde o ponto anterior</small><b>' + travel + '</b></div><div class="map-detail"><small>Quilometragem calculada</small><b>' + distance + '</b></div></div><div id="modalGmap" class="gmap-mini"></div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px"><a class="outline" href="' + mapsUrl + '" target="_blank" rel="noopener">↗ Abrir rota no Google Maps</a><span class="outline" id="streetViewSlot" style="opacity:.6;cursor:default">👁 Verificando Street View…</span></div><p style="font-size:9px;color:var(--soft);margin:8px 0 0">Origem: ' + escHtml(originText) + '<br>Destino: ' + escHtml(destinationText) + '</p></div>', 'modal-lg');
+    /* requestId + captura dos nós agora (antes dos awaits) evitam que uma
+       busca lenta de um modal aberto anteriormente sobrescreva o modal
+       atual — era isso que antes fazia a foto "errada" (da origem)
+       aparecer no lugar da foto da unidade de destino. */
     const requestId = ++mapPointRequestSeq;
-    const photoBoxAtOpen = $('unitPhotoBox');
+    const destBoxAtOpen = $('destPhotoBox');
     fetchUnitPhoto(item).then(function(url) {
         if (requestId !== mapPointRequestSeq) return;
-        const photo = photoBoxAtOpen && photoBoxAtOpen.isConnected ? photoBoxAtOpen : $('unitPhotoBox');
-        if (!photo || !photo.isConnected) return;
-        if (url) photo.outerHTML = '<img class="unit-photo" src="' + url + '" alt="Foto de ' + escHtml(item.name) + '">';
-        else photo.outerHTML = '<div class="unit-photo" style="display:grid;place-items:center;color:var(--soft)">Foto não localizada</div>';
+        applyPhotoResult(destBoxAtOpen && destBoxAtOpen.isConnected ? destBoxAtOpen : $('destPhotoBox'), url, item.name);
     });
+    if (!isBaseModal) {
+        const originBoxAtOpen = $('originPhotoBox');
+        fetchUnitPhoto(origin).then(function(url) {
+            if (requestId !== mapPointRequestSeq) return;
+            applyPhotoResult(originBoxAtOpen && originBoxAtOpen.isConnected ? originBoxAtOpen : $('originPhotoBox'), url, origin.name);
+        });
+    }
+    attachStreetView(item, requestId);
     renderModalMiniMap(origin, item);
 }
 
@@ -3103,7 +3271,8 @@ function drawFallbackMap(arr, legs) {
         }).join(' ');
     $('routeSvg').innerHTML = '<polyline points="' + line + '" fill="none" stroke="#0d8c78" stroke-width=".9" stroke-dasharray="' + (legs.length ? '0' : '2 2') + '" stroke-linecap="round" stroke-linejoin="round"/>' + pts.map(function(p, i) {
         const item = i === 0 ? base : arr[i - 1];
-        return '<g data-point="' + i + '" transform="translate(' + p.x + ' ' + p.y + ')" style="cursor:pointer"><circle r="' + (i === 0 ? 2.4 : 2.1) + '" fill="' + (i === 0 ? '#192d43' : urgency[arr[i - 1]?.urgency || 'Média'].c) + '" stroke="#fff" stroke-width=".8"/><text y=".8" text-anchor="middle" fill="#fff" font-size="2.2" font-weight="700">' + (i === 0 ? 'B' : i) + '</text></g>';
+        const tooltip = item.name + (item.address ? ' — ' + item.address : '') + (i > 0 && item.urgency ? ' (' + item.urgency + ')' : '');
+        return '<g data-point="' + i + '" transform="translate(' + p.x + ' ' + p.y + ')" style="cursor:pointer"><title>' + escHtml(tooltip) + '</title><circle r="' + (i === 0 ? 2.4 : 2.1) + '" fill="' + (i === 0 ? '#192d43' : urgency[arr[i - 1]?.urgency || 'Média'].c) + '" stroke="#fff" stroke-width=".8"/><text y=".8" text-anchor="middle" fill="#fff" font-size="2.2" font-weight="700">' + (i === 0 ? 'B' : i) + '</text></g>';
     }).join('');
     document.querySelectorAll('#routeSvg [data-point]').forEach(function(node) {
         node.onclick = function() {
