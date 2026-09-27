@@ -2300,6 +2300,38 @@ function getGoogleKey() {
     }
 }
 
+let resolvedGoogleKey = null,
+    googleKeySource = null; /* 'server' | 'manual' | null */
+
+async function resolveGoogleKey(forceRefresh) {
+    if (forceRefresh) {
+        resolvedGoogleKey = null;
+        googleKeySource = null;
+    }
+    if (resolvedGoogleKey) return resolvedGoogleKey;
+    try {
+        const res = await fetch('/api/maps-key', {
+            cache: 'no-store'
+        });
+        if (res.ok) {
+            const data = await res.json();
+            if (data && data.apiKey) {
+                resolvedGoogleKey = data.apiKey;
+                googleKeySource = 'server';
+                return resolvedGoogleKey;
+            }
+        }
+    } catch (e) {
+        /* sem função serverless disponível (ex.: arquivo aberto localmente) — segue para a chave manual */
+    }
+    const manual = getGoogleKey();
+    if (manual) {
+        resolvedGoogleKey = manual;
+        googleKeySource = 'manual';
+    }
+    return resolvedGoogleKey;
+}
+
 function toLatLng(p) {
     return {
         lat: p.lat,
@@ -2311,9 +2343,13 @@ function setGmapsStatus(state, msg) {
     const dot = $('gmapsDot'),
         label = $('gmapsLabel');
     if (dot) dot.className = 'gdot ' + (state === true ? 'on' : state === false ? 'off' : 'pending');
-    if (label) label.textContent = state === true ? 'Google Maps · tempo real' : state === false ? (msg || 'Google Maps não configurado') : (msg || 'Conectando ao Google Maps…');
+    if (label) label.textContent = state === true ? 'Google Maps · tempo real' + (googleKeySource === 'server' ? ' (chave do servidor)' : '') : state === false ? (msg || 'Google Maps não configurado') : (msg || 'Conectando ao Google Maps…');
     const pref = $('prefGmapsStatus');
-    if (pref) pref.textContent = state === true ? '✓ Google Maps ativo — rotas e fotos em tempo real, equiparadas ao Google Maps.' : state === false ? '○ ' + (msg || (getGoogleKey() ? 'Chave salva, mas o Google Maps não pôde ser ativado.' : 'Nenhuma chave configurada — usando estimativa local (OSRM/OpenStreetMap).')) : '… ' + (msg || 'Conectando ao Google Maps…');
+    if (pref) pref.textContent = state === true ? '✓ Google Maps ativo — ' + (googleKeySource === 'server' ? 'chave carregada com segurança a partir da variável de ambiente da Vercel.' : 'chave salva manualmente neste navegador.') : state === false ? '○ ' + (msg || (getGoogleKey() || googleKeySource === 'server' ? 'Chave configurada, mas o Google Maps não pôde ser ativado.' : 'Nenhuma chave configurada — usando estimativa local (OSRM/OpenStreetMap).')) : '… ' + (msg || 'Conectando ao Google Maps…');
+    const manualBox = $('prefGmapsManualBox');
+    if (manualBox) manualBox.style.display = googleKeySource === 'server' ? 'none' : 'block';
+    const serverNote = $('prefGmapsServerNote');
+    if (serverNote) serverNote.style.display = googleKeySource === 'server' ? 'block' : 'none';
 }
 
 function loadGoogleMapsScript(apiKey) {
@@ -2332,7 +2368,7 @@ function loadGoogleMapsScript(apiKey) {
             resolve(true);
         };
         window.gm_authFailure = function() {
-            setGmapsStatus(false, 'Chave inválida ou sem permissão para as APIs necessárias.');
+            setGmapsStatus(false, 'Chave inválida, sem faturamento ativo ou sem permissão para as APIs necessárias (veja o console do navegador para o código exato do erro).');
             resolve(false);
         };
         const script = document.createElement('script');
@@ -2347,8 +2383,8 @@ function loadGoogleMapsScript(apiKey) {
     });
 }
 
-async function initGoogleMapsIfConfigured() {
-    const apiKey = getGoogleKey();
+async function initGoogleMapsIfConfigured(forceRefresh) {
+    const apiKey = await resolveGoogleKey(forceRefresh);
     if (!apiKey) {
         setGmapsStatus(false);
         return;
@@ -3336,7 +3372,7 @@ function closeModal() {
 
 function openPreferences() {
     const currentKey = getGoogleKey();
-    openModal('Preferências operacionais', `<div class="pref-row"><span>Tema da aplicação</span><select id="prefTheme"><option value="light">Claro</option><option value="dark">Escuro</option></select></div><div class="pref-row"><span>Trânsito padrão</span><select id="prefTraffic"><option value="estimated">Estimado por faixa horária</option><option value="off">Sem ajuste de trânsito</option></select></div><div class="pref-row"><span>Retornar à base ao final</span><input id="prefReturn" type="checkbox" checked></div><div class="divider" style="margin:18px 0"></div><div class="over" style="margin-bottom:6px">Google Maps</div><p style="margin:0 0 10px">Informe uma chave de API do Google Maps com as APIs <b>Maps JavaScript API</b>, <b>Directions API</b>, <b>Geocoding API</b> e <b>Places API</b> habilitadas para obter rotas em tempo real e fotos das unidades equiparadas ao Google Maps. Sem chave, a aplicação usa OSRM/OpenStreetMap como estimativa.</p><label style="display:block;margin-bottom:10px">Chave de API<input id="prefGmapsKey" type="text" placeholder="AIza…" value="${escHtml(currentKey)}" style="margin-top:6px"></label><div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px"><button class="primary" style="width:auto" id="prefGmapsSave">Salvar e conectar</button><button class="outline" id="prefGmapsClear">Remover chave</button><a class="outline" href="https://console.cloud.google.com/google/maps-apis/credentials" target="_blank" rel="noopener">↗ Obter chave</a></div><p id="prefGmapsStatus" style="font-size:10px;margin:6px 0 0"></p><div class="divider" style="margin:18px 0"></div><div class="over" style="margin-bottom:6px">Dados salvos neste navegador</div><p style="margin:0 0 10px">Planilha importada, seleção, formulário e última rota calculada ficam salvos para uso após fechar ou reiniciar a aplicação.</p><button class="outline" id="prefClearData">🗑 Limpar dados salvos e reiniciar</button><p style="margin-top:17px">As preferências são aplicadas imediatamente e ficam salvas neste navegador.</p>`);
+    openModal('Preferências operacionais', `<div class="pref-row"><span>Tema da aplicação</span><select id="prefTheme"><option value="light">Claro</option><option value="dark">Escuro</option></select></div><div class="pref-row"><span>Trânsito padrão</span><select id="prefTraffic"><option value="estimated">Estimado por faixa horária</option><option value="off">Sem ajuste de trânsito</option></select></div><div class="pref-row"><span>Retornar à base ao final</span><input id="prefReturn" type="checkbox" checked></div><div class="divider" style="margin:18px 0"></div><div class="over" style="margin-bottom:6px">Google Maps</div><p style="margin:0 0 10px">Rotas em tempo real e fotos das unidades exigem uma chave de API do Google Maps com <b>Maps JavaScript API</b>, <b>Directions API</b>, <b>Geocoding API</b> e <b>Places API</b> habilitadas (e faturamento ativo no projeto). Sem chave, a aplicação usa OSRM/OpenStreetMap como estimativa.</p><p id="prefGmapsServerNote" style="display:none;margin:0 0 10px;padding:9px 11px;border:1px solid var(--line);border-radius:8px;background:var(--mint);font-size:11px">🔒 Esta chave está sendo carregada automaticamente e com segurança a partir da variável de ambiente configurada na Vercel — não fica salva neste navegador.</p><div id="prefGmapsManualBox"><label style="display:block;margin-bottom:10px">Chave de API (uso manual/local)<input id="prefGmapsKey" type="text" placeholder="AIza…" value="${escHtml(currentKey)}" style="margin-top:6px"></label><div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px"><button class="primary" style="width:auto" id="prefGmapsSave">Salvar e conectar</button><button class="outline" id="prefGmapsClear">Remover chave</button><a class="outline" href="https://console.cloud.google.com/google/maps-apis/credentials" target="_blank" rel="noopener">↗ Obter chave</a></div></div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px"><button class="outline" id="prefGmapsRetry">↻ Testar conexão novamente</button></div><p id="prefGmapsStatus" style="font-size:10px;margin:6px 0 0"></p><div class="divider" style="margin:18px 0"></div><div class="over" style="margin-bottom:6px">Dados salvos neste navegador</div><p style="margin:0 0 10px">Planilha importada, seleção, formulário e última rota calculada ficam salvos para uso após fechar ou reiniciar a aplicação.</p><button class="outline" id="prefClearData">🗑 Limpar dados salvos e reiniciar</button><p style="margin-top:17px">As preferências são aplicadas imediatamente e ficam salvas neste navegador.</p>`);
     $('prefTheme').value = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
     $('prefTraffic').value = $('traffic').value;
     $('prefReturn').checked = $('returnBase').checked;
@@ -3368,7 +3404,7 @@ function openPreferences() {
         }
         localStorage.setItem('planiroute-gmaps-key', value);
         setGmapsStatus(null, 'Conectando…');
-        await initGoogleMapsIfConfigured();
+        await initGoogleMapsIfConfigured(true);
     };
     $('prefGmapsClear').onclick = function() {
         localStorage.removeItem('planiroute-gmaps-key');
@@ -3378,7 +3414,12 @@ function openPreferences() {
         geocoderG = null;
         $('prefGmapsKey').value = '';
         setGmapsStatus(false);
+        initGoogleMapsIfConfigured(true);
         render();
+    };
+    $('prefGmapsRetry').onclick = async function() {
+        setGmapsStatus(null, 'Verificando a variável de ambiente no servidor…');
+        await initGoogleMapsIfConfigured(true);
     };
     $('prefClearData').onclick = function() {
         if (confirm('Isto apaga a planilha importada, seleção e rota salvas neste navegador (o histórico de planejamentos é mantido). Deseja continuar?')) {
