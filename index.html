@@ -2662,7 +2662,16 @@ async function getGoogleRoute(base, ordered, returnToBase) {
 function fetchGooglePlacePhoto(item) {
     return new Promise(function(resolve) {
         if (!placesService) {
-            resolve('');
+            /* gmapsReady/placesService só existem depois que o script do Google
+               Maps carrega com uma chave de API válida (ver resolveGoogleKey /
+               loadGoogleMapsScript). Se chegou aqui sem placesService, o problema
+               não é a consulta — é que o Google Maps nunca foi conectado nesta
+               sessão (sem chave configurada, chave inválida, ou falha ao
+               carregar o script). */
+            resolve({
+                url: '',
+                reason: 'no-key'
+            });
             return;
         }
         const hasCoords = Number.isFinite(item.lat) && Number.isFinite(item.lng);
@@ -2674,8 +2683,10 @@ function fetchGooglePlacePhoto(item) {
            com esse nome. O endereço só entra como reforço no fallback abaixo. */
         const nameQuery = [item.name, item.city, 'Brasil'].filter(Boolean).join(', ');
         const addressQuery = [item.name, item.address, item.city, 'Brasil'].filter(Boolean).join(', ');
+        let lastStatus = '';
 
         function extractPhoto(results, status) {
+            lastStatus = status;
             if (status === google.maps.places.PlacesServiceStatus.OK && results && results[0] && results[0].photos && results[0].photos[0]) {
                 return results[0].photos[0].getUrl({
                     maxWidth: 640,
@@ -2714,7 +2725,10 @@ function fetchGooglePlacePhoto(item) {
                 url = extractPhoto(results, status);
             } catch (e) {}
             if (url) {
-                resolve(url);
+                resolve({
+                    url,
+                    reason: ''
+                });
                 return;
             }
             if (status !== google.maps.places.PlacesServiceStatus.OK) {
@@ -2727,13 +2741,21 @@ function fetchGooglePlacePhoto(item) {
                associadas. */
             textSearchFallback(nameQuery, function(url2) {
                 if (url2) {
-                    resolve(url2);
+                    resolve({
+                        url: url2,
+                        reason: ''
+                    });
                     return;
                 }
                 /* Fallback 2: só agora entra o endereço completo, como
                    última tentativa para desambiguar nomes muito genéricos
                    (ex.: "UPA 24H" se repete em várias cidades). */
-                textSearchFallback(addressQuery, resolve);
+                textSearchFallback(addressQuery, function(url3) {
+                    resolve({
+                        url: url3,
+                        reason: url3 ? '' : (lastStatus || 'ZERO_RESULTS')
+                    });
+                });
             });
         });
     });
@@ -3150,13 +3172,16 @@ function escHtml(value) {
     });
 }
 async function fetchUnitPhoto(item) {
-    if (item.photoUrl) return item.photoUrl;
+    if (item.photoUrl) return {
+        url: item.photoUrl,
+        reason: ''
+    };
     if (gmapsReady && placesService) {
         try {
-            const googleUrl = await fetchGooglePlacePhoto(item);
-            if (googleUrl) {
-                item.photoUrl = googleUrl;
-                return googleUrl;
+            const googleResult = await fetchGooglePlacePhoto(item);
+            if (googleResult.url) {
+                item.photoUrl = googleResult.url;
+                return googleResult;
             }
         } catch (e) {}
     }
@@ -3165,16 +3190,41 @@ async function fetchUnitPhoto(item) {
         const data = await response.json();
         const page = data.query && Object.values(data.query.pages || {})[0];
         item.photoUrl = page && page.imageinfo && page.imageinfo[0] && (page.imageinfo[0].thumburl || page.imageinfo[0].url) || '';
-        return item.photoUrl;
+        /* Mantém o motivo do Google quando ele existir (é mais específico —
+           diz se faltou chave, se a Places API negou a requisição etc.) e só
+           usa um motivo genérico de Wikimedia quando o Google nem chegou a
+           rodar (offline) ou não retornou nada de útil. */
+        return {
+            url: item.photoUrl,
+            reason: item.photoUrl ? '' : (gmapsReady && placesService ? 'ZERO_RESULTS' : 'no-key')
+        };
     } catch (e) {
-        return '';
+        return {
+            url: '',
+            reason: 'fetch-error'
+        };
     }
 }
 
-function applyPhotoResult(box, url, name) {
+const PHOTO_FAIL_MESSAGES = {
+    'no-key': 'Google Maps não conectado — configure a chave em Preferências',
+    'REQUEST_DENIED': 'Places API negou a requisição (verifique chave/faturamento)',
+    'OVER_QUERY_LIMIT': 'Limite de requisições do Google Maps atingido',
+    'INVALID_REQUEST': 'Requisição inválida à Places API',
+    'ZERO_RESULTS': 'Nenhuma foto encontrada para esta unidade',
+    'fetch-error': 'Falha de rede ao buscar a foto'
+};
+
+function applyPhotoResult(box, result, name) {
     if (!box || !box.isConnected) return;
-    if (url) box.outerHTML = '<img class="unit-photo" src="' + url + '" alt="Foto de ' + escHtml(name) + '">';
-    else box.outerHTML = '<div class="unit-photo" style="display:grid;place-items:center;color:var(--soft)">Foto não localizada</div>';
+    const url = typeof result === 'string' ? result : (result && result.url) || '';
+    const reason = typeof result === 'string' ? '' : (result && result.reason) || '';
+    if (url) {
+        box.outerHTML = '<img class="unit-photo" src="' + url + '" alt="Foto de ' + escHtml(name) + '">';
+        return;
+    }
+    const message = PHOTO_FAIL_MESSAGES[reason] || 'Foto não localizada';
+    box.outerHTML = '<div class="unit-photo" style="display:grid;place-items:center;text-align:center;padding:10px;color:var(--soft);font-size:10.5px;line-height:1.4">' + escHtml(message) + '</div>';
 }
 
 function attachStreetView(item, requestId) {
@@ -3238,15 +3288,15 @@ function mapPointModal(item, index, base) {
        aparecer no lugar da foto da unidade de destino. */
     const requestId = ++mapPointRequestSeq;
     const destBoxAtOpen = $('destPhotoBox');
-    fetchUnitPhoto(item).then(function(url) {
+    fetchUnitPhoto(item).then(function(result) {
         if (requestId !== mapPointRequestSeq) return;
-        applyPhotoResult(destBoxAtOpen && destBoxAtOpen.isConnected ? destBoxAtOpen : $('destPhotoBox'), url, item.name);
+        applyPhotoResult(destBoxAtOpen && destBoxAtOpen.isConnected ? destBoxAtOpen : $('destPhotoBox'), result, item.name);
     });
     if (!isBaseModal) {
         const originBoxAtOpen = $('originPhotoBox');
-        fetchUnitPhoto(origin).then(function(url) {
+        fetchUnitPhoto(origin).then(function(result) {
             if (requestId !== mapPointRequestSeq) return;
-            applyPhotoResult(originBoxAtOpen && originBoxAtOpen.isConnected ? originBoxAtOpen : $('originPhotoBox'), url, origin.name);
+            applyPhotoResult(originBoxAtOpen && originBoxAtOpen.isConnected ? originBoxAtOpen : $('originPhotoBox'), result, origin.name);
         });
     }
     attachStreetView(item, requestId);
