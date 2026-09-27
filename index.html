@@ -2074,7 +2074,8 @@ const urgency = {
    (lat/lng) para a localização real desta base antes de usar em produção. */
 const DEFAULT_BASE = {
     id: 'base-alberico-diniz',
-    name: 'Avenida Albérico Diniz, 351 – Jardim Sulacap – RJ',
+    name: 'Alberico Diniz',
+    address: 'Avenida Albérico Diniz, 351 – Jardim Sulacap – RJ',
     searchText: 'Avenida Albérico Diniz, 351 – Jardim Sulacap – RJ, Brasil',
     lat: -22.8872,
     lng: -43.3986,
@@ -2257,6 +2258,7 @@ function fmt(m) {
 let gmapsReady = false;
 let gmap = null,
     gDirectionsRenderer = null,
+    gFallbackPolyline = null,
     gMarkers = [],
     placesService = null,
     geocoderG = null;
@@ -2628,8 +2630,38 @@ function drawGoogleMap(arr, legs) {
     });
     if (route && route.googleDirections && gDirectionsRenderer) {
         gDirectionsRenderer.setDirections(route.googleDirections);
-    } else if (gDirectionsRenderer) {
-        gDirectionsRenderer.set('directions', null);
+        if (gFallbackPolyline) {
+            gFallbackPolyline.setMap(null);
+            gFallbackPolyline = null;
+        }
+    } else {
+        if (gDirectionsRenderer) gDirectionsRenderer.set('directions', null);
+        if (gFallbackPolyline) {
+            gFallbackPolyline.setMap(null);
+            gFallbackPolyline = null;
+        }
+        if (all.length > 1) {
+            /* Sem um resultado do Directions "ao vivo" (rota reaberta do
+               Histórico, por exemplo), desenha uma linha reta ligando os
+               pontos na ordem calculada — melhor do que não mostrar rota
+               nenhuma no mapa. */
+            gFallbackPolyline = new google.maps.Polyline({
+                map: gmap,
+                path: all.map(toLatLng),
+                strokeColor: '#0d8c78',
+                strokeWeight: 4,
+                strokeOpacity: legs.length ? 0.9 : 0.45,
+                icons: legs.length ? [] : [{
+                    icon: {
+                        path: 'M 0,-1 0,1',
+                        strokeOpacity: 1,
+                        scale: 3
+                    },
+                    offset: '0',
+                    repeat: '14px'
+                }]
+            });
+        }
     }
     if (all.length) {
         const bounds = new google.maps.LatLngBounds();
@@ -2753,6 +2785,25 @@ function withTimeout(promise, ms, fallbackValue) {
             resolve(fallbackValue);
         });
     });
+}
+
+/* Localiza (geocodifica) uma lista de pontos, um de cada vez, atualizando o
+   texto/percentual do modal de progresso a cada ponto concluído — assim o
+   operador vê que a aplicação está avançando (e não travada), mesmo com
+   muitas unidades selecionadas. Um prazo total (overallTimeoutMs) garante
+   que, mesmo em rede lenta/bloqueada, o cálculo segue em frente usando os
+   pontos já localizados em vez de ficar esperando indefinidamente. */
+async function geocodeAllWithProgress(points, geocodeFn, label, overallTimeoutMs) {
+    const start = Date.now();
+    for (let i = 0; i < points.length; i++) {
+        if (Date.now() - start > overallTimeoutMs) {
+            showProgress('Tempo de localização de endereços esgotado — seguindo com o que foi localizado até aqui…', 58);
+            break;
+        }
+        showProgress('Localizando endereços (' + label + ') · ' + (i + 1) + '/' + points.length + '…', 45 + Math.round((i / Math.max(1, points.length)) * 15));
+        await geocodeFn(points[i]);
+    }
+    return points;
 }
 async function geocodePoint(point) {
     if (point.geoReady) return point;
@@ -2947,8 +2998,12 @@ async function calc() {
             route.end = arrivalClock;
         }
         let routeSource = 'estimativa local';
+        const returnToBase = $('returnBase').checked;
+        const allPoints = [base].concat(ordered).concat(returnToBase ? [base] : []);
         if (gmapsReady) {
-            showProgress('Calculando rota em tempo real com o Google Maps…', 55);
+            const geoPoints = [base].concat(ordered);
+            await geocodeAllWithProgress(geoPoints, geocodePointGoogle, 'Google Maps', 20000);
+            showProgress('Calculando rota em tempo real com o Google Maps…', 60);
             const googleRoute = await getGoogleRoute(base, ordered, $('returnBase').checked);
             if (googleRoute) {
                 applyRealLegs(googleRoute.legs);
@@ -2959,6 +3014,8 @@ async function calc() {
         }
         if (routeSource === 'estimativa local') {
             showProgress('Consultando OpenStreetMap e OSRM…', 68);
+            await geocodeAllWithProgress(allPoints, geocodePoint, 'OpenStreetMap', 25000);
+            showProgress('Calculando rota via OSRM…', 78);
             const osrmRoute = await getOSRMRoute(base, ordered);
             if (osrmRoute) {
                 route.geometry = osrmRoute.geometry;
@@ -3035,8 +3092,23 @@ function mapPointModal(item, index, base) {
 }
 
 function drawMap(arr, legs) {
+    if (!stops.length && !route) return showEmptyMap();
     if (gmapsReady && gmap) return drawGoogleMap(arr, legs);
     return drawFallbackMap(arr, legs);
+}
+
+function showEmptyMap() {
+    gMarkers.forEach(function(m) {
+        m.setMap(null);
+    });
+    gMarkers = [];
+    if (gDirectionsRenderer) gDirectionsRenderer.set('directions', null);
+    if (gFallbackPolyline) {
+        gFallbackPolyline.setMap(null);
+        gFallbackPolyline = null;
+    }
+    if ($('routeSvg')) $('routeSvg').innerHTML = '';
+    if ($('mapSub')) $('mapSub').textContent = 'Importe uma planilha ou selecione uma rota no Histórico para visualizar o mapa.';
 }
 
 function drawFallbackMap(arr, legs) {
