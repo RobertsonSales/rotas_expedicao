@@ -1834,6 +1834,27 @@ svg.route {
     box-shadow: 0 25px 70px #0a202b44
 }
 
+.modal.modal-lg {
+    width: min(920px, 100%)
+}
+
+.modal.modal-lg .gmap-mini {
+    height: 440px
+}
+
+.modal.modal-lg .unit-photo {
+    height: 230px
+}
+
+@media (max-width:720px) {
+    .modal.modal-lg .gmap-mini {
+        height: 280px
+    }
+    .modal.modal-lg .unit-photo {
+        height: 170px
+    }
+}
+
 .modal-head {
     display: flex;
     justify-content: space-between;
@@ -2312,6 +2333,7 @@ function getGoogleKey() {
 
 let resolvedGoogleKey = null,
     googleKeySource = null; /* 'server' | 'manual' | null */
+let mapPointRequestSeq = 0; /* evita que uma busca de foto atrasada de um modal já fechado sobrescreva o modal atual */
 
 async function resolveGoogleKey(forceRefresh) {
     if (forceRefresh) {
@@ -2998,10 +3020,17 @@ function mapPointModal(item, index, base) {
     const originText = origin.name + ' · ' + origin.address,
         destinationText = item.name + ' · ' + item.address;
     const mapsUrl = 'https://www.google.com/maps/dir/?api=1&origin=' + encodeURIComponent(origin.searchText || origin.address || origin.name) + '&destination=' + encodeURIComponent(item.searchText || item.address || item.name) + '&travelmode=driving';
-    openModal(index === 0 ? 'Base de partida' : 'Unidade da rota', '<div id="mapPointContent"><div class="unit-photo" id="unitPhotoBox" style="display:grid;place-items:center;color:var(--soft)">Buscando foto…</div><h4 style="margin:0;color:var(--ink)">' + escHtml(item.name) + '</h4><p style="margin:6px 0;color:var(--soft);font-size:11px">' + escHtml(item.address) + '</p><div class="map-details"><div class="map-detail"><small>Tempo desde o ponto anterior</small><b>' + travel + '</b></div><div class="map-detail"><small>Quilometragem calculada</small><b>' + distance + '</b></div></div><div id="modalGmap" class="gmap-mini"></div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px"><a class="outline" href="' + mapsUrl + '" target="_blank" rel="noopener">↗ Abrir rota no Google Maps</a></div><p style="font-size:9px;color:var(--soft);margin:8px 0 0">Origem: ' + escHtml(originText) + '<br>Destino: ' + escHtml(destinationText) + '</p></div>');
+    const streetViewUrl = 'https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=' + item.lat + ',' + item.lng;
+    openModal(index === 0 ? 'Base de partida' : 'Unidade da rota', '<div id="mapPointContent"><div class="unit-photo" id="unitPhotoBox" style="display:grid;place-items:center;color:var(--soft)">Buscando foto…</div><h4 style="margin:0;color:var(--ink)">' + escHtml(item.name) + '</h4><p style="margin:6px 0;color:var(--soft);font-size:11px">' + escHtml(item.address) + '</p><div class="map-details"><div class="map-detail"><small>Tempo desde o ponto anterior</small><b>' + travel + '</b></div><div class="map-detail"><small>Quilometragem calculada</small><b>' + distance + '</b></div></div><div id="modalGmap" class="gmap-mini"></div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px"><a class="outline" href="' + mapsUrl + '" target="_blank" rel="noopener">↗ Abrir rota no Google Maps</a><a class="outline" href="' + streetViewUrl + '" target="_blank" rel="noopener">👁 Abrir Street View</a></div><p style="font-size:9px;color:var(--soft);margin:8px 0 0">Origem: ' + escHtml(originText) + '<br>Destino: ' + escHtml(destinationText) + '</p></div>', 'modal-lg');
+    /* Foto é sempre da unidade de DESTINO (item), nunca da origem.
+       requestId + captura do nó agora (antes do await) evitam que uma busca
+       lenta de um modal aberto anteriormente sobrescreva o modal atual. */
+    const requestId = ++mapPointRequestSeq;
+    const photoBoxAtOpen = $('unitPhotoBox');
     fetchUnitPhoto(item).then(function(url) {
-        const photo = $('unitPhotoBox');
-        if (!photo) return;
+        if (requestId !== mapPointRequestSeq) return;
+        const photo = photoBoxAtOpen && photoBoxAtOpen.isConnected ? photoBoxAtOpen : $('unitPhotoBox');
+        if (!photo || !photo.isConnected) return;
         if (url) photo.outerHTML = '<img class="unit-photo" src="' + url + '" alt="Foto de ' + escHtml(item.name) + '">';
         else photo.outerHTML = '<div class="unit-photo" style="display:grid;place-items:center;color:var(--soft)">Foto não localizada</div>';
     });
@@ -3390,8 +3419,8 @@ function handleHistory(e) {
     }
 }
 
-function openModal(title, body) {
-    $('modalRoot').innerHTML = `<div class="modal-backdrop" id="modalBackdrop"><div class="modal"><div class="modal-head"><h3>${title}</h3><button class="modal-close" id="modalClose">×</button></div><div class="modal-body">${body}</div></div></div>`;
+function openModal(title, body, extraClass) {
+    $('modalRoot').innerHTML = `<div class="modal-backdrop" id="modalBackdrop"><div class="modal${extraClass ? ' ' + extraClass : ''}"><div class="modal-head"><h3>${title}</h3><button class="modal-close" id="modalClose">×</button></div><div class="modal-body">${body}</div></div></div>`;
     $('modalClose').onclick = closeModal;
     $('modalBackdrop').onclick = function(e) {
         if (e.target.id === 'modalBackdrop') closeModal();
