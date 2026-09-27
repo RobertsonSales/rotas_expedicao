@@ -1991,6 +1991,26 @@ svg.route {
     border-radius: 99px
 }
 
+.photo-slot-info {
+    margin-top: 7px
+}
+
+.photo-slot-info .u-name {
+    display: block;
+    font-weight: 700;
+    color: var(--ink);
+    font-size: 11.5px;
+    line-height: 1.3
+}
+
+.photo-slot-info .u-addr {
+    display: block;
+    margin-top: 2px;
+    color: var(--soft);
+    font-size: 10px;
+    line-height: 1.35
+}
+
 .modal.modal-lg .photo-slot .unit-photo {
     height: 190px
 }
@@ -2646,7 +2666,14 @@ function fetchGooglePlacePhoto(item) {
             return;
         }
         const hasCoords = Number.isFinite(item.lat) && Number.isFinite(item.lng);
-        const query = [item.name, item.city, item.address, 'Brasil'].filter(Boolean).join(', ');
+        /* Busca principal apenas por nome + cidade (sem o endereço completo):
+           o endereço da planilha costuma vir com formatação que não bate com
+           o texto cadastrado no Google (CEP, "Brazil" em vez de "Brasil",
+           complementos concatenados etc.), e isso fazia o findPlaceFromQuery
+           não encontrar nada — mesmo quando a unidade existe no Google Maps
+           com esse nome. O endereço só entra como reforço no fallback abaixo. */
+        const nameQuery = [item.name, item.city, 'Brasil'].filter(Boolean).join(', ');
+        const addressQuery = [item.name, item.address, item.city, 'Brasil'].filter(Boolean).join(', ');
 
         function extractPhoto(results, status) {
             if (status === google.maps.places.PlacesServiceStatus.OK && results && results[0] && results[0].photos && results[0].photos[0]) {
@@ -2658,8 +2685,28 @@ function fetchGooglePlacePhoto(item) {
             return '';
         }
 
+        function textSearchFallback(query, onDone) {
+            placesService.textSearch({
+                query,
+                location: hasCoords ? {
+                    lat: item.lat,
+                    lng: item.lng
+                } : undefined,
+                radius: hasCoords ? 3000 : undefined
+            }, function(results, status) {
+                let url = '';
+                try {
+                    url = extractPhoto(results, status);
+                } catch (e) {}
+                if (!url && status !== google.maps.places.PlacesServiceStatus.OK) {
+                    console.warn('Google Places (textSearch) sem sucesso para "' + query + '": ' + status);
+                }
+                onDone(url);
+            });
+        }
+
         placesService.findPlaceFromQuery({
-            query,
+            query: nameQuery,
             fields: ['photos', 'place_id']
         }, function(results, status) {
             let url = '';
@@ -2671,28 +2718,22 @@ function fetchGooglePlacePhoto(item) {
                 return;
             }
             if (status !== google.maps.places.PlacesServiceStatus.OK) {
-                console.warn('Google Places (findPlaceFromQuery) sem sucesso para "' + query + '": ' + status);
+                console.warn('Google Places (findPlaceFromQuery) sem sucesso para "' + nameQuery + '": ' + status);
             }
-            /* Fallback: busca mais abrangente (textSearch) — encontra o local
-               mesmo quando o nome/endereço da planilha não bate exatamente
-               com o nome cadastrado no Google Maps, ou quando o resultado do
-               findPlaceFromQuery existe mas não tem fotos associadas. */
-            placesService.textSearch({
-                query,
-                location: hasCoords ? {
-                    lat: item.lat,
-                    lng: item.lng
-                } : undefined,
-                radius: hasCoords ? 3000 : undefined
-            }, function(results2, status2) {
-                let url2 = '';
-                try {
-                    url2 = extractPhoto(results2, status2);
-                } catch (e) {}
-                if (!url2 && status2 !== google.maps.places.PlacesServiceStatus.OK) {
-                    console.warn('Google Places (textSearch) sem sucesso para "' + query + '": ' + status2);
+            /* Fallback 1: busca mais abrangente (textSearch) com o mesmo
+               nome + cidade — encontra o local mesmo quando o nome da
+               planilha não bate exatamente com o nome cadastrado no Google
+               Maps, ou quando o findPlaceFromQuery existe mas não tem fotos
+               associadas. */
+            textSearchFallback(nameQuery, function(url2) {
+                if (url2) {
+                    resolve(url2);
+                    return;
                 }
-                resolve(url2);
+                /* Fallback 2: só agora entra o endereço completo, como
+                   última tentativa para desambiguar nomes muito genéricos
+                   (ex.: "UPA 24H" se repete em várias cidades). */
+                textSearchFallback(addressQuery, resolve);
             });
         });
     });
@@ -3176,14 +3217,21 @@ function mapPointModal(item, index, base) {
     const isBaseModal = index === 0;
     const travel = leg ? leg.m + ' min' : '—';
     const distance = leg ? Number(leg.km).toFixed(1) + ' km' : '—';
-    const originText = origin.name + ' · ' + origin.address,
-        destinationText = item.name + ' · ' + item.address;
     const mapsUrl = 'https://www.google.com/maps/dir/?api=1&origin=' + encodeURIComponent(origin.searchText || origin.address || origin.name) + '&destination=' + encodeURIComponent(item.searchText || item.address || item.name) + '&travelmode=driving';
+    /* Cada bloco (foto + nome + endereço) descreve o seu próprio ponto —
+       antes só o destino tinha nome/endereço exibidos (num cabeçalho único
+       reutilizado para os dois casos), e a origem ficava só citada numa
+       linha de rodapé minúscula. Agora origem e destino têm sua descrição
+       completa, lado a lado com a respectiva foto. */
+    const originInfo = '<div class="photo-slot-info"><span class="u-name">' + escHtml(origin.name) + '</span><span class="u-addr">' + escHtml(origin.address) + '</span></div>';
+    const destInfo = '<div class="photo-slot-info"><span class="u-name">' + escHtml(item.name) + '</span><span class="u-addr">' + escHtml(item.address) + '</span></div>';
     /* Base de partida não tem "origem" própria (ela é o ponto de partida),
        então mostra só uma foto; qualquer outra parada mostra origem e
        destino lado a lado. */
-    const photosHtml = isBaseModal ? '<div class="unit-photos single"><div class="photo-slot"><div class="photo-slot-label">Base</div><div class="unit-photo" id="destPhotoBox" style="display:grid;place-items:center;color:var(--soft)">Buscando foto…</div></div></div>' : '<div class="unit-photos"><div class="photo-slot"><div class="photo-slot-label">Origem</div><div class="unit-photo" id="originPhotoBox" style="display:grid;place-items:center;color:var(--soft)">Buscando foto…</div></div><div class="photo-slot"><div class="photo-slot-label">Destino</div><div class="unit-photo" id="destPhotoBox" style="display:grid;place-items:center;color:var(--soft)">Buscando foto…</div></div></div>';
-    openModal(isBaseModal ? 'Base de partida' : 'Unidade da rota', '<div id="mapPointContent">' + photosHtml + '<h4 style="margin:0;color:var(--ink)">' + escHtml(item.name) + '</h4><p style="margin:6px 0;color:var(--soft);font-size:11px">' + escHtml(item.address) + '</p><div class="map-details"><div class="map-detail"><small>Tempo desde o ponto anterior</small><b>' + travel + '</b></div><div class="map-detail"><small>Quilometragem calculada</small><b>' + distance + '</b></div></div><div id="modalGmap" class="gmap-mini"></div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px"><a class="outline" href="' + mapsUrl + '" target="_blank" rel="noopener">↗ Abrir rota no Google Maps</a><span class="outline" id="streetViewSlot" style="opacity:.6;cursor:default">👁 Verificando Street View…</span></div><p style="font-size:9px;color:var(--soft);margin:8px 0 0">Origem: ' + escHtml(originText) + '<br>Destino: ' + escHtml(destinationText) + '</p></div>', 'modal-lg');
+    const photosHtml = isBaseModal ?
+        '<div class="unit-photos single"><div class="photo-slot"><div class="photo-slot-label">Base</div><div class="unit-photo" id="destPhotoBox" style="display:grid;place-items:center;color:var(--soft)">Buscando foto…</div>' + destInfo + '</div></div>' :
+        '<div class="unit-photos"><div class="photo-slot"><div class="photo-slot-label">Origem</div><div class="unit-photo" id="originPhotoBox" style="display:grid;place-items:center;color:var(--soft)">Buscando foto…</div>' + originInfo + '</div><div class="photo-slot"><div class="photo-slot-label">Destino</div><div class="unit-photo" id="destPhotoBox" style="display:grid;place-items:center;color:var(--soft)">Buscando foto…</div>' + destInfo + '</div></div>';
+    openModal(isBaseModal ? 'Base de partida' : 'Unidade da rota', '<div id="mapPointContent">' + photosHtml + '<div class="map-details"><div class="map-detail"><small>Tempo desde o ponto anterior</small><b>' + travel + '</b></div><div class="map-detail"><small>Quilometragem calculada</small><b>' + distance + '</b></div></div><div id="modalGmap" class="gmap-mini"></div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px"><a class="outline" href="' + mapsUrl + '" target="_blank" rel="noopener">↗ Abrir rota no Google Maps</a><span class="outline" id="streetViewSlot" style="opacity:.6;cursor:default">👁 Verificando Street View…</span></div></div>', 'modal-lg');
     /* requestId + captura dos nós agora (antes dos awaits) evitam que uma
        busca lenta de um modal aberto anteriormente sobrescreva o modal
        atual — era isso que antes fazia a foto "errada" (da origem)
