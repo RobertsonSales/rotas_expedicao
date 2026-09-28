@@ -2365,6 +2365,10 @@ function hav(a, b) {
     return 2 * r * Math.asin(Math.sqrt(x))
 }
 
+function hasValidCoordinates(point) {
+    return !!point && Number.isFinite(Number(point.lat)) && Number.isFinite(Number(point.lng));
+}
+
 function traffic(km, h, mode) {
     if (mode === 'off') return {
         m: Math.max(5, Math.round(km / 42 * 60 + 3)),
@@ -2600,52 +2604,63 @@ async function geocodePointGoogle(point, options) {
        disponível. O cálculo chama esta função com force:true para consultar
        novamente os endereços de origem e destino. */
     if (!options.force && point.geoProvider === 'google' && Number.isFinite(Number(point.lat)) && Number.isFinite(Number(point.lng))) return point;
-    const addressQuery = [point.address, point.city || '', 'Brasil'].filter(Boolean).join(', '),
-        fallbackQuery = [point.name, point.address, point.city || '', 'Brasil'].filter(Boolean).join(', '),
-        query = addressQuery || point.searchText || fallbackQuery,
-        cacheKey = 'planiroute-geog-v2-' + key(query);
-    if (!options.force) {
+    const queries = [];
+    function addQuery(value) {
+        const q = norm(value);
+        if (q && !queries.includes(q)) queries.push(q);
+    }
+    /* O endereço completo é a primeira tentativa; o texto antigo com nome
+       da unidade fica como alternativa porque alguns cadastros têm endereço
+       abreviado, mas são encontrados pelo nome oficial no Google. */
+    addQuery([point.address, point.city || '', 'Brasil'].filter(Boolean).join(', '));
+    addQuery(point.searchText);
+    addQuery([point.name, point.address, point.city || '', 'Brasil'].filter(Boolean).join(', '));
+    for (const query of queries) {
+        const cacheKey = 'planiroute-geog-v2-' + key(query);
+        if (!options.force) {
+            try {
+                const cached = JSON.parse(localStorage.getItem(cacheKey) || 'null');
+                if (cached && Number.isFinite(Number(cached.lat)) && Number.isFinite(Number(cached.lng))) {
+                    point.lat = Number(cached.lat);
+                    point.lng = Number(cached.lng);
+                    point.geoReady = true;
+                    point.geoSource = 'google';
+                    point.geoProvider = 'google';
+                    point.geoQuery = query;
+                    point.googleFormattedAddress = cached.formattedAddress || '';
+                    return point;
+                }
+            } catch (e) {}
+        }
         try {
-            const cached = JSON.parse(localStorage.getItem(cacheKey) || 'null');
-            if (cached && Number.isFinite(Number(cached.lat)) && Number.isFinite(Number(cached.lng))) {
-                point.lat = Number(cached.lat);
-                point.lng = Number(cached.lng);
+            const result = await withTimeout(new Promise(function(resolve) {
+                geocoderG.geocode({
+                    address: query,
+                    region: 'BR'
+                }, function(results, status) {
+                    resolve(status === 'OK' && results && results[0] ? results[0] : null);
+                });
+            }), 8000, null);
+            if (result && result.geometry && result.geometry.location) {
+                const loc = result.geometry.location;
+                point.lat = loc.lat();
+                point.lng = loc.lng();
                 point.geoReady = true;
                 point.geoSource = 'google';
                 point.geoProvider = 'google';
                 point.geoQuery = query;
-                point.googleFormattedAddress = cached.formattedAddress || '';
+                point.googleFormattedAddress = result.formatted_address || '';
+                try {
+                    localStorage.setItem(cacheKey, JSON.stringify({
+                        lat: point.lat,
+                        lng: point.lng,
+                        formattedAddress: point.googleFormattedAddress
+                    }));
+                } catch (e) {}
                 return point;
             }
         } catch (e) {}
     }
-    try {
-        const result = await withTimeout(new Promise(function(resolve) {
-            geocoderG.geocode({
-                address: query,
-                region: 'BR'
-            }, function(results, status) {
-                resolve(status === 'OK' && results && results[0] ? results[0] : null);
-            });
-        }), 8000, null);
-        if (result) {
-            const loc = result.geometry.location;
-            point.lat = loc.lat();
-            point.lng = loc.lng();
-            point.geoReady = true;
-            point.geoSource = 'google';
-            point.geoProvider = 'google';
-            point.geoQuery = query;
-            point.googleFormattedAddress = result.formatted_address || '';
-            try {
-                localStorage.setItem(cacheKey, JSON.stringify({
-                    lat: point.lat,
-                    lng: point.lng,
-                    formattedAddress: point.googleFormattedAddress
-                }));
-            } catch (e) {}
-        }
-    } catch (e) {}
     return point;
 }
 
@@ -3223,6 +3238,16 @@ async function calc() {
             await geocodeAllWithProgress([base].concat(rem), function(point) {
                 return geocodePointGoogle(point, { force: true });
             }, 'Google Maps', 30000);
+            /* Se um endereço estiver incompleto e o Google não o localizar,
+               tenta-se o geocodificador público apenas como contingência. O
+               cálculo nunca volta às coordenadas artificiais do importador. */
+            const unresolved = [base].concat(rem).filter(function(point) {
+                return !hasValidCoordinates(point);
+            });
+            for (const point of unresolved) {
+                point.geoSource = '';
+                await geocodePointPublic(point);
+            }
         }
         while (rem.length) {
             rem.sort((a, b) => urgency[b.urgency].w - urgency[a.urgency].w || hav(cur, a) - hav(cur, b));
@@ -3538,7 +3563,10 @@ function mapPointModal(item, index, base) {
 
 function drawMap(arr, legs) {
     if (!stops.length && !route) return showEmptyMap();
-    if (gmapsReady && gmap) return drawGoogleMap(arr, legs);
+    const base = bases.find(function(b) {
+        return b.id === $('baseSelect').value;
+    }) || bases[0] || baseFallback();
+    if (gmapsReady && gmap && [base].concat(arr).every(hasValidCoordinates)) return drawGoogleMap(arr, legs);
     return drawFallbackMap(arr, legs);
 }
 
