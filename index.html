@@ -2223,6 +2223,7 @@ let bases = [DEFAULT_BASE];
 let stops = [];
 let selected = new Set(),
     route = null;
+const ROUTE_ENGINE_VERSION = 'road-routing-v2';
 const $ = id => document.getElementById(id),
     baseFallback = () => ({
         id: 'none',
@@ -2337,8 +2338,16 @@ function restoreState() {
             }));
         }
         const savedRoute = loadJSON('planiroute-route', null);
-        if (savedRoute && Array.isArray(savedRoute.ordered) && savedRoute.ordered.length) {
+        if (savedRoute && savedRoute.engineVersion === ROUTE_ENGINE_VERSION && Array.isArray(savedRoute.ordered) && savedRoute.ordered.length) {
             route = savedRoute;
+        } else if (savedRoute) {
+            /* Não reutiliza pernas calculadas antes da geocodificação real.
+               Elas podem conter coordenadas determinísticas do importador e
+               produzir distâncias/tempos muito acima do endereço real. */
+            route = null;
+            try {
+                localStorage.removeItem('planiroute-route');
+            } catch (e) {}
         }
     } catch (e) {
         console.warn('PlaniRoute: não foi possível restaurar o estado salvo.', e);
@@ -3130,6 +3139,7 @@ async function geocodeAllWithProgress(points, geocodeFn, label, overallTimeoutMs
 
 function currentRouteItem() {
     return {
+        engineVersion: ROUTE_ENGINE_VERSION,
         meta: {
             driver: driverValue(),
             date: $('date').value,
@@ -3232,6 +3242,7 @@ async function calc() {
             t += z.m;
         }
         route = {
+            engineVersion: ROUTE_ENGINE_VERSION,
             ordered,
             legs,
             km: legs.reduce((a, x) => a + x.km, 0),
@@ -3762,6 +3773,7 @@ function exportExcel(item) {
 function saveHistory() {
     const item = {
         id: Date.now(),
+        engineVersion: ROUTE_ENGINE_VERSION,
         meta: {
             driver: driverValue(),
             date: $('date').value,
@@ -3836,6 +3848,7 @@ function reopenHistory(item) {
         return s.id;
     }));
     route = {
+        engineVersion: item.engineVersion || ROUTE_ENGINE_VERSION,
         ordered: stops,
         legs: item.legs,
         geometry: item.geometry || null,
@@ -4103,7 +4116,10 @@ function importFile(file) {
                 const urgencyValue = Object.keys(urgency).find(function(item) {
                     return key(rawUrgency).includes(key(item));
                 }) || 'Média';
-                const duration = value(row, ['duracao do deslocamento', 'duracao', 'tempo', 'atendimento', 'servico']);
+                /* Duração de deslocamento não é duração de atendimento.
+                   O cálculo viário determina o deslocamento; aqui entram
+                   apenas colunas explicitamente ligadas ao serviço. */
+                const duration = value(row, ['duracao do atendimento', 'tempo de atendimento', 'atendimento', 'servico', 'serviço']) || value(row, ['duracao', 'duração']);
                 let service = Number(String(duration).replace(',', '.').replace(/[^0-9.]/g, '')) || 25;
                 if (String(duration).includes(':')) {
                     const parts = String(duration).split(':').map(Number);
