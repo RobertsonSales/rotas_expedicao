@@ -2023,6 +2023,37 @@ svg.route {
     height: 190px
 }
 
+.photo-search-fallback {
+    min-height: 190px;
+    border-radius: 10px;
+    background: var(--mint);
+    display: grid;
+    place-items: center;
+    align-content: center;
+    gap: 9px;
+    padding: 15px;
+    text-align: center;
+    color: var(--soft);
+    font-size: 10.5px;
+    line-height: 1.4
+}
+
+.photo-search-fallback .outline {
+    width: max-content;
+    color: var(--green);
+    background: var(--card)
+}
+
+/* Os balões fecham no mouseout; o X nativo do InfoWindow é desnecessário. */
+.gm-style-iw-chr {
+    display: none !important
+}
+
+.gm-style-iw {
+    padding: 8px !important;
+    min-width: 0 !important
+}
+
 @media (max-width:720px) {
     .unit-photos {
         grid-template-columns: 1fr
@@ -2869,7 +2900,7 @@ function drawGoogleMap(arr, legs) {
     $('mapSub').textContent = legs.length ? legs.length + ' trechos calculados com o Google Maps' : 'pré-visualização da seleção';
 }
 
-function renderModalMiniMap(origin, destination) {
+function renderModalMiniMap(origin, destination, routeLeg) {
     const box = $('modalGmap');
     if (!box) return;
     if (gmapsReady) {
@@ -2925,24 +2956,10 @@ function renderModalMiniMap(origin, destination) {
                     repeat: '14px'
                 }]
             });
-            const dr = new google.maps.DirectionsRenderer({
-                map: miniMap,
-                suppressMarkers: true,
-                polylineOptions: {
-                    strokeColor: '#0d8c78',
-                    strokeWeight: 4
-                }
-            });
-            new google.maps.DirectionsService().route({
-                origin: toLatLng(origin),
-                destination: toLatLng(destination),
-                travelMode: google.maps.TravelMode.DRIVING
-            }, function(res, status) {
-                if (status === 'OK') {
-                    directLine.setMap(null);
-                    dr.setDirections(res);
-                }
-            });
+            /* Não faz uma segunda consulta de Directions aqui: ela poderia
+               gerar uma distância/tempo diferente do Resumo da Rota. O
+               trecho usado no modal é exatamente routeLeg, e a linha direta
+               permanece visível como representação desse mesmo trecho. */
             miniMap.fitBounds(bounds, 40);
         } catch (e) {
             box.innerHTML = '<div style="display:grid;place-items:center;height:100%;color:var(--soft);font-size:11px;text-align:center;padding:10px">Não foi possível carregar o mapa aqui.</div>';
@@ -3111,6 +3128,10 @@ async function calc() {
             prev = base,
             legs = [];
         ordered.forEach(s => {
+            /* A distância e o tempo exibidos no resumo e no detalhe devem
+               nascer do mesmo trecho. Sem Directions, hav() é a única
+               medida disponível; o fator rodoviário é aplicado uma única vez
+               aqui, nunca novamente no mapa do modal. */
             let km = hav(prev, s) * 1.22,
                 z = traffic(km, Math.floor(t / 60), $('traffic').value);
             legs.push({
@@ -3290,11 +3311,28 @@ function applyPhotoResult(box, result, name) {
            então o aviso deixa isso explícito em vez de sugerir 100% de
            certeza como uma foto vinda do cadastro do Google. */
         const sourceNote = source === 'wikimedia' ? '<div class="photo-source-note">Fonte: Wikimedia Commons — confirme se corresponde à unidade</div>' : '';
-        box.outerHTML = '<img class="unit-photo" src="' + url + '" alt="Foto de ' + escHtml(name) + '">' + sourceNote;
+        const img = document.createElement('img');
+        img.className = 'unit-photo';
+        img.src = url;
+        img.alt = 'Foto de ' + name;
+        img.addEventListener('error', function() {
+            showGoogleSearchFallback(img, name);
+        }, { once: true });
+        box.replaceWith(img);
+        if (sourceNote) img.insertAdjacentHTML('afterend', sourceNote);
         return;
     }
-    const message = PHOTO_FAIL_MESSAGES[reason] || 'Foto não localizada';
-    box.outerHTML = '<div class="unit-photo" style="display:grid;place-items:center;text-align:center;padding:10px;color:var(--soft);font-size:10.5px;line-height:1.4">' + escHtml(message) + '</div>';
+    showGoogleSearchFallback(box, name, PHOTO_FAIL_MESSAGES[reason] || 'Foto não localizada');
+}
+
+function showGoogleSearchFallback(node, name, message) {
+    if (!node || !node.isConnected) return;
+    const query = encodeURIComponent((name || '') + ' unidade de saúde');
+    const label = message || 'A imagem não pôde ser carregada';
+    const wrap = document.createElement('div');
+    wrap.className = 'photo-search-fallback';
+    wrap.innerHTML = '<span>' + escHtml(label) + '</span><a class="outline" href="https://www.google.com/search?tbm=isch&q=' + query + '" target="_blank" rel="noopener">⌕ Pesquisar imagens no Google</a>';
+    node.replaceWith(wrap);
 }
 
 function attachStreetView(item, requestId) {
@@ -3335,7 +3373,7 @@ function mapPointModal(item, index, base) {
     const leg = index > 0 && route && route.legs[index - 1] ? route.legs[index - 1] : null;
     const origin = index > 0 && route && route.ordered[index - 2] ? route.ordered[index - 2] : base;
     const isBaseModal = index === 0;
-    const travel = leg ? leg.m + ' min' : '—';
+    const travel = leg ? fmt(leg.m) : '—';
     const distance = leg ? Number(leg.km).toFixed(1) + ' km' : '—';
     const mapsUrl = 'https://www.google.com/maps/dir/?api=1&origin=' + encodeURIComponent(origin.searchText || origin.address || origin.name) + '&destination=' + encodeURIComponent(item.searchText || item.address || item.name) + '&travelmode=driving';
     /* Cada bloco (foto + nome + endereço) descreve o seu próprio ponto —
@@ -3370,7 +3408,7 @@ function mapPointModal(item, index, base) {
         });
     }
     attachStreetView(item, requestId);
-    renderModalMiniMap(origin, item);
+    renderModalMiniMap(origin, item, leg);
 }
 
 function drawMap(arr, legs) {
@@ -3457,7 +3495,7 @@ function renderResult() {
         return
     }
     const base = bases.find(b => b.id === $('baseSelect').value) || bases[0] || baseFallback();
-    $('result').innerHTML = `<div class="resulthead"><div><div class="over">Resumo da rota · ${$('date').value.split('-').reverse().join('/')}</div><h3>${driverValue()} <span>· ${base.name.split('·')[0]}</span></h3></div><div class="result-actions"><button class="export" id="pdfBtn">▤ PDF</button><button class="export" id="xlsxBtn">▧ Excel</button></div></div><div class="kpis"><div><span>Distância total</span><b>${route.km.toFixed(1)} <small>km</small></b></div><div><span>Deslocamento</span><b>${fmt(route.travel)}</b></div><div><span>Atendimentos</span><b>${fmt(route.service)}</b></div><div><span>Retorno previsto</span><b>${$('returnBase').checked?clock(route.end):'—'}</b></div></div><div class="timeline">${route.ordered.map((s,i)=>`<div class="event"><div class="marker" style="background:${urgency[s.urgency].c}">${i+1}</div><div class="event-body"><div><b>${s.name}</b><small class="route-address">${s.address}</small><small>${s.city} · ${s.service} min de atendimento</small></div><div class="etime"><strong>${clock(route.legs[i].arrival)}</strong><small>${route.legs[i].m} min · ${route.legs[i].l}</small></div></div></div>`).join('')}<div class="event last"><div class="marker" style="background:#fff;color:#193346;border-color:#193346">⌖</div><div class="event-body"><div><b>${$('returnBase').checked?'Retorno à base':'Encerramento da rota'}</b><small>${base.name}</small></div><div class="etime"><strong>${$('returnBase').checked?clock(route.end):'—'}</strong><small>${$('returnBase').checked?'chegada prevista':'sem retorno'}</small></div></div></div></div>`;
+    $('result').innerHTML = `<div class="resulthead"><div><div class="over">Resumo da rota · ${$('date').value.split('-').reverse().join('/')}</div><h3>${driverValue()} <span>· ${base.name.split('·')[0]}</span></h3></div><div class="result-actions"><button class="export" id="pdfBtn">▤ PDF</button><button class="export" id="xlsxBtn">▧ Excel</button></div></div><div class="kpis"><div><span>Distância total</span><b>${route.km.toFixed(1)} <small>km</small></b></div><div><span>Deslocamento</span><b>${fmt(route.travel)}</b></div><div><span>Atendimentos</span><b>${fmt(route.service)}</b></div><div><span>Retorno previsto</span><b>${$('returnBase').checked?clock(route.end):'—'}</b></div></div><div class="timeline">${route.ordered.map((s,i)=>`<div class="event"><div class="marker" style="background:${urgency[s.urgency].c}">${i+1}</div><div class="event-body"><div><b>${s.name}</b><small class="route-address">${s.address}</small><small>${s.city} · ${fmt(s.service)} de atendimento</small></div><div class="etime"><strong>${clock(route.legs[i].arrival)}</strong><small>${fmt(route.legs[i].m)} · ${route.legs[i].l}</small></div></div></div>`).join('')}<div class="event last"><div class="marker" style="background:#fff;color:#193346;border-color:#193346">⌖</div><div class="event-body"><div><b>${$('returnBase').checked?'Retorno à base':'Encerramento da rota'}</b><small>${base.name}</small></div><div class="etime"><strong>${$('returnBase').checked?clock(route.end):'—'}</strong><small>${$('returnBase').checked?'chegada prevista':'sem retorno'}</small></div></div></div></div>`;
     $('pdfBtn').onclick = () => printHistory(currentRouteItem());
     $('xlsxBtn').onclick = () => exportExcel()
 }
