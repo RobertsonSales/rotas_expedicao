@@ -3029,18 +3029,22 @@ body.landing-lock {
 .zoom-btn:active{transform:scale(.94)}
 .dark .zoom-btn{background:#1c3744e0;border-color:#2f5a6a;color:#d8eee8;box-shadow:0 6px 14px rgba(0,0,0,.35)}
 .dark .zoom-btn:hover{background:#22475a}
-.mapcanvas #fallbackMap,.gmap-mini{transform-origin:50% 50%;transition:transform .25s ease}
-.mapcanvas.is-zoomed{overflow:auto}
-.mapcanvas.is-zoomed #fallbackMap{transform:scale(var(--zoom,1))}
-.gmap-mini.is-zoomed{transform:scale(var(--zoom,1))}
+.gmap-mini-wrap{position:relative;margin-top:4px}
+.gmap-mini-wrap .gmap-mini{margin-top:0}
+.gmap-mini-wrap .zoom-controls{right:10px;top:10px}
+#routeSvg{transition:none}
 /* UNIDADES RETR */
 .units-toggle{color:var(--green);font-weight:700}
 #smartSearch{align-items:center;gap:10px;flex-wrap:wrap}
 #smartSearch #search{flex:1 1 240px;min-width:200px;font-weight:500}
 .units .units-body{max-height:0;overflow:hidden;opacity:0;margin-top:0;border:0;padding:0 1px;transition:max-height .35s ease,opacity .25s ease,margin-top .25s ease,padding .25s ease}
-.units.is-open .units-body{max-height:60vh;opacity:1;margin-top:16px;padding:1px}
-.units-toggle::before{content:'▾ Mostrar unidades'}
-.units.is-open .units-toggle::before{content:'▴ Ocultar unidades'}
+.units.is-open .units-body{max-height:none;overflow:hidden;opacity:1;margin-top:16px;padding:1px}
+#unitRows{max-height:min(58vh,540px);overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:#9cc9bd transparent}
+#unitRows::-webkit-scrollbar{width:9px}
+#unitRows::-webkit-scrollbar-thumb{background:#9cc9bd;border-radius:9px;border:2px solid transparent;background-clip:padding-box}
+#unitRows::-webkit-scrollbar-thumb:hover{background:#0d8c78;background-clip:padding-box}
+.dark #unitRows{scrollbar-color:#3f7384 transparent}
+.dark #unitRows::-webkit-scrollbar-thumb{background:#3f7384;background-clip:padding-box}
 /* DARK */
 .dark body{background:#0c1d28;color:#e0eeea}
 .dark .card,.dark .modal,.dark .dropdown{background:#152a36;border-color:#2d505d;color:#e0eeea;box-shadow:0 16px 36px rgba(0,0,0,.35)}
@@ -3081,6 +3085,30 @@ body.landing-lock {
 .dark .map-detail b{color:#ecfff7}
 .dark .top h1,.dark .top .eyebrow{color:#d2e9e4}
 .dark .hero h2,.dark .hero h2 em,.dark .hero p{color:#e0eeea}
+/* MENU LATERAL RETRÁTIL */
+.side{transition:width .25s ease,flex-basis .25s ease,padding .25s ease;z-index:30;height:100vh;align-self:flex-start}
+.brand-txt{min-width:0;white-space:nowrap;overflow:hidden}
+.side-toggle{position:absolute;top:30px;right:-13px;z-index:31;width:26px;height:26px;border-radius:50%;border:2px solid var(--bg,#f4f8f7);background:#275264;color:#e6f5f1;display:grid;place-items:center;font-size:14px;line-height:1;cursor:pointer;box-shadow:0 4px 12px rgba(8,27,38,.28);transition:background .15s,transform .25s}
+.side-toggle span{display:block;transform:translateY(-1px)}
+.side-toggle:hover{background:#0d8c78}
+.dark .side-toggle{border-color:#0c1d28}
+.side-toggle:focus-visible,.nav button:focus-visible{outline:2px solid #58d3b0;outline-offset:2px}
+.nav-ico{font-style:normal;width:16px;flex:none;text-align:center}
+.nav-txt{font-style:normal;white-space:nowrap}
+.nav-ext{margin-left:auto;font-size:10px;opacity:.6}
+.operator-txt{white-space:nowrap;overflow:hidden}
+.side.collapsed{width:76px;flex-basis:76px;padding:24px 12px}
+.side.collapsed .brand{justify-content:center;padding:0 0 26px}
+.side.collapsed .brand-txt,.side.collapsed .workspace,.side.collapsed .nav-txt,.side.collapsed .nav-ext,.side.collapsed .operator-txt{display:none}
+.side.collapsed .side-toggle{transform:rotate(180deg)}
+.side.collapsed .nav-label{padding:0;height:1px;margin:10px 8px;background:#ffffff1a;font-size:0;overflow:hidden}
+.side.collapsed .nav-label.second{margin-top:18px}
+.side.collapsed .nav button{justify-content:center;padding:11px 0;position:relative}
+.side.collapsed .nav button .nav-ico{font-size:14px}
+.side.collapsed .nav button span{position:absolute;top:3px;right:3px;min-width:16px;height:14px;font-size:8px;margin:0}
+.side.collapsed .operator{justify-content:center;padding:13px 0 0}
+@media (max-width:768px){.side{height:auto;align-self:stretch}.side-toggle{display:none}.side.collapsed{width:100%;flex-basis:auto;padding:14px 14px 10px}.side.collapsed .nav-txt,.side.collapsed .brand-txt{display:initial}.side.collapsed .brand{justify-content:flex-start;padding:0 10px 28px}}
+@media (prefers-reduced-motion: reduce){.side,.side-toggle{transition:none}}
 </style>
 </head>
 <body>
@@ -3137,13 +3165,13 @@ body.landing-lock {
     </div>
 </div>
 <div class="app">
-<aside class="side"><div class="brand"><div class="brand-mark">⌁</div><div><strong>GRUPO LABMEDIC</strong><span>Planejamento de Entregas</span></div></div><div class="workspace"><div class="eyebrow">Workspace ativo</div><div class="workspace-row"><i></i>Logística assistencial<b>⌄</b></div></div><div class="nav"><div class="nav-label">Operação</div><button class="active" data-tab="plan">➤ Planejamento <span id="navCount">5</span></button><button data-tab="import">▧ Importar dados</button><button data-tab="history">▦ Histórico</button><div class="nav-label second">Configuração</div><button id="preferencesBtn">☷ Preferências</button><button id="helpBtn">? Central de ajuda</button></div><div class="operator"><div class="avatar">MC</div><div><b>Marina Costa</b><small>Operadora · Rede SP</small></div></div></aside>
+<aside class="side" id="sideNav"><button class="side-toggle" id="sideToggle" type="button" aria-controls="sideNav" aria-expanded="true" title="Recolher menu lateral (Ctrl + B)"><span aria-hidden="true">«</span></button><div class="brand"><div class="brand-mark">⌁</div><div class="brand-txt"><strong>GRUPO LABMEDIC</strong><span>Planejamento de Entregas</span></div></div><div class="workspace"><div class="eyebrow">Workspace ativo</div><div class="workspace-row"><i></i>Logística assistencial<b>⌄</b></div></div><div class="nav"><div class="nav-label">Operação</div><button class="active" data-tab="plan" title="Planejamento"><i class="nav-ico">➤</i><em class="nav-txt">Planejamento</em> <span id="navCount">5</span></button><button data-tab="import" title="Importar dados"><i class="nav-ico">▧</i><em class="nav-txt">Importar dados</em></button><button data-tab="history" title="Histórico"><i class="nav-ico">▦</i><em class="nav-txt">Histórico</em></button><div class="nav-label second">Configuração</div><button id="preferencesBtn" title="Preferências"><i class="nav-ico">☷</i><em class="nav-txt">Preferências</em></button><button id="helpBtn" title="Central de Ajuda · abre o manual de uso em uma nova aba"><i class="nav-ico">?</i><em class="nav-txt">Central de Ajuda</em><small class="nav-ext" aria-hidden="true">↗</small></button></div><div class="operator"><div class="avatar">MC</div><div class="operator-txt"><b>Marina Costa</b><small>Operadora · Rede SP</small></div></div></aside>
 <main class="main"><header class="top"><div><div class="eyebrow">Centro de controle / <span id="crumb">Planejamento de rotas de entrega</span></div><h1 id="pageTitle">Planejamento de rotas</h1></div><div style="display:flex;align-items:center;gap:10px"><button class="theme-btn" id="themeBtn" title="Alternar tema">☾</button><div class="status"><i></i>API oficial Google</div></div></header>
 <section id="planPage"><section class="hero"><div><div class="eyebrow" style="color:#71d8bc">✦ Uso da API oficial do Google Maps</div><h2>Previsibilidade de rotas em poucos cliques<br><em>Monitore o trajeto dos condutores</em></h3><p>Você pode salvar as rotas diariamente, ganhando assim uma importante ferramenta de rastreabilidade histórica. </p></div><div class="hero-art"><div class="orbit o1"></div><div class="orbit o2"></div><div class="route-line"></div><div class="node n1">⌖</div><div class="node n2">⌖</div><div class="node n3">⌖</div></div></section>
 <section class="summary"><div class="card"><div class="ico">▣</div><div><span>Unidades no planejamento</span><b id="sumStops">5<small> / 8</small></b></div></div><div class="card"><div class="ico">◷</div><div><span>Tempo de trânsito estimado</span><b id="sumTravel">—</b></div><span class="trend" id="sumTravelSub">aguardando rota</span></div><div class="card"><div class="ico">◔</div><div><span>Urgências críticas</span><b id="sumCritical">4</b></div><span class="trend" id="sumCriticalSub">2 super · 2 alta</span></div><div class="card"><div class="ico">♙</div><div><span>Condutor responsável</span><b style="font-size:14px" id="sumDriver">Reginaldo Braga</b></div><span class="trend">dia 28</span></div></section>
 <div class="grid"><section><div class="section"><div><div class="over">01 · Configuração</div><h3>Monte a rota</h3></div><button class="link" id="clearBtn">Limpar seleção ×</button></div><div class="card form"><label>Condutor<select id="driver"><option>Reginaldo Braga</option><option>Marcelo Medeiros</option></option></select><input id="driverName" type="text" value="Reginaldo Braga" placeholder="Nome utilizado nos documentos" style="margin-top:7px"></label><div class="two"><label>Data da operação<input id="date" type="date" value="2026-09-28"></label><label>Saída prevista<input id="departure" type="time" value="07:30"></label></div><label>Base de partida<select id="baseSelect"></select></label><div class="base"><div class="base-icon">⌖</div><div><b id="baseName"></b><small id="baseAddr"></small></div><span class="ok">✓</span></div><div class="divider"></div><div class="labelrow"><label>Paradas da rota <span id="selectedLabel">5 selecionadas</span></label><button id="addPoint">＋ Adicionar ponto</button></div><div class="selected" id="selectedList"></div><div class="options"><label class="switchline"><input id="returnBase" type="checkbox" checked><span class="switch"></span>Retornar à base ao final</label><label>Trânsito<select id="traffic"><option value="estimated">Estimado por faixa horária</option><option value="off">Sem ajuste de trânsito</option></select></label></div><button class="primary" id="calcBtn">⌁ Calcular melhor rota <span>↑</span></button><div class="foot">✓ O cálculo considera distância, janela de saída, tempo de atendimento e urgência.</div></div></section>
 <section><div class="section"><div><div class="over">02 · Visualização</div><h3 id="mapTitle">Mapa operacional</h3></div><div class="map-actions"><button class="outline" id="driverRoutesBtn" title="Ver todas as rotas deste condutor no formato do roteiro PDF">▤ Rotas do condutor</button><button class="outline" id="gmapsOpenBtn" title="Abrir a rota selecionada e otimizada no Google Maps, em uma nova aba">🗺 Google Maps</button><button class="outline" id="saveRouteBtn">▣ Salvar Rota</button><button class="outline" id="recalcBtn">↻ Recalcular</button></div></div><div class="card map"><div class="mapcanvas" id="mapCanvas"><div id="fallbackMap" class="fallback-map"><div class="road r1"></div><div class="road r2"></div><div class="road r3"></div><span class="maplabel l1">ZONA NORTE</span><span class="maplabel l2">CENTRO EXPANDIDO</span><span class="maplabel l3">ZONA SUL</span><svg class="route" id="routeSvg" viewBox="0 0 100 100" preserveAspectRatio="none"></svg></div><div id="gmap" class="gmap-container" style="display:none"></div><div class="zoom-controls" id="mapZoomCtrls" aria-label="Controles de zoom do mapa do painel" data-target="panel"><button class="zoom-btn" data-zoom="in" title="Aumentar zoom">＋</button><button class="zoom-btn" data-zoom="out" title="Diminuir zoom">－</button><button class="zoom-btn" data-zoom="reset" title="Ajustar à área">⌖</button></div><div class="float"><i id="gmapsDot" class="gdot off"></i><span id="gmapsLabel">Google Maps não configurado</span><br><small id="mapSub">pré-visualização da seleção</small></div></div><div class="legend"><span><i class="dot db"></i>Base</span><span><i class="dot dg"></i>Rota planejada</span><span><i class="dot do"></i>Urgência</span><small>⌁ Rota real via Google Maps (ou estimativa local por distância e horário, sem chave)</small></div></div><div class="card result" id="result"><div class="empty"><div class="circle">⌁</div><h3>A rota aparecerá aqui</h3><p>Selecione as unidades, defina a urgência e clique em <b>Calcular melhor rota</b>.</p></div></div></section></div>
-<section class="units" id="unitsSection"><div class="section"><div><div class="over">03 · Unidades disponíveis</div><h3>Escolha os pontos de ligação</h3></div><div class="filters" id="smartSearch"><input id="search" placeholder="🔎  Busca inteligente · unidade, cliente, endereço ou código"><select id="urgencyFilter" tabindex="-1"><option>Todas</option><option>Super</option><option>Alta</option><option>Média</option><option>Baixa</option></select><button class="link units-toggle" id="unitsToggleBtn" aria-expanded="false" title="Expandir a lista completa de unidades">▾ Mostrar unidades</button></div></div><div class="card table units-body" id="unitsBody"><div class="thead"><span id="tableCount">5 de 8</span><span>Unidade de saúde</span><span>Município</span><span>Urgência</span><span>Atendimento</span><span>Ação</span></div><div id="unitRows"></div></div></section><div class="footer"><span>✓ Dados processados localmente neste navegador</span><span>Última atualização: agora · <button data-tab="import">Trocar planilha</button></span></div></section>
+<section class="units" id="unitsSection"><div class="section"><div><div class="over">03 · Unidades disponíveis</div><h3>Escolha os pontos de ligação</h3></div><div class="filters" id="smartSearch"><input id="search" placeholder="🔎  Busca inteligente · unidade, cliente, endereço ou código"><button class="link units-toggle" id="unitsToggleBtn" aria-expanded="false" title="Expandir a lista completa de unidades">▾ Mostrar unidades</button></div></div><div class="card table units-body" id="unitsBody"><div class="thead"><span id="tableCount">5 de 8</span><span>Unidade de saúde</span><span>Município</span><span>Urgência</span><span>Atendimento</span><span>Ação</span></div><div id="unitRows"></div></div></section><div class="footer"><span>✓ Dados processados localmente neste navegador</span><span>Última atualização: agora · <button data-tab="import">Trocar planilha</button></span></div></section>
 <section id="importPage" class="import-page" style="display:none"><div class="importhero"><div><div class="eyebrow" style="color:#71d8bc">⇧ Entrada de dados</div><h2>Traga sua planilha.<br><em>O restante fica organizado.</em></h2><p>Selecione um arquivo Excel ou CSV com as abas Cliente, Endereço e Base. A leitura acontece no navegador.</p></div><div style="font-size:58px;color:#9af0d5">▧</div></div><div class="importgrid"><div class="card upload"><div class="drop" id="dropZone"><div class="uploadicon">⇧</div><h3>Arraste sua planilha aqui</h3><p>ou clique para procurar no computador</p><small>Formatos aceitos: .xlsx, .xls e .csv · até 20 MB</small><button class="primary" style="width:auto;margin-top:17px" id="fileBtn">⇧ Selecionar arquivo</button></div><input id="fileInput" type="file" accept=".xlsx,.xls,.csv" hidden><div class="file-status"><div style="font-size:20px;color:#0d8c78">▧</div><div><b id="fileName">Planilha de rede · aguardando importação</b><small id="fileInfo">Nenhum arquivo carregado ainda</small></div></div></div><div class="card mapping"><div class="over">Mapeamento de abas</div><h3>Defina a origem dos dados</h3><p>As abas podem ter outros nomes. Escolha qual representa cada tipo de informação.</p><div class="maprow"><span><b>Cliente</b><small>unidades a visitar</small></span><select id="sheetStop"><option>Cliente</option></select></div><div class="maprow"><span><b>Endereço</b><small>localização e endereço</small></span><select id="sheetAddress"><option>Endereço</option></select></div><div class="maprow"><span><b>Base</b><small>pontos de saída</small></span><select id="sheetBase"><option>Base</option></select></div><button class="outline" style="width:100%;justify-content:center;margin-top:15px" id="changeFile">↻ Trocar arquivo</button></div><div class="card guide"><b>Como preparar a planilha?</b><p>Use a primeira linha como cabeçalho. Para melhor precisão, inclua <strong>Unidade, Endereço, Município, Latitude e Longitude</strong>. A urgência pode ser ajustada depois no planejamento.</p></div></div></section>
 <section id="historyPage" class="history-page" style="display:none"><div class="historyhead"><div><div class="over">Registro de operações</div><h2>Histórico de planejamentos</h2><p>Revisite, reabra e exporte os cenários calculados nesta sessão.</p></div><div style="display:flex;align-items:end;gap:7px;flex-wrap:wrap"><label class="muted">De<input id="historyFrom" type="date" style="display:block;margin-top:4px;padding:7px;border:1px solid var(--line);border-radius:7px;background:var(--card);color:var(--ink)"></label><label class="muted">Até<input id="historyTo" type="date" style="display:block;margin-top:4px;padding:7px;border:1px solid var(--line);border-radius:7px;background:var(--card);color:var(--ink)"></label><button class="outline" id="applyHistoryFilter">Filtrar</button><button class="outline" id="exportHistoryBtn">⇩ Exportar histórico</button></div></div><div class="card" id="historyList"><div class="history-empty">Nenhuma rota calculada ainda. Calcule uma rota para que ela apareça aqui.</div></div><div class="notice">△ As rotas ficam salvas neste navegador. Use PDF ou Excel para arquivamento operacional externo.</div></section>
 <div id="modalRoot"></div>
@@ -3204,9 +3232,9 @@ let selected = new Set(),
     route = null;
 /* Mudança de versão invalida rotas persistidas que ainda possam conter
    coordenadas determinísticas criadas pelo importador. */
-const ROUTE_ENGINE_VERSION = 'road-routing-v8-leg-distance-in-exports';
-const DWELL_MINUTES = 30;
-const FIXED_DELIVERY_MINUTES = 30;
+const ROUTE_ENGINE_VERSION = 'road-routing-v9-dwell-45min';
+const DWELL_MINUTES = 45;
+const FIXED_DELIVERY_MINUTES = 45; /* tempo médio de permanência do condutor em cada unidade */
 function normalizeServiceMinutes(value) {
     /* O tempo informado na planilha é deliberadamente ignorado. */
     return FIXED_DELIVERY_MINUTES;
@@ -3492,6 +3520,8 @@ function setGmapsStatus(state, msg) {
     const dot = $('gmapsDot'),
         label = $('gmapsLabel');
     if (dot) dot.className = 'gdot ' + (state === true ? 'on' : state === false ? 'off' : 'pending');
+    const floatBox = label ? label.closest('.float') : null;
+    if (floatBox) floatBox.style.display = state === true ? 'none' : '';
     if (label) label.textContent = state === true ? 'Google Maps · tempo real' + (googleKeySource === 'server' ? ' (chave do servidor)' : '') : state === false ? (msg || 'Google Maps não configurado') : (msg || 'Conectando ao Google Maps…');
     const pref = $('prefGmapsStatus');
     if (pref) pref.textContent = state === true ? '✓ Google Maps ativo — ' + (googleKeySource === 'server' ? 'chave carregada com segurança a partir da variável de ambiente da Vercel.' : 'chave salva manualmente neste navegador.') : state === false ? '○ ' + (msg || (getGoogleKey() || googleKeySource === 'server' ? 'Chave configurada, mas o Google Maps não pôde ser ativado.' : 'Nenhuma chave configurada — usando apenas estimativa local por distância e horário.')) : '… ' + (msg || 'Conectando ao Google Maps…');
@@ -3577,6 +3607,7 @@ function setupGoogleMap() {
         zoom: 11,
         streetViewControl: false,
         fullscreenControl: false,
+        zoomControl: false, /* substituído pelos controles próprios do contêiner */
         mapTypeControl: false,
         styles: document.documentElement.classList.contains('dark') ? DARK_MAP_STYLE : []
     });
@@ -4029,6 +4060,7 @@ function drawGoogleMap(arr, legs) {
             bounds.extend(toLatLng(p));
         });
         gmap.fitBounds(bounds, 60);
+        panelMapBounds = bounds;
     }
     $('mapSub').textContent = legs.length ? legs.length + ' trechos calculados com o Google Maps' : 'pré-visualização da seleção';
 }
@@ -4042,7 +4074,7 @@ function renderModalMiniMap(origin, destination, routeLeg) {
                 center: toLatLng(origin),
                 zoom: 12,
                 disableDefaultUI: true,
-                gestureHandling: 'cooperative',
+                gestureHandling: 'greedy',
                 styles: document.documentElement.classList.contains('dark') ? DARK_MAP_STYLE : []
             });
             const bounds = new google.maps.LatLngBounds();
@@ -4094,6 +4126,8 @@ function renderModalMiniMap(origin, destination, routeLeg) {
                trecho usado no modal é exatamente routeLeg, e a linha direta
                permanece visível como representação desse mesmo trecho. */
             miniMap.fitBounds(bounds, 40);
+            modalMiniMap = miniMap;
+            modalMiniBounds = bounds;
         } catch (e) {
             box.innerHTML = '<div style="display:grid;place-items:center;height:100%;color:var(--soft);font-size:11px;text-align:center;padding:10px">Não foi possível carregar o mapa aqui.</div>';
         }
@@ -4127,17 +4161,16 @@ function renderSelected() {
 function renderUnits() {
     const query = norm($('search').value).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
     const tokens = query.split(/\s+/).filter(Boolean);
-    const filter = $('urgencyFilter').value;
     const list = stops.filter(function(stop) {
         const hay = [stop.name, stop.client, stop.address, stop.city, stop.code || '', stop.cnpj || ''].join(' ').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
         return tokens.every(function(token) {
             return hay.includes(token);
-        }) && (filter === 'Todas' || stop.urgency === filter);
+        });
     });
     $('tableCount').textContent = list.length + ' de ' + stops.length;
     $('unitRows').innerHTML = list.map(function(s) {
         return `<div class="unit ${selected.has(s.id)?'chosen':''}"><button class="check ${selected.has(s.id)?'on':''}" data-toggle="${s.id}">${selected.has(s.id)?'✓':''}</button><div class="unitname"><b>${s.name}</b><small>${s.client} · ${s.address}</small></div><span class="muted">${s.city}</span><select class="urg" data-u="${s.id}" style="color:${urgency[s.urgency].c};background:${urgency[s.urgency].bg}"><option ${s.urgency==='Super'?'selected':''}>Super</option><option ${s.urgency==='Alta'?'selected':''}>Alta</option><option ${s.urgency==='Média'?'selected':''}>Média</option><option ${s.urgency==='Baixa'?'selected':''}>Baixa</option></select><span class="muted">${FIXED_DELIVERY_MINUTES} min</span><button class="${selected.has(s.id)?'included':'add'}" data-toggle="${s.id}">${selected.has(s.id)?'✓ Incluída':'＋ Adicionar'}</button></div>`
-    }).join('') || '<div style="padding:25px;text-align:center;color:#9aa7a7">Nenhuma unidade encontrada para os filtros atuais.</div>';
+    }).join('') || '<div style="padding:25px;text-align:center;color:#9aa7a7">Nenhuma unidade encontrada para a busca atual.</div>';
 }
 
 function wait(ms) {
@@ -4289,7 +4322,7 @@ async function calc() {
                 l: z.l,
                 arrival: t + z.m
             });
-            /* Após cada entrega o condutor permanece 30 minutos no ponto.
+            /* Após cada entrega o condutor permanece 45 minutos no ponto.
                Esse intervalo entra no horário da próxima chegada e no
                tempo total do roteiro, sem alterar a duração do trecho viário. */
             t += z.m + FIXED_DELIVERY_MINUTES;
@@ -4391,8 +4424,51 @@ function escHtml(value) {
     });
 }
 
-/* ZOOM CONTROLS - reaproveitavel para o mapa do painel e modal */
-function attachZoomControls(ctrlId,targetId){const ctrl=document.getElementById(ctrlId);const target=document.getElementById(targetId);if(!ctrl||!target)return;let zoom=1;const MIN=1,MAX=3,STEP=0.25;ctrl.querySelectorAll('[data-zoom]').forEach(function(b){b.onclick=function(){if(b.dataset.zoom==='in')zoom=Math.min(MAX,zoom+STEP);else if(b.dataset.zoom==='out')zoom=Math.max(MIN,zoom-STEP);else zoom=1;target.classList.add('is-zoomed');target.style.setProperty('--zoom',zoom);};});target.addEventListener('wheel',function(e){if(!(e.ctrlKey||e.metaKey))return;e.preventDefault();zoom=Math.max(MIN,Math.min(MAX,zoom+(e.deltaY<0?STEP:-STEP)));target.classList.add('is-zoomed');target.style.setProperty('--zoom',zoom);},{passive:false});}
+/* ZOOM CONTROLS · mapa do painel Planejamento e mapa do modal de detalhes.
+   Com o Google Maps ativo, os botões atuam no próprio mapa (setZoom /
+   fitBounds). Sem Google Maps, o mapa ilustrativo (SVG) é ampliado pelo
+   viewBox, mantendo a nitidez dos pontos e da linha da rota. */
+let panelMapBounds = null,
+    modalMiniMap = null,
+    modalMiniBounds = null,
+    fallbackZoom = 1;
+
+function applyFallbackZoom(level) {
+    const svg = $('routeSvg');
+    fallbackZoom = Math.max(1, Math.min(4, level));
+    if (!svg) return;
+    const size = 100 / fallbackZoom,
+        off = (100 - size) / 2;
+    svg.setAttribute('viewBox', off + ' ' + off + ' ' + size + ' ' + size);
+}
+
+function attachZoomControls(ctrlId, targetId, getMap, getBounds, padding) {
+    const ctrl = document.getElementById(ctrlId);
+    if (!ctrl) return;
+    ctrl.querySelectorAll('[data-zoom]').forEach(function(b) {
+        b.onclick = function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            const action = b.dataset.zoom;
+            const map = typeof getMap === 'function' ? getMap() : null;
+            if (map && typeof map.getZoom === 'function') {
+                const z = map.getZoom() || 11;
+                if (action === 'in') map.setZoom(Math.min(21, z + 1));
+                else if (action === 'out') map.setZoom(Math.max(2, z - 1));
+                else {
+                    const bounds = typeof getBounds === 'function' ? getBounds() : null;
+                    if (bounds) map.fitBounds(bounds, padding || 50);
+                }
+                return;
+            }
+            /* Sem Google Maps: apenas o mapa ilustrativo do painel tem zoom. */
+            if (targetId !== 'mapCanvas') return;
+            if (action === 'in') applyFallbackZoom(fallbackZoom + 0.5);
+            else if (action === 'out') applyFallbackZoom(fallbackZoom - 0.5);
+            else applyFallbackZoom(1);
+        };
+    });
+}
 
 async function fetchUnitPhoto(item) {
     if (item.photoUrl) return {
@@ -4560,8 +4636,10 @@ function mapPointModal(item, index, base) {
     const photosHtml = isBaseModal ?
         '<div class="unit-photos single"><div class="photo-slot"><div class="photo-slot-label">Base</div><div class="unit-photo" id="destPhotoBox" style="display:grid;place-items:center;color:var(--soft)">Buscando foto…</div>' + destInfo + '</div></div>' :
         '<div class="unit-photos"><div class="photo-slot"><div class="photo-slot-label">Origem</div><div class="unit-photo" id="originPhotoBox" style="display:grid;place-items:center;color:var(--soft)">Buscando foto…</div>' + originInfo + '</div><div class="photo-slot"><div class="photo-slot-label">Destino</div><div class="unit-photo" id="destPhotoBox" style="display:grid;place-items:center;color:var(--soft)">Buscando foto…</div>' + destInfo + '</div></div>';
-    openModal(isBaseModal ? 'Base de partida' : 'Unidade da rota', '<div id="mapPointContent">' + photosHtml + '<div class="map-details"><div class="map-detail"><small>Tempo desde o ponto anterior</small><b>' + travel + '</b></div><div class="map-detail"><small>Quilometragem calculada</small><b>' + distance + '</b></div></div><div id="modalGmap" class="gmap-mini"></div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px"><a class="outline" href="' + mapsUrl + '" target="_blank" rel="noopener">↗ Abrir rota no Google Maps</a><span class="outline" id="streetViewSlot" style="opacity:.6;cursor:default">👁 Verificando Street View…</span></div></div>', 'modal-lg');
-    attachZoomControls('modalZoomCtrls', 'modalGmap');
+    openModal(isBaseModal ? 'Base de partida' : 'Unidade da rota', '<div id="mapPointContent">' + photosHtml + '<div class="map-details"><div class="map-detail"><small>Tempo desde o ponto anterior</small><b>' + travel + '</b></div><div class="map-detail"><small>Quilometragem calculada</small><b>' + distance + '</b></div></div><div class="gmap-mini-wrap"><div id="modalGmap" class="gmap-mini"></div><div class="zoom-controls" id="modalZoomCtrls" aria-label="Controles de zoom do mapa do trecho"><button class="zoom-btn" type="button" data-zoom="in" title="Aumentar zoom">＋</button><button class="zoom-btn" type="button" data-zoom="out" title="Diminuir zoom">－</button><button class="zoom-btn" type="button" data-zoom="reset" title="Ajustar à área">⌖</button></div></div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px"><a class="outline" href="' + mapsUrl + '" target="_blank" rel="noopener">↗ Abrir rota no Google Maps</a><span class="outline" id="streetViewSlot" style="opacity:.6;cursor:default">👁 Verificando Street View…</span></div></div>', 'modal-lg');
+    modalMiniMap = null;
+    modalMiniBounds = null;
+    attachZoomControls('modalZoomCtrls', 'modalGmap', function() { return modalMiniMap; }, function() { return modalMiniBounds; }, 40);
     /* requestId + captura dos nós agora (antes dos awaits) evitam que uma
        busca lenta de um modal aberto anteriormente sobrescreva o modal
        atual — era isso que antes fazia a foto "errada" (da origem)
@@ -4655,6 +4733,7 @@ function drawFallbackMap(arr, legs) {
         const tooltip = item.name + (item.address ? ' — ' + item.address : '') + (i > 0 && item.urgency ? ' (' + item.urgency + ')' : '');
         return '<g data-point="' + i + '" transform="translate(' + p.x + ' ' + p.y + ')" style="cursor:pointer"><title>' + escHtml(tooltip) + '</title><circle r="' + (i === 0 ? 2.4 : 2.1) + '" fill="' + (i === 0 ? '#192d43' : urgency[arr[i - 1]?.urgency || 'Média'].c) + '" stroke="#fff" stroke-width=".8"/><text y=".8" text-anchor="middle" fill="#fff" font-size="2.2" font-weight="700">' + (i === 0 ? 'B' : i) + '</text></g>';
     }).join('');
+    applyFallbackZoom(fallbackZoom);
     document.querySelectorAll('#routeSvg [data-point]').forEach(function(node) {
         node.onclick = function() {
             const i = Number(node.dataset.point),
@@ -4993,7 +5072,7 @@ function closeModal() {
 
 function openPreferences() {
     const currentKey = getGoogleKey();
-    openModal('Preferências operacionais', `<div class="pref-row"><span>Tema da aplicação</span><select id="prefTheme"><option value="light">Claro</option><option value="dark">Escuro</option></select></div><div class="pref-row"><span>Trânsito padrão</span><select id="prefTraffic"><option value="estimated">Estimado por faixa horária</option><option value="off">Sem ajuste de trânsito</option></select></div><div class="pref-row"><span>Retornar à base ao final</span><input id="prefReturn" type="checkbox" checked></div><div class="divider" style="margin:18px 0"></div><div class="over" style="margin-bottom:6px">Google Maps</div><p style="margin:0 0 10px">Rotas em tempo real e fotos das unidades exigem uma chave de API do Google Maps com <b>Maps JavaScript API</b>, <b>Directions API</b>, <b>Geocoding API</b> e <b>Places API</b> habilitadas (e faturamento ativo no projeto). Sem chave, a aplicação usa apenas uma estimativa local por distância e faixa horária (sem geocodificação real de endereços).</p><p id="prefGmapsServerNote" style="display:none;margin:0 0 10px;padding:9px 11px;border:1px solid var(--line);border-radius:8px;background:var(--mint);font-size:11px">🔒 Esta chave está sendo carregada automaticamente e com segurança a partir da variável de ambiente configurada na Vercel — não fica salva neste navegador.</p><div id="prefGmapsManualBox"><label style="display:block;margin-bottom:10px">Chave de API (uso manual/local)<input id="prefGmapsKey" type="text" placeholder="AIza…" value="${escHtml(currentKey)}" style="margin-top:6px"></label><div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px"><button class="primary" style="width:auto" id="prefGmapsSave">Salvar e conectar</button><button class="outline" id="prefGmapsClear">Remover chave</button><a class="outline" href="https://console.cloud.google.com/google/maps-apis/credentials" target="_blank" rel="noopener">↗ Obter chave</a></div></div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px"><button class="outline" id="prefGmapsRetry">↻ Testar conexão novamente</button></div><p id="prefGmapsStatus" style="font-size:10px;margin:6px 0 0"></p><div class="divider" style="margin:18px 0"></div><div class="over" style="margin-bottom:6px">Dados salvos neste navegador</div><p style="margin:0 0 10px">Planilha importada, seleção, formulário e última rota calculada ficam salvos para uso após fechar ou reiniciar a aplicação.</p><button class="outline" id="prefClearData">🗑 Limpar dados salvos e reiniciar</button><p style="margin-top:17px">As preferências são aplicadas imediatamente e ficam salvas neste navegador.</p>`);
+    openModal('Preferências operacionais', `<div class="pref-row"><span>Tema da aplicação</span><select id="prefTheme"><option value="light">Claro</option><option value="dark">Escuro</option></select></div><div class="pref-row"><span>Trânsito padrão</span><select id="prefTraffic"><option value="estimated">Estimado por faixa horária</option><option value="off">Sem ajuste de trânsito</option></select></div><div class="pref-row"><span>Retornar à base ao final</span><input id="prefReturn" type="checkbox" checked></div><div class="divider" style="margin:18px 0"></div><div class="over" style="margin-bottom:6px">Google Maps</div><p style="margin:0 0 10px">Rotas em tempo real e fotos das unidades exigem uma chave de API do Google Maps com <b>Maps JavaScript API</b>, <b>Directions API</b>, <b>Geocoding API</b> e <b>Places API</b> habilitadas (e faturamento ativo no projeto). Sem chave, a aplicação usa apenas uma estimativa local por distância e faixa horária (sem geocodificação real de endereços).</p><p id="prefGmapsServerNote" style="display:none;margin:0 0 10px;padding:9px 11px;border:1px solid var(--line);border-radius:8px;background:var(--mint);font-size:11px">🔒 Esta chave está sendo carregada automaticamente e com segurança a partir da variável de ambiente configurada na Vercel — não fica salva neste navegador.</p><div id="prefGmapsManualBox"><label style="display:block;margin-bottom:10px">Chave de API (uso manual/local)<input id="prefGmapsKey" type="text" placeholder="AIza…" value="${escHtml(currentKey)}" style="margin-top:6px"></label><div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px"><button class="primary" style="width:auto" id="prefGmapsSave">Salvar e conectar</button><button class="outline" id="prefGmapsClear">Remover chave</button><a class="outline" href="https://console.cloud.google.com/google/maps-apis/credentials" target="_blank" rel="noopener">↗ Obter chave</a></div></div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px"><button class="outline" id="prefGmapsRetry">↻ Testar conexão novamente</button></div><p id="prefGmapsStatus" style="font-size:10px;margin:6px 0 0"></p><div class="divider" style="margin:18px 0"></div><div class="over" style="margin-bottom:6px">Dados salvos neste navegador</div><p style="margin:0 0 10px">Planilha importada, seleção, formulário e última rota calculada ficam salvos para uso após fechar ou reiniciar a aplicação.</p><button class="outline" id="prefClearData">🗑 Limpar dados ativos e reiniciar</button><p style="margin-top:17px">As preferências são aplicadas imediatamente e ficam salvas neste navegador.</p>`);
     $('prefTheme').value = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
     $('prefTraffic').value = $('traffic').value;
     $('prefReturn').checked = $('returnBase').checked;
@@ -5044,14 +5123,22 @@ function openPreferences() {
     };
     $('prefClearData').onclick = function() {
         if (confirm('Isto apaga a planilha importada, seleção e rota salvas neste navegador (o histórico de planejamentos é mantido). Deseja continuar?')) {
-            clearSavedData();
-            location.reload();
+            resetActiveData();
         }
     };
 }
 
+const HELP_MANUAL_FILE = 'Manual_Rotas_Expedicao.html';
 function openHelp() {
-    openModal('Central de ajuda', `<h4>Como importar a planilha?</h4><p>Use a aba Tarefas com cabeçalho na primeira linha válida. O sistema identifica Cliente, Endereço, Base, Prioridade e Duração automaticamente.</p><h4>Como montar uma rota?</h4><p>Após importar, escolha a base, pesquise unidades e marque apenas as que serão visitadas. Ajuste a urgência e clique em Calcular melhor rota.</p><h4>O que é o trânsito estimado?</h4><p>Com uma chave do Google Maps configurada em Preferências, a rota é calculada em tempo real, com trânsito atual, exatamente como no Google Maps. Sem chave, é usado apenas um fator estimado por faixa horária, sem geocodificação real de endereços.</p><h4>Como gerar documentos?</h4><p>No Histórico, use PDF para abrir o roteiro profissional para impressão ou Excel para baixar a agenda e o resumo executivo.</p><h4>Meus dados ficam salvos?</h4><p>Sim. A planilha importada, a seleção de unidades, o formulário e a última rota calculada ficam salvos neste navegador e são recarregados automaticamente ao reabrir a aplicação.</p>`);
+    /* O manual fica na mesma pasta (raiz do repositório) da aplicação. */
+    const url = new URL(HELP_MANUAL_FILE, window.location.href).href;
+    const w = window.open(url, '_blank');
+    if (w) {
+        try { w.opener = null; } catch (e) {}
+    } else {
+        /* Navegador bloqueou a nova aba: oferece o link direto. */
+        openModal('Central de Ajuda', '<p style="margin-top:0">O navegador bloqueou a abertura automática da nova aba.</p><a class="outline" href="' + url + '" target="_blank" rel="noopener">↗ Abrir manual de uso</a>');
+    }
 }
 
 function toggle(id) {
@@ -5103,7 +5190,6 @@ $('clearBtn').onclick = () => {
     persistRoute();
 };
 $('search').oninput = renderUnits;
-$('urgencyFilter').onchange = renderUnits;
 $('driver').onchange = function() {
     $('driverName').value = this.value;
     render();
@@ -5124,7 +5210,9 @@ $('addPoint').onclick = () => document.querySelector('.units').scrollIntoView({
 });
 $('gmapsOpenBtn').onclick = openGoogleMapsRoute;
 $('driverRoutesBtn').onclick = openDriverRoutes;
-attachZoomControls('mapZoomCtrls','mapCanvas');
+attachZoomControls('mapZoomCtrls', 'mapCanvas', function() {
+    return gmapsReady && gmap && $('gmap') && $('gmap').style.display !== 'none' ? gmap : null;
+}, function() { return panelMapBounds; }, 60);
 if($('unitsToggleBtn')){const ub=$('unitsToggleBtn');ub.onclick=function(){const opened=$('unitsSection').classList.toggle('is-open');ub.setAttribute('aria-expanded',opened?'true':'false');ub.textContent=opened?'▴ Ocultar unidades':'▾ Mostrar unidades';};}
 if ($('landingPage')) {
     document.body.classList.add('landing-lock');
@@ -5228,7 +5316,7 @@ function importFile(file) {
                 }) || 'Média';
                 /* A nova planilha terá apenas Base, Endereço e Cliente. Todo
                    tempo eventualmente existente em colunas antigas é
-                   ignorado: cada entrega usa exatamente 30 minutos. */
+                   ignorado: cada entrega usa exatamente 45 minutos. */
                 const service = FIXED_DELIVERY_MINUTES;
                 const previous = grouped.get(identity);
                 if (previous) {
@@ -5272,7 +5360,6 @@ function importFile(file) {
             persistForm();
             showProgress('Importação concluída.', 100);
             setTimeout(hideProgress, 450);
-            alert('Importação concluída: ' + stops.length.toLocaleString('pt-BR') + ' unidades únicas consolidadas a partir de ' + rows.length.toLocaleString('pt-BR') + ' registros.');
         } catch (error) {
             console.error(error);
             hideProgress();
@@ -5430,6 +5517,86 @@ function openDriverRoutes() {
     openModal('Rotas do condutor · ' + escHtml(driver),
         '<div class="rs-driver-chip">Condutor: <b>' + escHtml(driver) + '</b> · rota exibida no mapa do painel Planejamento</div>' +
         driverRoutesSheet(cur), 'modal-lg');
+}
+
+/* ================================================================
+   PREFERÊNCIAS · limpar dados ativos sem recarregar a página
+   Apaga planilha importada, seleção, formulário, rota atual e o cache de
+   geocodificação; mantém histórico, tema, chave do Google e preferências.
+   A aplicação permanece aberta no painel Planejamento.
+   ================================================================ */
+function resetActiveData() {
+    clearSavedData();
+    try {
+        Object.keys(localStorage).forEach(function(k) {
+            if (k.indexOf('planiroute-geog-') === 0) localStorage.removeItem(k);
+        });
+    } catch (e) {}
+    stops = [];
+    bases = [DEFAULT_BASE];
+    selected = new Set();
+    route = null;
+    panelMapBounds = null;
+    applyFallbackZoom(1);
+    $('baseSelect').innerHTML = bases.map(function(b) {
+        return '<option value="' + b.id + '">' + escHtml(b.name) + '</option>';
+    }).join('');
+    $('baseSelect').value = DEFAULT_BASE.id;
+    $('fileName').textContent = 'Planilha de rede · aguardando importação';
+    $('fileInfo').textContent = 'Nenhum arquivo carregado ainda';
+    ['sheetStop', 'sheetAddress', 'sheetBase'].forEach(function(id, i) {
+        if ($(id)) $(id).innerHTML = '<option>' + ['Cliente', 'Endereço', 'Base'][i] + '</option>';
+    });
+    if ($('fileInput')) $('fileInput').value = '';
+    $('search').value = '';
+    $('driverName').value = $('driver').value;
+    $('date').value = new Date().toISOString().slice(0, 10);
+    $('departure').value = '07:30';
+    $('mapTitle').textContent = 'Mapa operacional';
+    $('sumTravel').textContent = '—';
+    $('sumTravelSub').textContent = 'aguardando rota';
+    if (gmap && window.google && google.maps) {
+        gmap.setCenter({ lat: DEFAULT_BASE.lat, lng: DEFAULT_BASE.lng });
+        gmap.setZoom(11);
+    }
+    render();
+    renderResult();
+    closeModal();
+    tabs('plan');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+/* MENU LATERAL RETRÁTIL · estado salvo neste navegador */
+function setSidebarCollapsed(collapsed) {
+    const side = $('sideNav'),
+        btn = $('sideToggle');
+    if (!side || !btn) return;
+    side.classList.toggle('collapsed', collapsed);
+    btn.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+    btn.title = collapsed ? 'Expandir menu lateral (Ctrl + B)' : 'Recolher menu lateral (Ctrl + B)';
+    try {
+        localStorage.setItem('planiroute-sidebar', collapsed ? 'collapsed' : 'open');
+    } catch (e) {}
+    /* O Google Maps redimensiona sozinho, mas o evento garante o ajuste. */
+    setTimeout(function() {
+        window.dispatchEvent(new Event('resize'));
+    }, 280);
+}
+if ($('sideToggle')) {
+    $('sideToggle').onclick = function() {
+        setSidebarCollapsed(!$('sideNav').classList.contains('collapsed'));
+    };
+    document.addEventListener('keydown', function(e) {
+        if ((e.ctrlKey || e.metaKey) && !e.shiftKey && !e.altKey && e.key.toLowerCase() === 'b') {
+            const tag = (e.target && e.target.tagName) || '';
+            if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+            e.preventDefault();
+            setSidebarCollapsed(!$('sideNav').classList.contains('collapsed'));
+        }
+    });
+    let savedSide = null;
+    try { savedSide = localStorage.getItem('planiroute-sidebar'); } catch (e) {}
+    if (savedSide === 'collapsed') setSidebarCollapsed(true);
 }
 
 restoreState();
