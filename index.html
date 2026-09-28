@@ -2225,7 +2225,8 @@ let selected = new Set(),
     route = null;
 /* Mudança de versão invalida rotas persistidas que ainda possam conter
    coordenadas determinísticas criadas pelo importador. */
-const ROUTE_ENGINE_VERSION = 'road-routing-v3-google-geocoded';
+const ROUTE_ENGINE_VERSION = 'road-routing-v4-dwell-return';
+const DWELL_MINUTES = 30;
 const $ = id => document.getElementById(id),
     baseFallback = () => ({
         id: 'none',
@@ -3257,6 +3258,10 @@ async function calc() {
     showProgress('Ordenando unidades por urgência e distância…', 18);
     try {
         const base = bases.find(b => b.id === $('baseSelect').value) || bases[0] || baseFallback();
+        /* O roteiro operacional sempre termina na base. Mantém o controle
+           visual sincronizado, mas não permite salvar uma rota incompleta. */
+        const returnToBase = true;
+        $('returnBase').checked = true;
         let rem = stops.filter(s => selected.has(s.id)),
             ordered = [],
             cur = base;
@@ -3297,10 +3302,13 @@ async function calc() {
                 l: z.l,
                 arrival: t + z.m
             });
-            t += z.m + s.service;
+            /* Após cada entrega o condutor permanece 30 minutos no ponto.
+               Esse intervalo entra no horário da próxima chegada e no
+               tempo total do roteiro, sem alterar a duração do trecho viário. */
+            t += z.m + s.service + DWELL_MINUTES;
             prev = s;
         });
-        if ($('returnBase').checked) {
+        if (returnToBase) {
             let km = hav(prev, base) * 1.22,
                 z = traffic(km, Math.floor(t / 60), $('traffic').value);
             legs.push({
@@ -3319,7 +3327,7 @@ async function calc() {
             legs,
             km: legs.reduce((a, x) => a + x.km, 0),
             travel: legs.reduce((a, x) => a + x.m, 0),
-            service: ordered.reduce((a, x) => a + x.service, 0),
+            service: ordered.reduce((a, x) => a + x.service + DWELL_MINUTES, 0),
             end: t
         };
         function applyRealLegs(newLegs) {
@@ -3335,14 +3343,14 @@ async function calc() {
             let arrivalClock = Number($('departure').value.slice(0, 2)) * 60 + Number($('departure').value.slice(3));
             route.legs.forEach(function(leg, i) {
                 leg.arrival = arrivalClock;
-                arrivalClock += leg.m + (i < route.ordered.length ? route.ordered[i].service : 0);
+                arrivalClock += leg.m + (i < route.ordered.length ? route.ordered[i].service + DWELL_MINUTES : 0);
             });
             route.end = arrivalClock;
         }
         let routeSource = 'estimativa local';
         if (gmapsReady) {
             showProgress('Calculando rota em tempo real com o Google Maps…', 70);
-            const googleRoute = await getGoogleRoute(base, ordered, $('returnBase').checked);
+            const googleRoute = await getGoogleRoute(base, ordered, returnToBase);
             if (googleRoute) {
                 applyRealLegs(googleRoute.legs);
                 route.googleDirections = googleRoute.directionsResult;
@@ -3351,7 +3359,7 @@ async function calc() {
             }
         } else {
             showProgress('Calculando distância e tempo pela malha viária…', 70);
-            const publicRoute = await getPublicRoute(base, ordered, $('returnBase').checked);
+            const publicRoute = await getPublicRoute(base, ordered, returnToBase);
             if (publicRoute) {
                 applyRealLegs(publicRoute.legs);
                 route.geometry = publicRoute.geometry;
@@ -3665,7 +3673,7 @@ function renderResult() {
         return
     }
     const base = bases.find(b => b.id === $('baseSelect').value) || bases[0] || baseFallback();
-    $('result').innerHTML = `<div class="resulthead"><div><div class="over">Resumo da rota · ${$('date').value.split('-').reverse().join('/')}</div><h3>${driverValue()} <span>· ${base.name.split('·')[0]}</span></h3></div><div class="result-actions"><button class="export" id="pdfBtn">▤ PDF</button><button class="export" id="xlsxBtn">▧ Excel</button></div></div><div class="kpis"><div><span>Distância total</span><b>${route.km.toFixed(1)} <small>km</small></b></div><div><span>Deslocamento</span><b>${fmt(route.travel)}</b></div><div><span>Atendimentos</span><b>${fmt(route.service)}</b></div><div><span>Retorno previsto</span><b>${$('returnBase').checked?clock(route.end):'—'}</b></div></div><div class="timeline">${route.ordered.map((s,i)=>`<div class="event"><div class="marker" style="background:${urgency[s.urgency].c}">${i+1}</div><div class="event-body"><div><b>${s.name}</b><small class="route-address">${s.address}</small><small>${s.city} · ${fmt(s.service)} de atendimento</small></div><div class="etime"><strong>${clock(route.legs[i].arrival)}</strong><small>${fmt(route.legs[i].m)} · ${route.legs[i].l}</small></div></div></div>`).join('')}<div class="event last"><div class="marker" style="background:#fff;color:#193346;border-color:#193346">⌖</div><div class="event-body"><div><b>${$('returnBase').checked?'Retorno à base':'Encerramento da rota'}</b><small>${base.name}</small></div><div class="etime"><strong>${$('returnBase').checked?clock(route.end):'—'}</strong><small>${$('returnBase').checked?'chegada prevista':'sem retorno'}</small></div></div></div></div>`;
+    $('result').innerHTML = `<div class="resulthead"><div><div class="over">Resumo da rota · ${$('date').value.split('-').reverse().join('/')}</div><h3>${driverValue()} <span>· ${base.name.split('·')[0]}</span></h3></div><div class="result-actions"><button class="export" id="pdfBtn">▤ PDF</button><button class="export" id="xlsxBtn">▧ Excel</button></div></div><div class="kpis"><div><span>Distância total</span><b>${route.km.toFixed(1)} <small>km</small></b></div><div><span>Deslocamento</span><b>${fmt(route.travel)}</b></div><div><span>Atendimento + permanência</span><b>${fmt(route.service)}</b></div><div><span>Retorno à base</span><b>${clock(route.end)}</b></div></div><div class="timeline">${route.ordered.map((s,i)=>`<div class="event"><div class="marker" style="background:${urgency[s.urgency].c}">${i+1}</div><div class="event-body"><div><b>${s.name}</b><small class="route-address">${s.address}</small><small>${s.city} · ${fmt(s.service)} atendimento + ${DWELL_MINUTES} min de permanência</small></div><div class="etime"><strong>${clock(route.legs[i].arrival)}</strong><small>${fmt(route.legs[i].m)} · ${route.legs[i].l}</small></div></div></div>`).join('')}<div class="event last"><div class="marker" style="background:#fff;color:#193346;border-color:#193346">⌖</div><div class="event-body"><div><b>Retorno à base</b><small>${base.name}</small></div><div class="etime"><strong>${clock(route.end)}</strong><small>chegada prevista · ${fmt(route.legs[route.ordered.length].m)} de retorno</small></div></div></div></div>`;
     $('pdfBtn').onclick = () => printHistory(currentRouteItem());
     $('xlsxBtn').onclick = () => exportExcel()
 }
@@ -3694,17 +3702,22 @@ function buildRouteSheets(data, wb, suffix) {
             ['Unidades visitadas', meta.stops],
             ['Distância total (km)', +Number(meta.km).toFixed(1)],
             ['Deslocamento', fmt(meta.travel)],
-            ['Atendimento', fmt(meta.service)],
-            ['Retorno previsto', meta.end]
+            ['Atendimento + permanência', fmt(meta.service)],
+            ['Permanência por unidade', DWELL_MINUTES + ' min'],
+            ['Retorno à base', meta.end]
         ],
         agenda = [
             ['AGENDA OTIMIZADA DE VISITAS', '', '', '', '', '', '', '', '', '', ''],
-            ['Ordem', 'Unidade', 'Endereço utilizado', 'Município', 'Urgência', 'Chegada prevista', 'Atendimento', 'Trecho (km)', 'Deslocamento', 'Trânsito', 'Cliente']
+            ['Ordem', 'Unidade', 'Endereço utilizado', 'Município', 'Urgência', 'Chegada prevista', 'Atendimento + permanência', 'Trecho (km)', 'Deslocamento', 'Trânsito', 'Cliente']
         ];
     ordered.forEach(function(s, i) {
         const leg = legs[i] || {};
-        agenda.push([i + 1, s.name, s.address, s.city, s.urgency, clock(leg.arrival), fmt(s.service), +Number(leg.km || 0).toFixed(1), fmt(leg.m || 0), leg.l || '', s.client]);
+        agenda.push([i + 1, s.name, s.address, s.city, s.urgency, clock(leg.arrival), fmt(s.service + DWELL_MINUTES), +Number(leg.km || 0).toFixed(1), fmt(leg.m || 0), leg.l || '', s.client]);
     });
+    const returnLeg = legs[ordered.length];
+    if (returnLeg) {
+        agenda.push(['↩', 'Retorno à base', meta.base, '', '', clock(returnLeg.arrival), '—', +Number(returnLeg.km || 0).toFixed(1), fmt(returnLeg.m || 0), returnLeg.l || '', '']);
+    }
     const sumWs = XLSX.utils.aoa_to_sheet(summary),
         ws = XLSX.utils.aoa_to_sheet(agenda),
         green = '0D806D',
@@ -3908,11 +3921,11 @@ function renderHistory() {
 
 function printHistory(item) {
     const rows = item.ordered.map(function(s, i) {
-        return `<tr><td>${i+1}</td><td><strong>${s.name}</strong><br><small>${s.address}</small></td><td>${s.urgency}</td><td>${clock(item.legs[i].arrival)}</td><td>${fmt(item.legs[i].m)}</td><td>${fmt(s.service)}</td></tr>`
-    }).join('');
+        return `<tr><td>${i+1}</td><td><strong>${s.name}</strong><br><small>${s.address}</small></td><td>${s.urgency}</td><td>${clock(item.legs[i].arrival)}</td><td>${fmt(item.legs[i].m)}</td><td>${fmt(s.service + DWELL_MINUTES)}<br><small>inclui ${DWELL_MINUTES} min de permanência</small></td></tr>`
+    }).join('') + (item.legs[item.ordered.length] ? `<tr style="font-weight:700;background:#eff8f4"><td>↩</td><td><strong>Retorno à base</strong><br><small>${item.meta.base}</small></td><td>—</td><td>${clock(item.legs[item.ordered.length].arrival)}</td><td>${fmt(item.legs[item.ordered.length].m)}</td><td>Chegada à base: ${clock(item.end)}</td></tr>` : '');
     const w = window.open('', '_blank');
     if (!w) return alert('Permita pop-ups para gerar o PDF.');
-    w.document.write(`<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>PlaniRoute · Roteiro</title><style>@page{size:A4 landscape;margin:10mm}body{font-family:Arial;color:#183345;padding:18px}.toolbar{display:flex;gap:8px;margin-bottom:16px}.toolbar button{border:0;border-radius:6px;padding:9px 13px;background:#0d806d;color:#fff;cursor:pointer}.toolbar button.alt{background:#193345}h1{margin:0;color:#0d806d}h2{font-size:15px;margin-top:28px;border-bottom:2px solid #0d806d;padding-bottom:8px}.sub{color:#6d7e80;font-size:12px;margin:6px 0 22px}.meta{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.box{background:#eff8f4;padding:12px;border-radius:7px}.box small{display:block;color:#718184;font-size:10px}.box b{display:block;margin-top:4px;font-size:13px}table{width:100%;border-collapse:collapse;margin-top:12px;font-size:11px}th{text-align:left;background:#193345;color:white;padding:9px}td{padding:9px;border-bottom:1px solid #dce8e3}small{color:#758789}@media print{button{display:none}}.unit-photo{width:100%;height:150px;object-fit:cover;border-radius:10px;background:var(--mint);display:block;margin-bottom:12px}.map-details{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin:12px 0}.map-detail{padding:9px;border:1px solid var(--line);border-radius:8px;background:var(--card)}.map-detail small{display:block;color:var(--soft);font-size:9px}.map-detail b{display:block;color:var(--ink);margin-top:3px}.maps-frame{width:100%;height:220px;border:1px solid var(--line);border-radius:10px;margin-top:12px;background:var(--mint)}.progress-backdrop{position:fixed;inset:0;background:rgba(8,27,38,.58);backdrop-filter:blur(5px);z-index:100;display:grid;place-items:center}.progress-card{width:min(390px,calc(100vw - 36px));background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:18px;padding:25px;box-shadow:0 22px 60px rgba(0,0,0,.25);text-align:center}.progress-ring{width:62px;height:62px;border:5px solid var(--line);border-top-color:var(--teal);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 15px}@keyframes spin{to{transform:rotate(360deg)}}.progress-bar{height:7px;background:var(--line);border-radius:99px;overflow:hidden;margin-top:16px}.progress-bar i{display:block;height:100%;width:18%;background:linear-gradient(90deg,var(--teal),#70dfbf);border-radius:inherit;transition:width .3s ease}@page{size:A4 landscape;margin:10mm}</style></head><body><div class="toolbar"><button onclick="window.print()">▤ Imprimir / Salvar como PDF</button><button class="alt" onclick="downloadReport()">⇩ Baixar relatório</button></div><h1>PlaniRoute Saúde</h1><div class="sub">Roteiro profissional de visitação · ${item.meta.date}</div><div class="meta"><div class="box"><small>Condutor</small><b>${item.meta.driver}</b></div><div class="box"><small>Base de partida</small><b>${item.meta.base}</b></div><div class="box"><small>Resumo</small><b>${item.meta.stops} paradas · ${Number(item.meta.km).toFixed(1)} km</b></div></div><h2>Agenda otimizada</h2><table><thead><tr><th>#</th><th>Unidade</th><th>Urgência</th><th>Chegada</th><th>Deslocamento</th><th>Atendimento</th></tr></thead><tbody>${rows}</tbody></table><p style="margin-top:24px;color:#718184;font-size:10px">Trânsito estimado por faixa horária · Documento gerado localmente pelo PlaniRoute.</p><script>function downloadReport(){const blob=new Blob([document.documentElement.outerHTML],{type:"text/html;charset=utf-8"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="PlaniRoute_Roteiro.html";a.click();setTimeout(function(){URL.revokeObjectURL(a.href)},500)}window.onload=function(){setTimeout(function(){window.print()},350)}</body></html>`);
+    w.document.write(`<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>PlaniRoute · Roteiro</title><style>@page{size:A4 landscape;margin:10mm}body{font-family:Arial;color:#183345;padding:18px}.toolbar{display:flex;gap:8px;margin-bottom:16px}.toolbar button{border:0;border-radius:6px;padding:9px 13px;background:#0d806d;color:#fff;cursor:pointer}.toolbar button.alt{background:#193345}h1{margin:0;color:#0d806d}h2{font-size:15px;margin-top:28px;border-bottom:2px solid #0d806d;padding-bottom:8px}.sub{color:#6d7e80;font-size:12px;margin:6px 0 22px}.meta{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.box{background:#eff8f4;padding:12px;border-radius:7px}.box small{display:block;color:#718184;font-size:10px}.box b{display:block;margin-top:4px;font-size:13px}table{width:100%;border-collapse:collapse;margin-top:12px;font-size:11px}th{text-align:left;background:#193345;color:white;padding:9px}td{padding:9px;border-bottom:1px solid #dce8e3}small{color:#758789}@media print{button{display:none}}.unit-photo{width:100%;height:150px;object-fit:cover;border-radius:10px;background:var(--mint);display:block;margin-bottom:12px}.map-details{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin:12px 0}.map-detail{padding:9px;border:1px solid var(--line);border-radius:8px;background:var(--card)}.map-detail small{display:block;color:var(--soft);font-size:9px}.map-detail b{display:block;color:var(--ink);margin-top:3px}.maps-frame{width:100%;height:220px;border:1px solid var(--line);border-radius:10px;margin-top:12px;background:var(--mint)}.progress-backdrop{position:fixed;inset:0;background:rgba(8,27,38,.58);backdrop-filter:blur(5px);z-index:100;display:grid;place-items:center}.progress-card{width:min(390px,calc(100vw - 36px));background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:18px;padding:25px;box-shadow:0 22px 60px rgba(0,0,0,.25);text-align:center}.progress-ring{width:62px;height:62px;border:5px solid var(--line);border-top-color:var(--teal);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 15px}@keyframes spin{to{transform:rotate(360deg)}}.progress-bar{height:7px;background:var(--line);border-radius:99px;overflow:hidden;margin-top:16px}.progress-bar i{display:block;height:100%;width:18%;background:linear-gradient(90deg,var(--teal),#70dfbf);border-radius:inherit;transition:width .3s ease}@page{size:A4 landscape;margin:10mm}</style></head><body><div class="toolbar"><button onclick="window.print()">▤ Imprimir / Salvar como PDF</button><button class="alt" onclick="downloadReport()">⇩ Baixar relatório</button></div><h1>PlaniRoute Saúde</h1><div class="sub">Roteiro profissional de visitação · ${item.meta.date}</div><div class="meta"><div class="box"><small>Condutor</small><b>${item.meta.driver}</b></div><div class="box"><small>Base de partida</small><b>${item.meta.base}</b></div><div class="box"><small>Resumo</small><b>${item.meta.stops} paradas · ${Number(item.meta.km).toFixed(1)} km</b></div></div><h2>Agenda otimizada</h2><table><thead><tr><th>#</th><th>Unidade</th><th>Urgência</th><th>Chegada</th><th>Deslocamento</th><th>Atendimento + permanência</th></tr></thead><tbody>${rows}</tbody></table><p style="margin-top:24px;color:#718184;font-size:10px">Cada parada considera ${DWELL_MINUTES} minutos de permanência. A última linha mostra o retorno à base · Documento gerado localmente pelo PlaniRoute.</p><script>function downloadReport(){const blob=new Blob([document.documentElement.outerHTML],{type:"text/html;charset=utf-8"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="PlaniRoute_Roteiro.html";a.click();setTimeout(function(){URL.revokeObjectURL(a.href)},500)}window.onload=function(){setTimeout(function(){window.print()},350)}</body></html>`);
     w.document.close();
 }
 
