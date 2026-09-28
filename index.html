@@ -2357,7 +2357,7 @@ function restoreState() {
 }
 
 function hav(a, b) {
-    if (!a || !b || !Number.isFinite(Number(a.lat)) || !Number.isFinite(Number(a.lng)) || !Number.isFinite(Number(b.lat)) || !Number.isFinite(Number(b.lng))) return Infinity;
+    if (!hasValidCoordinates(a) || !hasValidCoordinates(b)) return Infinity;
     const r = 6371,
         d1 = (b.lat - a.lat) * Math.PI / 180,
         d2 = (b.lng - a.lng) * Math.PI / 180,
@@ -2366,7 +2366,12 @@ function hav(a, b) {
 }
 
 function hasValidCoordinates(point) {
-    return !!point && Number.isFinite(Number(point.lat)) && Number.isFinite(Number(point.lng));
+    /* Number(null) e Number('') retornam 0; a validação anterior aceitava
+       coordenadas vazias e enviava {lat:null,lng:null} ao Google Maps. */
+    if (!point || point.lat === null || point.lat === undefined || point.lng === null || point.lng === undefined || point.lat === '' || point.lng === '') return false;
+    const lat = Number(point.lat),
+        lng = Number(point.lng);
+    return Number.isFinite(lat) && Number.isFinite(lng) && lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180;
 }
 
 function traffic(km, h, mode) {
@@ -2489,8 +2494,8 @@ async function resolveGoogleKey(forceRefresh) {
 
 function toLatLng(p) {
     return {
-        lat: p.lat,
-        lng: p.lng
+        lat: Number(p.lat),
+        lng: Number(p.lng)
     };
 }
 
@@ -2603,7 +2608,7 @@ async function geocodePointGoogle(point, options) {
        Nominatim nunca são usadas como fonte de verdade quando o Google está
        disponível. O cálculo chama esta função com force:true para consultar
        novamente os endereços de origem e destino. */
-    if (!options.force && point.geoProvider === 'google' && Number.isFinite(Number(point.lat)) && Number.isFinite(Number(point.lng))) return point;
+    if (!options.force && point.geoProvider === 'google' && hasValidCoordinates(point)) return point;
     const queries = [];
     function addQuery(value) {
         const q = norm(value);
