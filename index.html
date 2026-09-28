@@ -2223,7 +2223,9 @@ let bases = [DEFAULT_BASE];
 let stops = [];
 let selected = new Set(),
     route = null;
-const ROUTE_ENGINE_VERSION = 'road-routing-v2';
+/* Mudança de versão invalida rotas persistidas que ainda possam conter
+   coordenadas determinísticas criadas pelo importador. */
+const ROUTE_ENGINE_VERSION = 'road-routing-v3-google-geocoded';
 const $ = id => document.getElementById(id),
     baseFallback = () => ({
         id: 'none',
@@ -2355,6 +2357,7 @@ function restoreState() {
 }
 
 function hav(a, b) {
+    if (!a || !b || !Number.isFinite(Number(a.lat)) || !Number.isFinite(Number(a.lng)) || !Number.isFinite(Number(b.lat)) || !Number.isFinite(Number(b.lng))) return Infinity;
     const r = 6371,
         d1 = (b.lat - a.lat) * Math.PI / 180,
         d2 = (b.lng - a.lng) * Math.PI / 180,
@@ -2590,19 +2593,32 @@ function setupGoogleMap() {
     });
 }
 
-async function geocodePointGoogle(point) {
-    if (point.geoReady) return point;
-    const query = point.searchText || [point.name, point.address, point.city || '', 'Brasil'].filter(Boolean).join(', '),
-        cacheKey = 'planiroute-geog-' + key(query);
-    try {
-        const cached = JSON.parse(localStorage.getItem(cacheKey) || 'null');
-        if (cached && Number.isFinite(cached.lat) && Number.isFinite(cached.lng)) {
-            point.lat = cached.lat;
-            point.lng = cached.lng;
-            point.geoReady = true;
-            return point;
-        }
-    } catch (e) {}
+async function geocodePointGoogle(point, options) {
+    options = options || {};
+    /* Coordenadas importadas, geradas pelo importador ou obtidas pelo
+       Nominatim nunca são usadas como fonte de verdade quando o Google está
+       disponível. O cálculo chama esta função com force:true para consultar
+       novamente os endereços de origem e destino. */
+    if (!options.force && point.geoProvider === 'google' && Number.isFinite(Number(point.lat)) && Number.isFinite(Number(point.lng))) return point;
+    const addressQuery = [point.address, point.city || '', 'Brasil'].filter(Boolean).join(', '),
+        fallbackQuery = [point.name, point.address, point.city || '', 'Brasil'].filter(Boolean).join(', '),
+        query = addressQuery || point.searchText || fallbackQuery,
+        cacheKey = 'planiroute-geog-v2-' + key(query);
+    if (!options.force) {
+        try {
+            const cached = JSON.parse(localStorage.getItem(cacheKey) || 'null');
+            if (cached && Number.isFinite(Number(cached.lat)) && Number.isFinite(Number(cached.lng))) {
+                point.lat = Number(cached.lat);
+                point.lng = Number(cached.lng);
+                point.geoReady = true;
+                point.geoSource = 'google';
+                point.geoProvider = 'google';
+                point.geoQuery = query;
+                point.googleFormattedAddress = cached.formattedAddress || '';
+                return point;
+            }
+        } catch (e) {}
+    }
     try {
         const result = await withTimeout(new Promise(function(resolve) {
             geocoderG.geocode({
@@ -2617,10 +2633,15 @@ async function geocodePointGoogle(point) {
             point.lat = loc.lat();
             point.lng = loc.lng();
             point.geoReady = true;
+            point.geoSource = 'google';
+            point.geoProvider = 'google';
+            point.geoQuery = query;
+            point.googleFormattedAddress = result.formatted_address || '';
             try {
                 localStorage.setItem(cacheKey, JSON.stringify({
                     lat: point.lat,
-                    lng: point.lng
+                    lng: point.lng,
+                    formattedAddress: point.googleFormattedAddress
                 }));
             } catch (e) {}
         }
@@ -3194,6 +3215,15 @@ async function calc() {
         let rem = stops.filter(s => selected.has(s.id)),
             ordered = [],
             cur = base;
+        /* Primeiro resolve todos os pontos no Google. A ordenação também
+           passa a usar as coordenadas reais, em vez das coordenadas
+           determinísticas que o importador cria apenas como placeholder. */
+        if (gmapsReady) {
+            showProgress('Localizando origem e destinos no Google Maps…', 26);
+            await geocodeAllWithProgress([base].concat(rem), function(point) {
+                return geocodePointGoogle(point, { force: true });
+            }, 'Google Maps', 30000);
+        }
         while (rem.length) {
             rem.sort((a, b) => urgency[b.urgency].w - urgency[a.urgency].w || hav(cur, a) - hav(cur, b));
             let urgent = rem.find(s => urgency[s.urgency].w >= 3),
@@ -3270,6 +3300,9 @@ async function calc() {
         let routeSource = 'estimativa local';
         if (gmapsReady) {
             const geoPoints = [base].concat(ordered);
+            /* Os pontos já foram resolvidos antes da ordenação. Esta segunda
+               passagem apenas completa algum endereço que tenha excedido o
+               prazo da primeira, sem substituir coordenadas Google válidas. */
             await geocodeAllWithProgress(geoPoints, geocodePointGoogle, 'Google Maps', 20000);
             showProgress('Calculando rota em tempo real com o Google Maps…', 70);
             const googleRoute = await getGoogleRoute(base, ordered, $('returnBase').checked);
@@ -4103,8 +4136,11 @@ function importFile(file) {
                         name: baseValue,
                         address: baseAddress + ' · ' + baseCity,
                         searchText: baseValue + ', ' + baseAddress + ', ' + baseCity + ', Brasil',
-                        lat: coord(baseValue, -22.83, .5),
-                        lng: coord(baseValue + 'lng', -43.3, .8)
+                        /* Não inventar coordenadas. Elas serão preenchidas
+                           pelo Google Geocoder no cálculo da rota (ou pelo
+                           geocodificador público somente sem chave Google). */
+                        lat: null,
+                        lng: null
                     });
                 }
                 const name = value(row, ['cliente', 'unidade', 'estabelecimento', 'hospital']) || 'Unidade ' + (index + 1);
@@ -4140,8 +4176,10 @@ function importFile(file) {
                         address: address,
                         city: city,
                         searchText: name + ', ' + address + ', ' + city + ', Brasil',
-                        lat: coord(identity, -22.83, .5),
-                        lng: coord(identity + 'lng', -43.3, .8),
+                        /* Coordenadas hash eram apenas um placeholder e
+                           podiam levar o Directions para outra cidade. */
+                        lat: null,
+                        lng: null,
                         urgency: urgencyValue,
                         service: Math.max(10, Math.min(180, service)),
                         tasks: 1,
