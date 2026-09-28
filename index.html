@@ -2749,30 +2749,33 @@ function buildDepartureDate() {
 async function getGoogleRoute(base, ordered, returnToBase) {
     if (!(window.google && google.maps && google.maps.DirectionsService) || !ordered.length) return null;
     const allPoints = [base].concat(ordered);
-    for (const p of allPoints) await geocodePointGoogle(p);
-    if (allPoints.some(function(p) {
-            return !Number.isFinite(p.lat) || !Number.isFinite(p.lng);
-        })) return null;
+    /* O Directions também aceita endereços. Isso evita que um cadastro com
+       endereço abreviado bloqueie a rota inteira: quando o Geocoder não
+       encontrar a coordenada de um ponto, o próprio Directions faz a
+       resolução do endereço e devolve as coordenadas/legs do trajeto. */
+    function routeLocation(point) {
+        return hasValidCoordinates(point) ? toLatLng(point) : (point.searchText || [point.name, point.address, point.city || '', 'Brasil'].filter(Boolean).join(', '));
+    }
     let destination, waypoints;
     if (returnToBase) {
-        destination = toLatLng(base);
+        destination = routeLocation(base);
         waypoints = ordered.map(function(s) {
             return {
-                location: toLatLng(s),
+                location: routeLocation(s),
                 stopover: true
             };
         });
     } else {
-        destination = toLatLng(ordered[ordered.length - 1]);
+        destination = routeLocation(ordered[ordered.length - 1]);
         waypoints = ordered.slice(0, -1).map(function(s) {
             return {
-                location: toLatLng(s),
+                location: routeLocation(s),
                 stopover: true
             };
         });
     }
     const request = {
-        origin: toLatLng(base),
+        origin: routeLocation(base),
         destination,
         waypoints,
         optimizeWaypoints: false,
@@ -2794,7 +2797,29 @@ async function getGoogleRoute(base, ordered, returnToBase) {
             console.warn('Google Directions: tempo esgotado ou sem resposta.');
             return null;
         }
-        const legs = result.routes[0].legs.map(function(leg) {
+        const resultLegs = result.routes[0].legs || [];
+        resultLegs.forEach(function(leg, index) {
+            /* O Directions devolve as posições efetivamente usadas na rota.
+               Elas passam a ser as coordenadas dos marcadores e do modal,
+               inclusive quando a entrada original foi apenas um endereço. */
+            const start = leg.start_location,
+                end = leg.end_location,
+                from = allPoints[index],
+                to = allPoints[index + 1];
+            if (from && start && typeof start.lat === 'function') {
+                from.lat = start.lat();
+                from.lng = start.lng();
+                from.geoProvider = 'google';
+                from.geoSource = 'google';
+            }
+            if (to && end && typeof end.lat === 'function') {
+                to.lat = end.lat();
+                to.lng = end.lng();
+                to.geoProvider = 'google';
+                to.geoSource = 'google';
+            }
+        });
+        const legs = resultLegs.map(function(leg) {
             const durationSeconds = (leg.duration_in_traffic && leg.duration_in_traffic.value) || leg.duration.value;
             return {
                 km: leg.distance.value / 1000,
@@ -3233,22 +3258,9 @@ async function calc() {
         /* Primeiro resolve todos os pontos no Google. A ordenação também
            passa a usar as coordenadas reais, em vez das coordenadas
            determinísticas que o importador cria apenas como placeholder. */
-        if (gmapsReady) {
-            showProgress('Localizando origem e destinos no Google Maps…', 26);
-            await geocodeAllWithProgress([base].concat(rem), function(point) {
-                return geocodePointGoogle(point, { force: true });
-            }, 'Google Maps', 30000);
-            /* Se um endereço estiver incompleto e o Google não o localizar,
-               tenta-se o geocodificador público apenas como contingência. O
-               cálculo nunca volta às coordenadas artificiais do importador. */
-            const unresolved = [base].concat(rem).filter(function(point) {
-                return !hasValidCoordinates(point);
-            });
-            for (const point of unresolved) {
-                point.geoSource = '';
-                await geocodePointPublic(point);
-            }
-        }
+        /* Não bloqueia a rota esperando o Geocoder. O Directions aceita
+           lat/lng ou endereço e, em ambos os casos, devolve as coordenadas
+           efetivamente usadas nos legs. */
         while (rem.length) {
             rem.sort((a, b) => urgency[b.urgency].w - urgency[a.urgency].w || hav(cur, a) - hav(cur, b));
             let urgent = rem.find(s => urgency[s.urgency].w >= 3),
@@ -3324,11 +3336,6 @@ async function calc() {
         }
         let routeSource = 'estimativa local';
         if (gmapsReady) {
-            const geoPoints = [base].concat(ordered);
-            /* Os pontos já foram resolvidos antes da ordenação. Esta segunda
-               passagem apenas completa algum endereço que tenha excedido o
-               prazo da primeira, sem substituir coordenadas Google válidas. */
-            await geocodeAllWithProgress(geoPoints, geocodePointGoogle, 'Google Maps', 20000);
             showProgress('Calculando rota em tempo real com o Google Maps…', 70);
             const googleRoute = await getGoogleRoute(base, ordered, $('returnBase').checked);
             if (googleRoute) {
@@ -3357,6 +3364,11 @@ async function calc() {
         persistSelected();
         persistRoute();
         await wait(350);
+    } catch (error) {
+        console.error('PlaniRoute: falha ao calcular a rota:', error);
+        route = null;
+        renderResult();
+        alert('Não foi possível calcular a rota. Verifique a chave/permissões do Google Maps e os endereços da planilha. Detalhe: ' + (error && error.message ? error.message : error));
     } finally {
         hideProgress();
     }
