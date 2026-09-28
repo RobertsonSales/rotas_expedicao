@@ -2156,16 +2156,934 @@ svg.route {
     size: A4 landscape;
     margin: 10mm
 }
+
+/* ================================================================
+   LANDING PAGE DE ABERTURA
+   ================================================================ */
+body.landing-lock {
+    overflow: hidden
+}
+
+.landing {
+    position: fixed;
+    inset: 0;
+    z-index: 300;
+    overflow: auto;
+    color: #eaf4f0;
+    background: radial-gradient(900px 480px at 85% -10%, rgba(13, 140, 120, .55), transparent 60%), radial-gradient(700px 420px at -10% 110%, rgba(64, 201, 170, .28), transparent 55%), linear-gradient(158deg, #142c3f 0%, #193346 46%, #0d3a3c 100%);
+    transition: opacity .4s ease, transform .4s ease
+}
+
+.landing-out {
+    opacity: 0;
+    transform: translateY(-18px);
+    pointer-events: none
+}
+
+.landing-glow {
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(70px);
+    opacity: .5;
+    pointer-events: none
+}
+
+.landing-glow.g1 {
+    width: 420px;
+    height: 420px;
+    background: #12a58c;
+    top: -140px;
+    right: -90px;
+    animation: glowFloat 9s ease-in-out infinite alternate
+}
+
+.landing-glow.g2 {
+    width: 360px;
+    height: 360px;
+    background: #0d8c78;
+    bottom: -160px;
+    left: -110px;
+    animation: glowFloat 11s ease-in-out infinite alternate-reverse
+}
+
+@keyframes glowFloat {
+    to {
+        transform: translateY(26px) scale(1.06)
+    }
+}
+
+.landing-inner {
+    position: relative;
+    max-width: 1150px;
+    margin: 0 auto;
+    padding: 26px 34px 30px;
+    min-height: 100%;
+    display: flex;
+    flex-direction: column
+}
+
+.landing-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 14px;
+    animation: fadeDown .7s ease both
+}
+
+.landing-brand {
+    display: flex;
+    gap: 11px;
+    align-items: center;
+    color: #fff
+}
+
+.landing-brandmark {
+    width: 38px;
+    height: 38px;
+    border-radius: 11px;
+    background: linear-gradient(135deg, #0d8c78, #14b89c);
+    display: grid;
+    place-items: center;
+    font-size: 19px;
+    box-shadow: 0 10px 24px rgba(13, 140, 120, .45)
+}
+
+.landing-brand strong {
+    display: block;
+    font-size: 15px;
+    letter-spacing: .4px
+}
+
+.landing-brand span {
+    display: block;
+    font-size: 11px;
+    color: #9fd8c9
+}
+
+.landing-chipstatus {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    color: #bfe8dc;
+    border: 1px solid rgba(255, 255, 255, .16);
+    border-radius: 99px;
+    padding: 7px 13px;
+    background: rgba(255, 255, 255, .06)
+}
+
+.landing-chipstatus i {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #35d0a5;
+    box-shadow: 0 0 0 0 rgba(53, 208, 165, .6);
+    animation: ping 1.8s ease-out infinite
+}
+
+@keyframes ping {
+    70% {
+        box-shadow: 0 0 0 9px rgba(53, 208, 165, 0)
+    }
+
+    100% {
+        box-shadow: 0 0 0 0 rgba(53, 208, 165, 0)
+    }
+}
+
+.landing-hero {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 1.05fr .95fr;
+    gap: 34px;
+    align-items: center;
+    padding: 44px 0 30px
+}
+
+.landing-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    letter-spacing: 1.6px;
+    text-transform: uppercase;
+    color: #8fe6cb;
+    border: 1px solid rgba(143, 230, 203, .35);
+    background: rgba(13, 140, 120, .16);
+    border-radius: 99px;
+    padding: 8px 14px;
+    animation: fadeUp .7s .08s ease both
+}
+
+.landing-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(30px, 4.4vw, 52px);
+    line-height: 1.12;
+    margin: 20px 0 0;
+    color: #fff;
+    animation: fadeUp .7s .16s ease both
+}
+
+.landing-title em {
+    color: #7fe3c4;
+    font-style: italic
+}
+
+.landing-sub {
+    margin: 18px 0 26px;
+    color: #c9dcd6;
+    font-size: 15px;
+    line-height: 1.65;
+    max-width: 520px;
+    animation: fadeUp .7s .24s ease both
+}
+
+.landing-ctarow {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+    animation: fadeUp .7s .32s ease both
+}
+
+.landing-cta {
+    border: 0;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    background: linear-gradient(135deg, #0d8c78, #15b193);
+    color: #fff;
+    font-family: inherit;
+    font-weight: 800;
+    font-size: 16px;
+    padding: 17px 30px;
+    border-radius: 14px;
+    box-shadow: 0 18px 38px rgba(13, 140, 120, .42);
+    transition: transform .2s ease, box-shadow .2s ease
+}
+
+.landing-cta span {
+    display: inline-grid;
+    place-items: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, .2);
+    font-size: 13px;
+    transition: transform .2s ease
+}
+
+.landing-cta:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 24px 48px rgba(13, 140, 120, .55)
+}
+
+.landing-cta:hover span {
+    transform: translateX(4px)
+}
+
+.landing-note {
+    font-size: 11.5px;
+    color: #9fc4ba
+}
+
+.landing-feats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 30px;
+    animation: fadeUp .7s .4s ease both
+}
+
+.landing-feats .feat {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: #dcefe9;
+    border: 1px solid rgba(255, 255, 255, .13);
+    background: rgba(255, 255, 255, .055);
+    border-radius: 11px;
+    padding: 10px 13px
+}
+
+.landing-feats .feat b {
+    color: #7fe3c4;
+    font-size: 14px
+}
+
+.landing-scene {
+    position: relative;
+    min-height: 360px;
+    border: 1px solid rgba(255, 255, 255, .12);
+    border-radius: 22px;
+    background: linear-gradient(180deg, rgba(255, 255, 255, .05), rgba(255, 255, 255, .02));
+    overflow: hidden;
+    animation: fadeUp .8s .3s ease both
+}
+
+.landing-scene::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(rgba(255, 255, 255, .16) 1px, transparent 1.4px);
+    background-size: 24px 24px;
+    opacity: .5;
+    pointer-events: none
+}
+
+.scene-sky {
+    position: absolute;
+    inset: 0
+}
+
+.scene-road {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 84px
+}
+
+.roadline {
+    position: absolute;
+    left: -10%;
+    right: -10%;
+    bottom: 30px;
+    height: 4px;
+    border-radius: 99px;
+    background-image: linear-gradient(90deg, rgba(255, 255, 255, .85) 0 34px, transparent 34px 64px);
+    background-size: 64px 4px;
+    animation: roadMove 1.1s linear infinite;
+    opacity: .85
+}
+
+@keyframes roadMove {
+    to {
+        background-position: -64px 0
+    }
+}
+
+.truck {
+    position: absolute;
+    bottom: 34px;
+    left: -160px;
+    display: flex;
+    align-items: flex-end;
+    animation: truckDrive 7s linear infinite, truckBob .55s ease-in-out infinite;
+    filter: drop-shadow(0 14px 18px rgba(0, 0, 0, .35))
+}
+
+.truck-cargo {
+    width: 112px;
+    height: 52px;
+    border-radius: 10px 4px 4px 6px;
+    background: linear-gradient(160deg, #17a98f, #0d8c78);
+    display: grid;
+    place-items: center;
+    color: #fff;
+    font-weight: 800;
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    border: 2px solid rgba(255, 255, 255, .25);
+    border-right: 0
+}
+
+.truck-cab {
+    width: 40px;
+    height: 36px;
+    background: #193346;
+    border: 2px solid rgba(255, 255, 255, .25);
+    border-left: 1px solid rgba(255, 255, 255, .25);
+    border-radius: 4px 9px 3px 3px;
+    position: relative;
+    margin-left: -2px
+}
+
+.truck-cab i {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    left: 12px;
+    height: 12px;
+    border-radius: 3px;
+    background: #7fd7c8
+}
+
+.truck-wheel {
+    position: absolute;
+    bottom: -11px;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: #0e2233;
+    border: 4px solid #23445c
+}
+
+.truck-wheel::after {
+    content: '';
+    position: absolute;
+    inset: 6px;
+    border-radius: 50%;
+    background: #54748c
+}
+
+.truck-wheel.w1 {
+    left: 20px
+}
+
+.truck-wheel.w2 {
+    left: 122px
+}
+
+@keyframes truckDrive {
+    0% {
+        left: -160px
+    }
+
+    100% {
+        left: 106%
+    }
+}
+
+@keyframes truckBob {
+    0%,
+    100% {
+        transform: translateY(0)
+    }
+
+    50% {
+        transform: translateY(-1.6px)
+    }
+}
+
+.pinbox {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    animation: pinDrop 5.5s ease-in-out infinite
+}
+
+.pinbox .pin {
+    position: relative;
+    width: 26px;
+    height: 26px;
+    border-radius: 50% 50% 50% 0;
+    transform: rotate(-45deg);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, .3)
+}
+
+.pin.green {
+    background: #0d8c78
+}
+
+.pin.orange {
+    background: #d06b1e
+}
+
+.pin.navy {
+    background: #193346
+}
+
+.pin::after {
+    content: '';
+    position: absolute;
+    top: 7px;
+    left: 8px;
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: #fff
+}
+
+.pinpulse {
+    width: 14px;
+    height: 5px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, .35);
+    margin-top: 5px;
+    animation: pinPulse 5.5s ease-in-out infinite
+}
+
+.pinbox.p1 {
+    left: 10%;
+    top: 14%
+}
+
+.pinbox.p2 {
+    left: 47%;
+    top: 34%;
+    animation-delay: .9s
+}
+
+.pinbox.p3 {
+    right: 9%;
+    top: 9%;
+    animation-delay: 1.7s
+}
+
+.pinpulse {
+    animation-delay: inherit
+}
+
+@keyframes pinDrop {
+    0%,
+    100% {
+        transform: translateY(-14px);
+        opacity: .85
+    }
+
+    15%,
+    60% {
+        transform: translateY(0);
+        opacity: 1
+    }
+
+    80% {
+        transform: translateY(-9px);
+        opacity: .75
+    }
+}
+
+@keyframes pinPulse {
+    0%,
+    100% {
+        transform: scale(.7);
+        opacity: .4
+    }
+
+    50% {
+        transform: scale(1.25);
+        opacity: .9
+    }
+}
+
+.chip {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #fff;
+    color: var(--ink);
+    font-size: 11.5px;
+    font-weight: 700;
+    padding: 10px 14px;
+    border-radius: 12px;
+    box-shadow: 0 16px 34px rgba(6, 32, 40, .35);
+    animation: chipFloat 6s ease-in-out infinite
+}
+
+.chip.c1 {
+    top: 5%;
+    left: 30%
+}
+
+.chip.c2 {
+    bottom: 30%;
+    right: 6%;
+    animation-delay: 1.2s
+}
+
+.chip.c3 {
+    top: 44%;
+    left: 5%;
+    animation-delay: 2.2s
+}
+
+@keyframes chipFloat {
+    0%,
+    100% {
+        transform: translateY(0)
+    }
+
+    50% {
+        transform: translateY(-12px)
+    }
+}
+
+.landing-footer {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+    color: #8fb5ab;
+    font-size: 11px;
+    padding: 18px 4px 6px;
+    border-top: 1px solid rgba(255, 255, 255, .1);
+    animation: fadeUp .8s .5s ease both
+}
+
+@keyframes fadeUp {
+    from {
+        opacity: 0;
+        transform: translateY(22px)
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0)
+    }
+}
+
+@keyframes fadeDown {
+    from {
+        opacity: 0;
+        transform: translateY(-16px)
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0)
+    }
+}
+
+/* ================================================================
+   ROTAS DO CONDUTOR · modal no estilo do PDF
+   ================================================================ */
+.rs-modal .modal-body {
+    padding: 20px 22px 24px
+}
+
+.rs-driver-chip {
+    display: inline-flex;
+    gap: 8px;
+    align-items: center;
+    background: var(--mint);
+    border: 1px solid var(--line);
+    color: var(--ink);
+    font-size: 12px;
+    border-radius: 99px;
+    padding: 8px 14px;
+    margin-bottom: 14px
+}
+
+.rs-sheet {
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    overflow: hidden
+}
+
+.rs-sheet-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    background: #193345;
+    color: #fff;
+    padding: 12px 16px
+}
+
+.rs-sheet-head h4 {
+    margin: 0;
+    font-size: 14px;
+    letter-spacing: .3px
+}
+
+.rs-sheet-head small {
+    color: #a9c3bb;
+    font-size: 10.5px
+}
+
+.rs-tag {
+    background: #0d806d;
+    color: #fff;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: .6px;
+    text-transform: uppercase;
+    border-radius: 99px;
+    padding: 4px 10px;
+    white-space: nowrap
+}
+
+.rs-meta {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    padding: 14px 16px 4px
+}
+
+.rs-box {
+    background: #eff8f4;
+    padding: 10px 12px;
+    border-radius: 8px
+}
+
+.rs-box small {
+    display: block;
+    color: #718184;
+    font-size: 10px
+}
+
+.rs-box b {
+    display: block;
+    margin-top: 3px;
+    font-size: 12.5px;
+    color: #183345
+}
+
+.rs-tablewrap {
+    overflow-x: auto;
+    padding: 10px 16px 16px
+}
+
+.rs-sheet table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 11px;
+    min-width: 600px
+}
+
+.rs-sheet th {
+    text-align: left;
+    background: #193345;
+    color: #fff;
+    padding: 8px
+}
+
+.rs-sheet td {
+    padding: 8px;
+    border-bottom: 1px solid #dce8e3;
+    color: #183345
+}
+
+.rs-sheet small {
+    color: #758789
+}
+
+.rs-return td {
+    font-weight: 700;
+    background: #eff8f4
+}
+
+.rs-sep {
+    height: 18px
+}
+
+.rs-empty {
+    padding: 26px 10px;
+    text-align: center;
+    color: var(--soft);
+    font-size: 13px;
+    border: 1px dashed var(--line);
+    border-radius: 12px
+}
+
+/* ================================================================
+   RESPONSIVIDADE EM DISPOSITIVOS MÓVEIS
+   ================================================================ */
+@media (max-width:900px) {
+    .landing-hero {
+        grid-template-columns: 1fr;
+        gap: 18px;
+        padding: 30px 0 10px
+    }
+
+    .landing-scene {
+        min-height: 250px
+    }
+
+    .landing-inner {
+        padding: 18px 18px 22px
+    }
+}
+
+@media (max-width:768px) {
+    .app {
+        flex-direction: column
+    }
+
+    .side {
+        position: static;
+        width: 100%;
+        flex: none;
+        min-height: 0;
+        padding: 14px 14px 10px
+    }
+
+    .side .workspace,
+    .side .operator {
+        display: none
+    }
+
+    .side .nav {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px
+    }
+
+    .side .nav .nav-label {
+        width: 100%;
+        margin: 4px 0 0
+    }
+
+    .side .nav button {
+        flex: 1 1 auto;
+        justify-content: center
+    }
+
+    .main {
+        padding: 0 14px 18px
+    }
+
+    .map-actions {
+        flex-wrap: wrap
+    }
+
+    .card.table {
+        overflow-x: auto
+    }
+
+    .card.table .thead,
+    .card.table .unit {
+        min-width: 660px
+    }
+
+    .modal {
+        width: 100%;
+        max-height: 92vh;
+        border-radius: 14px
+    }
+
+    .modal-body {
+        max-height: calc(92vh - 62px);
+        overflow: auto
+    }
+
+    .historyhead {
+        flex-direction: column;
+        align-items: stretch
+    }
+
+    .rs-meta {
+        grid-template-columns: 1fr 1fr
+    }
+
+    .top h1 {
+        font-size: 17px
+    }
+}
+
+@media (max-width:480px) {
+    .summary {
+        grid-template-columns: 1fr 1fr
+    }
+
+    .kpis {
+        grid-template-columns: 1fr 1fr
+    }
+
+    .importgrid {
+        grid-template-columns: 1fr
+    }
+
+    .filters {
+        flex-direction: column
+    }
+
+    .grid {
+        grid-template-columns: 1fr
+    }
+
+    .landing-title {
+        font-size: 27px
+    }
+
+    .landing-cta {
+        width: 100%;
+        justify-content: center
+    }
+
+    .landing-feats {
+        gap: 7px
+    }
+
+    .landing-feats .feat {
+        flex: 1 1 45%;
+        justify-content: center
+    }
+
+    .result-actions {
+        flex-wrap: wrap
+    }
+
+    .rs-meta {
+        grid-template-columns: 1fr
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+    .landing,
+    .landing * {
+        animation: none !important;
+        transition: none !important
+    }
+}
 </style>
 </head>
 <body>
+<div id="landingPage" class="landing" role="dialog" aria-label="Tela de abertura · GRUPO LABMEDIC">
+    <div class="landing-glow g1"></div>
+    <div class="landing-glow g2"></div>
+    <div class="landing-inner">
+        <div class="landing-top">
+            <div class="landing-brand"><span class="landing-brandmark">⌁</span>
+                <div><strong>GRUPO LABMEDIC</strong><span>Planejamento de Entregas</span></div>
+            </div>
+            <div class="landing-chipstatus"><i></i>API oficial Google Maps</div>
+        </div>
+        <div class="landing-hero">
+            <div class="landing-copy">
+                <div class="landing-badge">✦ Logística assistencial inteligente</div>
+                <h1 class="landing-title">Cada entrega no tempo certo.<br><em>Cada rota no melhor caminho.</em></h1>
+                <p class="landing-sub">Monte a rota do condutor em poucos cliques: importe a planilha, selecione as unidades, otimize a sequência de visitas e acompanhe tudo no Google Maps em tempo real — com histórico de operações e documentos prontos para a expedição.</p>
+                <div class="landing-ctarow">
+                    <button class="landing-cta" id="enterAppBtn">Acessar aplicação <span>➤</span></button>
+                    <span class="landing-note">✓ Dados processados localmente neste navegador</span>
+                </div>
+                <div class="landing-feats">
+                    <div class="feat"><b>⌁</b>Rota otimizada</div>
+                    <div class="feat"><b>🗺</b>Google Maps em tempo real</div>
+                    <div class="feat"><b>▤</b>Roteiro em PDF</div>
+                    <div class="feat"><b>▧</b>Agenda em Excel</div>
+                </div>
+            </div>
+            <div class="landing-scene" aria-hidden="true">
+                <div class="scene-sky">
+                    <div class="pinbox p1"><div class="pin green"></div><div class="pinpulse"></div></div>
+                    <div class="pinbox p2"><div class="pin orange"></div><div class="pinpulse"></div></div>
+                    <div class="pinbox p3"><div class="pin navy"></div><div class="pinpulse"></div></div>
+                    <div class="chip c1">⌁ Rota otimizada</div>
+                    <div class="chip c2">◷ Chegadas previstas</div>
+                    <div class="chip c3">▦ Histórico salvo</div>
+                </div>
+                <div class="scene-road">
+                    <div class="roadline"></div>
+                    <div class="truck">
+                        <div class="truck-cargo">LABMEDIC</div>
+                        <div class="truck-cab"><i></i></div>
+                        <div class="truck-wheel w1"></div>
+                        <div class="truck-wheel w2"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="landing-footer">
+            <span>GRUPO LABMEDIC · PlaniRoute Saúde</span>
+            <span>Rotas assistenciais com previsibilidade de chegada</span>
+        </div>
+    </div>
+</div>
 <div class="app">
 <aside class="side"><div class="brand"><div class="brand-mark">⌁</div><div><strong>GRUPO LABMEDIC</strong><span>Planejamento de Entregas</span></div></div><div class="workspace"><div class="eyebrow">Workspace ativo</div><div class="workspace-row"><i></i>Logística assistencial<b>⌄</b></div></div><div class="nav"><div class="nav-label">Operação</div><button class="active" data-tab="plan">➤ Planejamento <span id="navCount">5</span></button><button data-tab="import">▧ Importar dados</button><button data-tab="history">▦ Histórico</button><div class="nav-label second">Configuração</div><button id="preferencesBtn">☷ Preferências</button><button id="helpBtn">? Central de ajuda</button></div><div class="operator"><div class="avatar">MC</div><div><b>Marina Costa</b><small>Operadora · Rede SP</small></div></div></aside>
 <main class="main"><header class="top"><div><div class="eyebrow">Centro de controle / <span id="crumb">Planejamento de rotas de entrega</span></div><h1 id="pageTitle">Planejamento de rotas</h1></div><div style="display:flex;align-items:center;gap:10px"><button class="theme-btn" id="themeBtn" title="Alternar tema">☾</button><div class="status"><i></i>API oficial Google</div></div></header>
-<section id="planPage"><section class="hero"><div><div class="eyebrow" style="color:#71d8bc">✦ Uso da API oficial do Google Maps</div><h2>Previsibilidade de rotas em poucos cliques<br><em>Monitore o trajeto dos condutores</em></h2><p>Você pode salvar as rotas diariamente, ganhando assim uma importante ferramenta de rastreabilidade histórica. </p></div><div class="hero-art"><div class="orbit o1"></div><div class="orbit o2"></div><div class="route-line"></div><div class="node n1">⌖</div><div class="node n2">⌖</div><div class="node n3">⌖</div></div></section>
+<section id="planPage"><section class="hero"><div><div class="eyebrow" style="color:#71d8bc">✦ Uso da API oficial do Google Maps</div><h2>Previsibilidade de rotas em poucos cliques<br><em>Monitore o trajeto dos condutores</em></h3><p>Você pode salvar as rotas diariamente, ganhando assim uma importante ferramenta de rastreabilidade histórica. </p></div><div class="hero-art"><div class="orbit o1"></div><div class="orbit o2"></div><div class="route-line"></div><div class="node n1">⌖</div><div class="node n2">⌖</div><div class="node n3">⌖</div></div></section>
 <section class="summary"><div class="card"><div class="ico">▣</div><div><span>Unidades no planejamento</span><b id="sumStops">5<small> / 8</small></b></div></div><div class="card"><div class="ico">◷</div><div><span>Tempo de trânsito estimado</span><b id="sumTravel">—</b></div><span class="trend" id="sumTravelSub">aguardando rota</span></div><div class="card"><div class="ico">◔</div><div><span>Urgências críticas</span><b id="sumCritical">4</b></div><span class="trend" id="sumCriticalSub">2 super · 2 alta</span></div><div class="card"><div class="ico">♙</div><div><span>Condutor responsável</span><b style="font-size:14px" id="sumDriver">Reginaldo Braga</b></div><span class="trend">dia 28</span></div></section>
 <div class="grid"><section><div class="section"><div><div class="over">01 · Configuração</div><h3>Monte a rota</h3></div><button class="link" id="clearBtn">Limpar seleção ×</button></div><div class="card form"><label>Condutor<select id="driver"><option>Reginaldo Braga</option><option>Marcelo Medeiros</option></option></select><input id="driverName" type="text" value="Reginaldo Braga" placeholder="Nome utilizado nos documentos" style="margin-top:7px"></label><div class="two"><label>Data da operação<input id="date" type="date" value="2026-09-28"></label><label>Saída prevista<input id="departure" type="time" value="07:30"></label></div><label>Base de partida<select id="baseSelect"></select></label><div class="base"><div class="base-icon">⌖</div><div><b id="baseName"></b><small id="baseAddr"></small></div><span class="ok">✓</span></div><div class="divider"></div><div class="labelrow"><label>Paradas da rota <span id="selectedLabel">5 selecionadas</span></label><button id="addPoint">＋ Adicionar ponto</button></div><div class="selected" id="selectedList"></div><div class="options"><label class="switchline"><input id="returnBase" type="checkbox" checked><span class="switch"></span>Retornar à base ao final</label><label>Trânsito<select id="traffic"><option value="estimated">Estimado por faixa horária</option><option value="off">Sem ajuste de trânsito</option></select></label></div><button class="primary" id="calcBtn">⌁ Calcular melhor rota <span>↑</span></button><div class="foot">✓ O cálculo considera distância, janela de saída, tempo de atendimento e urgência.</div></div></section>
-<section><div class="section"><div><div class="over">02 · Visualização</div><h3 id="mapTitle">Mapa operacional</h3></div><div class="map-actions"><button class="outline" onclick="alert('A visualização geográfica acompanha a rota calculada.')">☷ Camadas</button><button class="outline" id="gmapsConfigBtn">🔑 Google Maps</button><button class="outline" id="saveRouteBtn">▣ Salvar Rota</button><button class="outline" id="recalcBtn">↻ Recalcular</button></div></div><div class="card map"><div class="mapcanvas" id="mapCanvas"><div id="fallbackMap" class="fallback-map"><div class="road r1"></div><div class="road r2"></div><div class="road r3"></div><span class="maplabel l1">ZONA NORTE</span><span class="maplabel l2">CENTRO EXPANDIDO</span><span class="maplabel l3">ZONA SUL</span><svg class="route" id="routeSvg" viewBox="0 0 100 100" preserveAspectRatio="none"></svg></div><div id="gmap" class="gmap-container" style="display:none"></div><div class="float"><i id="gmapsDot" class="gdot off"></i><span id="gmapsLabel">Google Maps não configurado</span><br><small id="mapSub">pré-visualização da seleção</small></div></div><div class="legend"><span><i class="dot db"></i>Base</span><span><i class="dot dg"></i>Rota planejada</span><span><i class="dot do"></i>Urgência</span><small>⌁ Rota real via Google Maps (ou estimativa local por distância e horário, sem chave)</small></div></div><div class="card result" id="result"><div class="empty"><div class="circle">⌁</div><h3>A rota aparecerá aqui</h3><p>Selecione as unidades, defina a urgência e clique em <b>Calcular melhor rota</b>.</p></div></div></section></div>
+<section><div class="section"><div><div class="over">02 · Visualização</div><h3 id="mapTitle">Mapa operacional</h3></div><div class="map-actions"><button class="outline" id="driverRoutesBtn" title="Ver todas as rotas deste condutor no formato do roteiro PDF">▤ Rotas do condutor</button><button class="outline" id="gmapsOpenBtn" title="Abrir a rota selecionada e otimizada no Google Maps, em uma nova aba">🗺 Google Maps</button><button class="outline" id="saveRouteBtn">▣ Salvar Rota</button><button class="outline" id="recalcBtn">↻ Recalcular</button></div></div><div class="card map"><div class="mapcanvas" id="mapCanvas"><div id="fallbackMap" class="fallback-map"><div class="road r1"></div><div class="road r2"></div><div class="road r3"></div><span class="maplabel l1">ZONA NORTE</span><span class="maplabel l2">CENTRO EXPANDIDO</span><span class="maplabel l3">ZONA SUL</span><svg class="route" id="routeSvg" viewBox="0 0 100 100" preserveAspectRatio="none"></svg></div><div id="gmap" class="gmap-container" style="display:none"></div><div class="float"><i id="gmapsDot" class="gdot off"></i><span id="gmapsLabel">Google Maps não configurado</span><br><small id="mapSub">pré-visualização da seleção</small></div></div><div class="legend"><span><i class="dot db"></i>Base</span><span><i class="dot dg"></i>Rota planejada</span><span><i class="dot do"></i>Urgência</span><small>⌁ Rota real via Google Maps (ou estimativa local por distância e horário, sem chave)</small></div></div><div class="card result" id="result"><div class="empty"><div class="circle">⌁</div><h3>A rota aparecerá aqui</h3><p>Selecione as unidades, defina a urgência e clique em <b>Calcular melhor rota</b>.</p></div></div></section></div>
 <section class="units"><div class="section"><div><div class="over">03 · Unidades disponíveis</div><h3>Escolha os pontos de ligação</h3></div><div class="filters"><input id="search" placeholder="Buscar unidade, cliente, endereço ou código"><select id="urgencyFilter"><option>Todas</option><option>Super</option><option>Alta</option><option>Média</option><option>Baixa</option></select></div></div><div class="card table"><div class="thead"><span id="tableCount">5 de 8</span><span>Unidade de saúde</span><span>Município</span><span>Urgência</span><span>Atendimento</span><span>Ação</span></div><div id="unitRows"></div></div></section><div class="footer"><span>✓ Dados processados localmente neste navegador</span><span>Última atualização: agora · <button data-tab="import">Trocar planilha</button></span></div></section>
 <section id="importPage" class="import-page" style="display:none"><div class="importhero"><div><div class="eyebrow" style="color:#71d8bc">⇧ Entrada de dados</div><h2>Traga sua planilha.<br><em>O restante fica organizado.</em></h2><p>Selecione um arquivo Excel ou CSV com as abas Cliente, Endereço e Base. A leitura acontece no navegador.</p></div><div style="font-size:58px;color:#9af0d5">▧</div></div><div class="importgrid"><div class="card upload"><div class="drop" id="dropZone"><div class="uploadicon">⇧</div><h3>Arraste sua planilha aqui</h3><p>ou clique para procurar no computador</p><small>Formatos aceitos: .xlsx, .xls e .csv · até 20 MB</small><button class="primary" style="width:auto;margin-top:17px" id="fileBtn">⇧ Selecionar arquivo</button></div><input id="fileInput" type="file" accept=".xlsx,.xls,.csv" hidden><div class="file-status"><div style="font-size:20px;color:#0d8c78">▧</div><div><b id="fileName">Planilha de rede · aguardando importação</b><small id="fileInfo">Nenhum arquivo carregado ainda</small></div></div></div><div class="card mapping"><div class="over">Mapeamento de abas</div><h3>Defina a origem dos dados</h3><p>As abas podem ter outros nomes. Escolha qual representa cada tipo de informação.</p><div class="maprow"><span><b>Cliente</b><small>unidades a visitar</small></span><select id="sheetStop"><option>Cliente</option></select></div><div class="maprow"><span><b>Endereço</b><small>localização e endereço</small></span><select id="sheetAddress"><option>Endereço</option></select></div><div class="maprow"><span><b>Base</b><small>pontos de saída</small></span><select id="sheetBase"><option>Base</option></select></div><button class="outline" style="width:100%;justify-content:center;margin-top:15px" id="changeFile">↻ Trocar arquivo</button></div><div class="card guide"><b>Como preparar a planilha?</b><p>Use a primeira linha como cabeçalho. Para melhor precisão, inclua <strong>Unidade, Endereço, Município, Latitude e Longitude</strong>. A urgência pode ser ajustada depois no planejamento.</p></div></div></section>
 <section id="historyPage" class="history-page" style="display:none"><div class="historyhead"><div><div class="over">Registro de operações</div><h2>Histórico de planejamentos</h2><p>Revisite, reabra e exporte os cenários calculados nesta sessão.</p></div><div style="display:flex;align-items:end;gap:7px;flex-wrap:wrap"><label class="muted">De<input id="historyFrom" type="date" style="display:block;margin-top:4px;padding:7px;border:1px solid var(--line);border-radius:7px;background:var(--card);color:var(--ink)"></label><label class="muted">Até<input id="historyTo" type="date" style="display:block;margin-top:4px;padding:7px;border:1px solid var(--line);border-radius:7px;background:var(--card);color:var(--ink)"></label><button class="outline" id="applyHistoryFilter">Filtrar</button><button class="outline" id="exportHistoryBtn">⇩ Exportar histórico</button></div></div><div class="card" id="historyList"><div class="history-empty">Nenhuma rota calculada ainda. Calcule uma rota para que ela apareça aqui.</div></div><div class="notice">△ As rotas ficam salvas neste navegador. Use PDF ou Excel para arquivamento operacional externo.</div></section>
@@ -4140,7 +5058,20 @@ $('addPoint').onclick = () => document.querySelector('.units').scrollIntoView({
     el.addEventListener('change', persistForm);
     el.addEventListener('input', persistForm);
 });
-if ($('gmapsConfigBtn')) $('gmapsConfigBtn').onclick = openPreferences;
+$('gmapsOpenBtn').onclick = openGoogleMapsRoute;
+$('driverRoutesBtn').onclick = openDriverRoutes;
+if ($('landingPage')) {
+    document.body.classList.add('landing-lock');
+    $('enterAppBtn').onclick = function() {
+        const lp = $('landingPage');
+        document.body.classList.remove('landing-lock');
+        if (!lp) return;
+        lp.classList.add('landing-out');
+        setTimeout(function() {
+            lp.remove();
+        }, 420);
+    };
+}
 
 function importFile(file) {
     showProgress('Abrindo a planilha selecionada…', 10);
@@ -4338,10 +5269,119 @@ $('exportHistoryBtn').onclick = function() {
     });
     XLSX.writeFile(wb, 'PlaniRoute_Historico_' + (from || 'inicio') + '_' + (to || 'atual') + '.xlsx');
 };
+/* ================================================================
+   GOOGLE MAPS · abre a rota selecionada/otimizada em nova aba
+   ================================================================ */
+/* GM-ROUTE-LINKS:START */
+function routePointParam(p) {
+    if (!p) return '';
+    if (p.lat != null && p.lng != null && isFinite(Number(p.lat)) && isFinite(Number(p.lng))) {
+        return Number(p.lat).toFixed(6) + ',' + Number(p.lng).toFixed(6);
+    }
+    if (p.searchText) return p.searchText;
+    return [p.name, p.address, p.city, 'Brasil'].filter(Boolean).join(', ');
+}
+
+function buildGoogleMapsLinks(points) {
+    /* A URL oficial (api=1) aceita até 9 waypoints por link, ou seja,
+       11 pontos por trecho (origem + 9 paradas + destino). Rotas maiores
+       são divididas em links sequenciais que se sobrepõem em um ponto. */
+    const MAX_POINTS = 11,
+        enc = function(p) {
+            return encodeURIComponent(routePointParam(p));
+        },
+        links = [];
+    for (let i = 0; i < points.length - 1; i += MAX_POINTS - 1) {
+        const seg = points.slice(i, Math.min(i + MAX_POINTS, points.length));
+        if (seg.length < 2) break;
+        let url = 'https://www.google.com/maps/dir/?api=1&origin=' + enc(seg[0]) +
+            '&destination=' + enc(seg[seg.length - 1]) + '&travelmode=driving';
+        const mid = seg.slice(1, -1).map(enc).join('%7C');
+        if (mid) url += '&waypoints=' + mid;
+        links.push(url);
+    }
+    return links;
+}
+/* GM-ROUTE-LINKS:END */
+
+function openGoogleMapsRoute() {
+    const base = bases.find(function(b) {
+            return b.id === $('baseSelect').value;
+        }) || bases[0] || baseFallback(),
+        returnToBase = !!$('returnBase').checked;
+    let ordered = null;
+    if (route && Array.isArray(route.ordered) && route.ordered.length) {
+        ordered = route.ordered;
+    } else if (selected.size) {
+        ordered = stops.filter(function(s) {
+            return selected.has(s.id);
+        });
+    }
+    if (!ordered || !ordered.length) {
+        alert('Selecione ao menos uma unidade (e calcule a rota) para abrir no Google Maps.');
+        return;
+    }
+    const points = [base].concat(ordered);
+    if (returnToBase) points.push(base);
+    const links = buildGoogleMapsLinks(points);
+    if (!links.length) return;
+    window.open(links[0], '_blank');
+    if (links.length > 1) {
+        openModal('Google Maps · rota dividida em ' + links.length + ' trechos',
+            '<p style="margin-top:0">O Google Maps aceita até <b>9 paradas por link</b>. O primeiro trecho foi aberto em uma nova aba; abra os links a seguir, em sequência, para percorrer a rota completa:</p>' +
+            links.map(function(u, i) {
+                return '<a class="outline" style="display:block;margin:8px 0;justify-content:center" href="' + u + '" target="_blank" rel="noopener">🗺 Trecho ' + (i + 1) + ' de ' + links.length + ' · Google Maps</a>';
+            }).join(''), '');
+    }
+}
+
+/* ================================================================
+   ROTAS DO CONDUTOR · modal no estilo e estrutura do PDF
+   ================================================================ */
+function driverRoutesSheet(item) {
+    const legs = item.legs || [],
+        ordered = item.ordered || [],
+        rows = ordered.map(function(s, i) {
+            const leg = legs[i] || {};
+            return '<tr><td>' + (i + 1) + '</td><td><strong>' + escHtml(s.name) + '</strong><br><small>' + escHtml(s.address) + '</small></td><td>' + escHtml(s.urgency) + '</td><td>' + clock(leg.arrival) + '</td><td>' + Number(leg.km || 0).toFixed(1) + ' km</td><td>' + fmt(leg.m || 0) + '</td><td>' + fmt(FIXED_DELIVERY_MINUTES) + '<br><small>tempo padrão</small></td></tr>';
+        }).join(''),
+        ret = legs[ordered.length],
+        retRow = ret ? '<tr class="rs-return"><td>↩</td><td><strong>Retorno à base</strong><br><small>' + escHtml(item.meta.base) + '</small></td><td>—</td><td>' + clock(ret.arrival) + '</td><td>' + Number(ret.km || 0).toFixed(1) + ' km</td><td>' + fmt(ret.m || 0) + '</td><td>Chegada à base: ' + clock(item.end) + '</td></tr>' : '';
+    return '<div class="rs-sheet"><div class="rs-sheet-head"><div><h4>PlaniRoute Saúde · Roteiro de visitação</h4><small>' + escHtml(item.meta.date || '') + ' · saída ' + escHtml(item.meta.departure || '') + '</small></div><span class="rs-tag">' + escHtml(item.sourceTag || 'Roteiro') + '</span></div>' +
+        '<div class="rs-meta"><div class="rs-box"><small>Condutor</small><b>' + escHtml(item.meta.driver) + '</b></div><div class="rs-box"><small>Base de partida</small><b>' + escHtml(item.meta.base) + '</b></div><div class="rs-box"><small>Resumo</small><b>' + item.meta.stops + ' paradas · ' + Number(item.meta.km).toFixed(1) + ' km</b></div></div>' +
+        '<div class="rs-tablewrap"><table><thead><tr><th>#</th><th>Unidade</th><th>Urgência</th><th>Chegada</th><th>Km do trecho</th><th>Deslocamento</th><th>Atendimento padrão</th></tr></thead><tbody>' + rows + retRow + '</tbody></table></div></div>';
+}
+
+function openDriverRoutes() {
+    const driver = driverValue(),
+        list = [];
+    if (route && Array.isArray(route.ordered) && route.ordered.length) {
+        const cur = currentRouteItem();
+        cur.sourceTag = 'Planejamento atual';
+        list.push(cur);
+    }
+    getHistory().forEach(function(h) {
+        if (String((h.meta && h.meta.driver) || '').trim().toLowerCase() === driver.trim().toLowerCase()) {
+            h.sourceTag = 'Histórico';
+            list.push(h);
+        }
+    });
+    if (!list.length) {
+        openModal('Rotas do condutor', '<div class="rs-empty">Nenhuma rota registrada para <b>' + escHtml(driver) + '</b> ainda.<br>Monte a seleção, calcule a rota e ela aparecerá aqui no mesmo formato do roteiro em PDF.</div>', '');
+        return;
+    }
+    openModal('Rotas do condutor · ' + escHtml(driver),
+        '<div class="rs-driver-chip">Condutor: <b>' + escHtml(driver) + '</b> · ' + list.length + ' rota(s) encontrada(s)</div>' +
+        list.map(function(item) {
+            return driverRoutesSheet(item);
+        }).join('<div class="rs-sep"></div>'), 'modal-lg');
+}
+
 restoreState();
 render();
 if (route) renderResult();
 initGoogleMapsIfConfigured();
 </script>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v31edd6df95cf4e85bb4c19e7a9bdbcba1788362987495" integrity="sha512-iIg7k2xntmwu6/uSb5tpc/hySgZc4eoL31yB29W6tJFo2akwjPWcEqnCEdJvGexCL0KEQwVYv5BlowfhVz26hg==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
 </body>
 </html>
