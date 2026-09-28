@@ -2619,6 +2619,75 @@ async function geocodePointGoogle(point) {
     return point;
 }
 
+async function geocodePointPublic(point) {
+    if (point.geoSource === 'nominatim' || point.geoSource === 'google' || point.geoSource === 'manual') return point;
+    const queries = [];
+    function addQuery(value) {
+        const q = norm(value);
+        if (q && !queries.includes(q)) queries.push(q);
+    }
+    addQuery(point.searchText);
+    addQuery([point.name, point.city || '', 'Brasil'].filter(Boolean).join(', '));
+    addQuery([point.name, point.address, point.city || '', 'Brasil'].filter(Boolean).join(', '));
+    /* Alguns cadastros usam "Cordeiro de Faria", enquanto o logradouro
+       oficial é publicado como "General Osvaldo Cordeiro de Faria". */
+    const address = String(point.address || '').replace(/\bAv\.?\s+Gen\.?\s+Cordeiro de Faria\b/gi, 'Rua General Osvaldo Cordeiro de Faria');
+    addQuery([address, point.city || '', 'Rio de Janeiro', 'Brasil'].filter(Boolean).join(', '));
+    addQuery(String(point.address || '').replace(/,?\s*Centro de Piabetá\b/gi, ', Piabetá, Magé'));
+    for (const query of queries) {
+        try {
+            const response = await withTimeout(fetch('https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&countrycodes=br&q=' + encodeURIComponent(query), {
+                headers: {
+                    Accept: 'application/json'
+                }
+            }), 8000, null);
+            const results = response && response.ok ? await response.json() : [];
+            const result = Array.isArray(results) && results[0];
+            if (result && Number.isFinite(Number(result.lat)) && Number.isFinite(Number(result.lon))) {
+                point.lat = Number(result.lat);
+                point.lng = Number(result.lon);
+                point.geoReady = true;
+                point.geoSource = 'nominatim';
+                point.geoQuery = query;
+                return point;
+            }
+        } catch (e) {}
+    }
+    return point;
+}
+
+async function getPublicRoute(base, ordered, returnToBase) {
+    if (!ordered.length) return null;
+    const allPoints = [base].concat(ordered);
+    if (returnToBase) allPoints.push(base);
+    if (allPoints.some(function(p) {
+            return !Number.isFinite(p.lat) || !Number.isFinite(p.lng) || !p.geoSource;
+        })) return null;
+    const coordinateText = allPoints.map(function(p) {
+        return p.lng + ',' + p.lat;
+    }).join(';');
+    try {
+        const response = await withTimeout(fetch('https://router.project-osrm.org/route/v1/driving/' + coordinateText + '?overview=full&geometries=geojson&steps=false'), 15000, null);
+        if (!response || !response.ok) return null;
+        const data = await response.json();
+        const result = data && data.routes && data.routes[0];
+        if (!result || !Array.isArray(result.legs) || result.legs.length !== allPoints.length - 1) return null;
+        return {
+            legs: result.legs.map(function(leg) {
+                return {
+                    km: leg.distance / 1000,
+                    m: Math.max(1, Math.round(leg.duration / 60)),
+                    l: 'Rota viária · OpenStreetMap'
+                };
+            }),
+            geometry: result.geometry && result.geometry.coordinates || null
+        };
+    } catch (e) {
+        console.warn('Roteamento público falhou:', e);
+        return null;
+    }
+}
+
 function buildDepartureDate() {
     try {
         const dateVal = $('date').value,
@@ -3123,6 +3192,10 @@ async function calc() {
             rem = rem.filter(s => s.id !== next.id);
             cur = next;
         }
+        if (!gmapsReady) {
+            showProgress('Localizando endereços para calcular a rota viária…', 30);
+            await geocodeAllWithProgress([base].concat(ordered), geocodePointPublic, 'OpenStreetMap', 30000);
+        }
         showProgress('Calculando estimativa local de distâncias…', 42);
         let t = Number($('departure').value.slice(0, 2)) * 60 + Number($('departure').value.slice(3)),
             prev = base,
@@ -3194,6 +3267,14 @@ async function calc() {
                 route.googleDirections = googleRoute.directionsResult;
                 route.geometry = null;
                 routeSource = 'Google Maps · tempo real';
+            }
+        } else {
+            showProgress('Calculando distância e tempo pela malha viária…', 70);
+            const publicRoute = await getPublicRoute(base, ordered, $('returnBase').checked);
+            if (publicRoute) {
+                applyRealLegs(publicRoute.legs);
+                route.geometry = publicRoute.geometry;
+                routeSource = 'OpenStreetMap · rota viária';
             }
         }
         $('mapTitle').textContent = 'Rota otimizada · ' + routeSource;
