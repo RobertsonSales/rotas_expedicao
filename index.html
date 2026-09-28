@@ -2227,8 +2227,13 @@ let selected = new Set(),
     route = null;
 /* Mudança de versão invalida rotas persistidas que ainda possam conter
    coordenadas determinísticas criadas pelo importador. */
-const ROUTE_ENGINE_VERSION = 'road-routing-v5-optional-return-official-base-photo';
+const ROUTE_ENGINE_VERSION = 'road-routing-v7-fixed-delivery-time-multiple-bases';
 const DWELL_MINUTES = 30;
+const FIXED_DELIVERY_MINUTES = 30;
+function normalizeServiceMinutes(value) {
+    /* O tempo informado na planilha é deliberadamente ignorado. */
+    return FIXED_DELIVERY_MINUTES;
+}
 const $ = id => document.getElementById(id),
     baseFallback = () => ({
         id: 'none',
@@ -2305,7 +2310,11 @@ function restoreState() {
     try {
         const dataset = loadJSON('planiroute-dataset', null);
         if (dataset && Array.isArray(dataset.stops) && dataset.stops.length) {
-            stops = dataset.stops;
+            stops = dataset.stops.map(function(stop) {
+                return Object.assign({}, stop, {
+                    service: normalizeServiceMinutes(stop.service)
+                });
+            });
             bases = withDefaultBase(Array.isArray(dataset.bases) ? dataset.bases : []);
             $('baseSelect').innerHTML = bases.map(function(b) {
                 return '<option value="' + b.id + '">' + escHtml(b.name) + '</option>';
@@ -3150,7 +3159,7 @@ function renderUnits() {
     });
     $('tableCount').textContent = list.length + ' de ' + stops.length;
     $('unitRows').innerHTML = list.map(function(s) {
-        return `<div class="unit ${selected.has(s.id)?'chosen':''}"><button class="check ${selected.has(s.id)?'on':''}" data-toggle="${s.id}">${selected.has(s.id)?'✓':''}</button><div class="unitname"><b>${s.name}</b><small>${s.client} · ${s.address}</small></div><span class="muted">${s.city}</span><select class="urg" data-u="${s.id}" style="color:${urgency[s.urgency].c};background:${urgency[s.urgency].bg}"><option ${s.urgency==='Super'?'selected':''}>Super</option><option ${s.urgency==='Alta'?'selected':''}>Alta</option><option ${s.urgency==='Média'?'selected':''}>Média</option><option ${s.urgency==='Baixa'?'selected':''}>Baixa</option></select><span class="muted">${s.service} min</span><button class="${selected.has(s.id)?'included':'add'}" data-toggle="${s.id}">${selected.has(s.id)?'✓ Incluída':'＋ Adicionar'}</button></div>`
+        return `<div class="unit ${selected.has(s.id)?'chosen':''}"><button class="check ${selected.has(s.id)?'on':''}" data-toggle="${s.id}">${selected.has(s.id)?'✓':''}</button><div class="unitname"><b>${s.name}</b><small>${s.client} · ${s.address}</small></div><span class="muted">${s.city}</span><select class="urg" data-u="${s.id}" style="color:${urgency[s.urgency].c};background:${urgency[s.urgency].bg}"><option ${s.urgency==='Super'?'selected':''}>Super</option><option ${s.urgency==='Alta'?'selected':''}>Alta</option><option ${s.urgency==='Média'?'selected':''}>Média</option><option ${s.urgency==='Baixa'?'selected':''}>Baixa</option></select><span class="muted">${FIXED_DELIVERY_MINUTES} min</span><button class="${selected.has(s.id)?'included':'add'}" data-toggle="${s.id}">${selected.has(s.id)?'✓ Incluída':'＋ Adicionar'}</button></div>`
     }).join('') || '<div style="padding:25px;text-align:center;color:#9aa7a7">Nenhuma unidade encontrada para os filtros atuais.</div>';
 }
 
@@ -3306,7 +3315,7 @@ async function calc() {
             /* Após cada entrega o condutor permanece 30 minutos no ponto.
                Esse intervalo entra no horário da próxima chegada e no
                tempo total do roteiro, sem alterar a duração do trecho viário. */
-            t += z.m + s.service + DWELL_MINUTES;
+            t += z.m + FIXED_DELIVERY_MINUTES;
             prev = s;
         });
         if (returnToBase) {
@@ -3328,7 +3337,7 @@ async function calc() {
             legs,
             km: legs.reduce((a, x) => a + x.km, 0),
             travel: legs.reduce((a, x) => a + x.m, 0),
-            service: ordered.reduce((a, x) => a + x.service + DWELL_MINUTES, 0),
+            service: ordered.reduce((a) => a + FIXED_DELIVERY_MINUTES, 0),
             end: t
         };
         function applyRealLegs(newLegs) {
@@ -3343,8 +3352,13 @@ async function calc() {
             route.travel = route.legs.reduce((a, x) => a + x.m, 0);
             let arrivalClock = Number($('departure').value.slice(0, 2)) * 60 + Number($('departure').value.slice(3));
             route.legs.forEach(function(leg, i) {
+                /* A chegada ocorre depois do deslocamento da própria perna.
+                   A versão anterior gravava arrival antes de somar leg.m,
+                   fazendo a próxima parada parecer adiantada e desalinhando
+                   atendimento, permanência e deslocamento. */
+                arrivalClock += leg.m;
                 leg.arrival = arrivalClock;
-                arrivalClock += leg.m + (i < route.ordered.length ? route.ordered[i].service + DWELL_MINUTES : 0);
+                if (i < route.ordered.length) arrivalClock += FIXED_DELIVERY_MINUTES;
             });
             route.end = arrivalClock;
         }
@@ -3676,7 +3690,7 @@ function renderResult() {
     const base = bases.find(b => b.id === $('baseSelect').value) || bases[0] || baseFallback();
     const hasReturn = !!$('returnBase').checked && route.legs.length > route.ordered.length,
         finalEvent = hasReturn ? `<div class="event last"><div class="marker" style="background:#fff;color:#193346;border-color:#193346">⌖</div><div class="event-body"><div><b>Retorno à base</b><small>${base.name}</small></div><div class="etime"><strong>${clock(route.end)}</strong><small>chegada prevista · ${fmt(route.legs[route.ordered.length].m)} de retorno</small></div></div></div>` : `<div class="event last"><div class="marker" style="background:#fff;color:#193346;border-color:#193346">✓</div><div class="event-body"><div><b>Encerramento da rota</b><small>Última unidade visitada</small></div><div class="etime"><strong>${clock(route.end)}</strong><small>sem retorno à base</small></div></div></div>`;
-    $('result').innerHTML = `<div class="resulthead"><div><div class="over">Resumo da rota · ${$('date').value.split('-').reverse().join('/')}</div><h3>${driverValue()} <span>· ${base.name.split('·')[0]}</span></h3></div><div class="result-actions"><button class="export" id="pdfBtn">▤ PDF</button><button class="export" id="xlsxBtn">▧ Excel</button></div></div><div class="kpis"><div><span>Distância total</span><b>${route.km.toFixed(1)} <small>km</small></b></div><div><span>Deslocamento</span><b>${fmt(route.travel)}</b></div><div><span>Atendimento + permanência</span><b>${fmt(route.service)}</b></div><div><span>${hasReturn ? 'Retorno à base' : 'Encerramento'}</span><b>${clock(route.end)}</b></div></div><div class="timeline">${route.ordered.map((s,i)=>`<div class="event"><div class="marker" style="background:${urgency[s.urgency].c}">${i+1}</div><div class="event-body"><div><b>${s.name}</b><small class="route-address">${s.address}</small><small>${s.city} · ${fmt(s.service)} atendimento + ${DWELL_MINUTES} min de permanência</small></div><div class="etime"><strong>${clock(route.legs[i].arrival)}</strong><small>${fmt(route.legs[i].m)} · ${route.legs[i].l}</small></div></div></div>`).join('')}${finalEvent}</div>`;
+    $('result').innerHTML = `<div class="resulthead"><div><div class="over">Resumo da rota · ${$('date').value.split('-').reverse().join('/')}</div><h3>${driverValue()} <span>· ${base.name.split('·')[0]}</span></h3></div><div class="result-actions"><button class="export" id="pdfBtn">▤ PDF</button><button class="export" id="xlsxBtn">▧ Excel</button></div></div><div class="kpis"><div><span>Distância total</span><b>${route.km.toFixed(1)} <small>km</small></b></div><div><span>Deslocamento</span><b>${fmt(route.travel)}</b></div><div><span>Atendimento padrão</span><b>${fmt(route.service)}</b></div><div><span>${hasReturn ? 'Retorno à base' : 'Encerramento'}</span><b>${clock(route.end)}</b></div></div><div class="timeline">${route.ordered.map((s,i)=>`<div class="event"><div class="marker" style="background:${urgency[s.urgency].c}">${i+1}</div><div class="event-body"><div><b>${s.name}</b><small class="route-address">${s.address}</small><small>${s.city} · ${FIXED_DELIVERY_MINUTES} min de atendimento padrão</small></div><div class="etime"><strong>${clock(route.legs[i].arrival)}</strong><small>${fmt(route.legs[i].m)} · ${route.legs[i].l}</small></div></div></div>`).join('')}${finalEvent}</div>`;
     $('pdfBtn').onclick = () => printHistory(currentRouteItem());
     $('xlsxBtn').onclick = () => exportExcel()
 }
@@ -3705,17 +3719,17 @@ function buildRouteSheets(data, wb, suffix) {
             ['Unidades visitadas', meta.stops],
             ['Distância total (km)', +Number(meta.km).toFixed(1)],
             ['Deslocamento', fmt(meta.travel)],
-            ['Atendimento + permanência', fmt(meta.service)],
-            ['Permanência por unidade', DWELL_MINUTES + ' min'],
+            ['Atendimento padrão', fmt(meta.service)],
+            ['Tempo fixo por unidade', FIXED_DELIVERY_MINUTES + ' min'],
             ['Retorno à base', meta.end]
         ],
         agenda = [
             ['AGENDA OTIMIZADA DE VISITAS', '', '', '', '', '', '', '', '', '', ''],
-            ['Ordem', 'Unidade', 'Endereço utilizado', 'Município', 'Urgência', 'Chegada prevista', 'Atendimento + permanência', 'Trecho (km)', 'Deslocamento', 'Trânsito', 'Cliente']
+            ['Ordem', 'Unidade', 'Endereço utilizado', 'Município', 'Urgência', 'Chegada prevista', 'Atendimento padrão', 'Trecho (km)', 'Deslocamento', 'Trânsito', 'Cliente']
         ];
     ordered.forEach(function(s, i) {
         const leg = legs[i] || {};
-        agenda.push([i + 1, s.name, s.address, s.city, s.urgency, clock(leg.arrival), fmt(s.service + DWELL_MINUTES), +Number(leg.km || 0).toFixed(1), fmt(leg.m || 0), leg.l || '', s.client]);
+        agenda.push([i + 1, s.name, s.address, s.city, s.urgency, clock(leg.arrival), fmt(FIXED_DELIVERY_MINUTES), +Number(leg.km || 0).toFixed(1), fmt(leg.m || 0), leg.l || '', s.client]);
     });
     const returnLeg = legs[ordered.length];
     if (returnLeg) {
@@ -3924,11 +3938,11 @@ function renderHistory() {
 
 function printHistory(item) {
     const rows = item.ordered.map(function(s, i) {
-        return `<tr><td>${i+1}</td><td><strong>${s.name}</strong><br><small>${s.address}</small></td><td>${s.urgency}</td><td>${clock(item.legs[i].arrival)}</td><td>${fmt(item.legs[i].m)}</td><td>${fmt(s.service + DWELL_MINUTES)}<br><small>inclui ${DWELL_MINUTES} min de permanência</small></td></tr>`
+        return `<tr><td>${i+1}</td><td><strong>${s.name}</strong><br><small>${s.address}</small></td><td>${s.urgency}</td><td>${clock(item.legs[i].arrival)}</td><td>${fmt(item.legs[i].m)}</td><td>${fmt(FIXED_DELIVERY_MINUTES)}<br><small>tempo padrão por entrega</small></td></tr>`
     }).join('') + (item.legs[item.ordered.length] ? `<tr style="font-weight:700;background:#eff8f4"><td>↩</td><td><strong>Retorno à base</strong><br><small>${item.meta.base}</small></td><td>—</td><td>${clock(item.legs[item.ordered.length].arrival)}</td><td>${fmt(item.legs[item.ordered.length].m)}</td><td>Chegada à base: ${clock(item.end)}</td></tr>` : '');
     const w = window.open('', '_blank');
     if (!w) return alert('Permita pop-ups para gerar o PDF.');
-    w.document.write(`<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>PlaniRoute · Roteiro</title><style>@page{size:A4 landscape;margin:10mm}body{font-family:Arial;color:#183345;padding:18px}.toolbar{display:flex;gap:8px;margin-bottom:16px}.toolbar button{border:0;border-radius:6px;padding:9px 13px;background:#0d806d;color:#fff;cursor:pointer}.toolbar button.alt{background:#193345}h1{margin:0;color:#0d806d}h2{font-size:15px;margin-top:28px;border-bottom:2px solid #0d806d;padding-bottom:8px}.sub{color:#6d7e80;font-size:12px;margin:6px 0 22px}.meta{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.box{background:#eff8f4;padding:12px;border-radius:7px}.box small{display:block;color:#718184;font-size:10px}.box b{display:block;margin-top:4px;font-size:13px}table{width:100%;border-collapse:collapse;margin-top:12px;font-size:11px}th{text-align:left;background:#193345;color:white;padding:9px}td{padding:9px;border-bottom:1px solid #dce8e3}small{color:#758789}@media print{button{display:none}}.unit-photo{width:100%;height:150px;object-fit:cover;border-radius:10px;background:var(--mint);display:block;margin-bottom:12px}.map-details{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin:12px 0}.map-detail{padding:9px;border:1px solid var(--line);border-radius:8px;background:var(--card)}.map-detail small{display:block;color:var(--soft);font-size:9px}.map-detail b{display:block;color:var(--ink);margin-top:3px}.maps-frame{width:100%;height:220px;border:1px solid var(--line);border-radius:10px;margin-top:12px;background:var(--mint)}.progress-backdrop{position:fixed;inset:0;background:rgba(8,27,38,.58);backdrop-filter:blur(5px);z-index:100;display:grid;place-items:center}.progress-card{width:min(390px,calc(100vw - 36px));background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:18px;padding:25px;box-shadow:0 22px 60px rgba(0,0,0,.25);text-align:center}.progress-ring{width:62px;height:62px;border:5px solid var(--line);border-top-color:var(--teal);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 15px}@keyframes spin{to{transform:rotate(360deg)}}.progress-bar{height:7px;background:var(--line);border-radius:99px;overflow:hidden;margin-top:16px}.progress-bar i{display:block;height:100%;width:18%;background:linear-gradient(90deg,var(--teal),#70dfbf);border-radius:inherit;transition:width .3s ease}@page{size:A4 landscape;margin:10mm}</style></head><body><div class="toolbar"><button onclick="window.print()">▤ Imprimir / Salvar como PDF</button><button class="alt" onclick="downloadReport()">⇩ Baixar relatório</button></div><h1>PlaniRoute Saúde</h1><div class="sub">Roteiro profissional de visitação · ${item.meta.date}</div><div class="meta"><div class="box"><small>Condutor</small><b>${item.meta.driver}</b></div><div class="box"><small>Base de partida</small><b>${item.meta.base}</b></div><div class="box"><small>Resumo</small><b>${item.meta.stops} paradas · ${Number(item.meta.km).toFixed(1)} km</b></div></div><h2>Agenda otimizada</h2><table><thead><tr><th>#</th><th>Unidade</th><th>Urgência</th><th>Chegada</th><th>Deslocamento</th><th>Atendimento + permanência</th></tr></thead><tbody>${rows}</tbody></table><p style="margin-top:24px;color:#718184;font-size:10px">Cada parada considera ${DWELL_MINUTES} minutos de permanência. A última linha mostra o retorno à base · Documento gerado localmente pelo PlaniRoute.</p><script>function downloadReport(){const blob=new Blob([document.documentElement.outerHTML],{type:"text/html;charset=utf-8"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="PlaniRoute_Roteiro.html";a.click();setTimeout(function(){URL.revokeObjectURL(a.href)},500)}window.onload=function(){setTimeout(function(){window.print()},350)}</body></html>`);
+    w.document.write(`<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>PlaniRoute · Roteiro</title><style>@page{size:A4 landscape;margin:10mm}body{font-family:Arial;color:#183345;padding:18px}.toolbar{display:flex;gap:8px;margin-bottom:16px}.toolbar button{border:0;border-radius:6px;padding:9px 13px;background:#0d806d;color:#fff;cursor:pointer}.toolbar button.alt{background:#193345}h1{margin:0;color:#0d806d}h2{font-size:15px;margin-top:28px;border-bottom:2px solid #0d806d;padding-bottom:8px}.sub{color:#6d7e80;font-size:12px;margin:6px 0 22px}.meta{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.box{background:#eff8f4;padding:12px;border-radius:7px}.box small{display:block;color:#718184;font-size:10px}.box b{display:block;margin-top:4px;font-size:13px}table{width:100%;border-collapse:collapse;margin-top:12px;font-size:11px}th{text-align:left;background:#193345;color:white;padding:9px}td{padding:9px;border-bottom:1px solid #dce8e3}small{color:#758789}@media print{button{display:none}}.unit-photo{width:100%;height:150px;object-fit:cover;border-radius:10px;background:var(--mint);display:block;margin-bottom:12px}.map-details{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin:12px 0}.map-detail{padding:9px;border:1px solid var(--line);border-radius:8px;background:var(--card)}.map-detail small{display:block;color:var(--soft);font-size:9px}.map-detail b{display:block;color:var(--ink);margin-top:3px}.maps-frame{width:100%;height:220px;border:1px solid var(--line);border-radius:10px;margin-top:12px;background:var(--mint)}.progress-backdrop{position:fixed;inset:0;background:rgba(8,27,38,.58);backdrop-filter:blur(5px);z-index:100;display:grid;place-items:center}.progress-card{width:min(390px,calc(100vw - 36px));background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:18px;padding:25px;box-shadow:0 22px 60px rgba(0,0,0,.25);text-align:center}.progress-ring{width:62px;height:62px;border:5px solid var(--line);border-top-color:var(--teal);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 15px}@keyframes spin{to{transform:rotate(360deg)}}.progress-bar{height:7px;background:var(--line);border-radius:99px;overflow:hidden;margin-top:16px}.progress-bar i{display:block;height:100%;width:18%;background:linear-gradient(90deg,var(--teal),#70dfbf);border-radius:inherit;transition:width .3s ease}@page{size:A4 landscape;margin:10mm}</style></head><body><div class="toolbar"><button onclick="window.print()">▤ Imprimir / Salvar como PDF</button><button class="alt" onclick="downloadReport()">⇩ Baixar relatório</button></div><h1>PlaniRoute Saúde</h1><div class="sub">Roteiro profissional de visitação · ${item.meta.date}</div><div class="meta"><div class="box"><small>Condutor</small><b>${item.meta.driver}</b></div><div class="box"><small>Base de partida</small><b>${item.meta.base}</b></div><div class="box"><small>Resumo</small><b>${item.meta.stops} paradas · ${Number(item.meta.km).toFixed(1)} km</b></div></div><h2>Agenda otimizada</h2><table><thead><tr><th>#</th><th>Unidade</th><th>Urgência</th><th>Chegada</th><th>Deslocamento</th><th>Atendimento padrão</th></tr></thead><tbody>${rows}</tbody></table><p style="margin-top:24px;color:#718184;font-size:10px">Cada parada considera exatamente ${FIXED_DELIVERY_MINUTES} minutos de atendimento padrão, independentemente de colunas de duração na planilha. A última linha mostra o retorno à base · Documento gerado localmente pelo PlaniRoute.</p><script>function downloadReport(){const blob=new Blob([document.documentElement.outerHTML],{type:"text/html;charset=utf-8"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="PlaniRoute_Roteiro.html";a.click();setTimeout(function(){URL.revokeObjectURL(a.href)},500)}window.onload=function(){setTimeout(function(){window.print()},350)}</body></html>`);
     w.document.close();
 }
 
@@ -4108,7 +4122,7 @@ $('clearBtn').onclick = () => {
 $('search').oninput = renderUnits;
 $('urgencyFilter').onchange = renderUnits;
 $('driver').onchange = function() {
-    if (!$('driverName').value.trim() || $('driverName').value === 'Reginaldo Braga') $('driverName').value = this.value;
+    $('driverName').value = this.value;
     render();
     persistForm();
 };
@@ -4190,13 +4204,14 @@ function importFile(file) {
             rows.forEach(function(row, index) {
                 const baseValue = value(row, ['base']);
                 if (baseValue && !baseMap.has(baseValue)) {
-                    const baseAddress = value(row, ['endereco da base', 'endereco base', 'logradouro base', 'local base']) || baseValue;
-                    const baseCity = value(row, ['cidade base', 'municipio base', 'município base', 'cidade', 'municipio', 'município']) || 'Brasil';
+                    const isDefault = key(baseValue) === key(DEFAULT_BASE.name) || key(baseValue).includes('albericodiniz');
+                    const baseAddress = isDefault ? DEFAULT_BASE.address : (value(row, ['endereco da base', 'endereco base', 'logradouro base', 'local base']) || baseValue);
+                    const baseCity = value(row, ['cidade base', 'municipio base', 'município base']) || 'Brasil';
                     baseMap.set(baseValue, {
                         id: 'base' + baseMap.size,
-                        name: baseValue,
-                        address: baseAddress + ' · ' + baseCity,
-                        searchText: baseValue + ', ' + baseAddress + ', ' + baseCity + ', Brasil',
+                        name: isDefault ? DEFAULT_BASE.name : baseValue,
+                        address: isDefault ? DEFAULT_BASE.address : baseAddress + ' · ' + baseCity,
+                        searchText: isDefault ? DEFAULT_BASE.searchText : baseValue + ', ' + baseAddress + ', ' + baseCity + ', Brasil',
                         /* Não inventar coordenadas. Elas serão preenchidas
                            pelo Google Geocoder no cálculo da rota (ou pelo
                            geocodificador público somente sem chave Google). */
@@ -4213,19 +4228,14 @@ function importFile(file) {
                 const urgencyValue = Object.keys(urgency).find(function(item) {
                     return key(rawUrgency).includes(key(item));
                 }) || 'Média';
-                /* Duração de deslocamento não é duração de atendimento.
-                   O cálculo viário determina o deslocamento; aqui entram
-                   apenas colunas explicitamente ligadas ao serviço. */
-                const duration = value(row, ['duracao do atendimento', 'tempo de atendimento', 'atendimento', 'servico', 'serviço']) || value(row, ['duracao', 'duração']);
-                let service = Number(String(duration).replace(',', '.').replace(/[^0-9.]/g, '')) || 25;
-                if (String(duration).includes(':')) {
-                    const parts = String(duration).split(':').map(Number);
-                    service = parts[0] * 60 + parts[1] + Math.round((parts[2] || 0) / 60);
-                }
+                /* A nova planilha terá apenas Base, Endereço e Cliente. Todo
+                   tempo eventualmente existente em colunas antigas é
+                   ignorado: cada entrega usa exatamente 30 minutos. */
+                const service = FIXED_DELIVERY_MINUTES;
                 const previous = grouped.get(identity);
                 if (previous) {
                     if (urgency[urgencyValue].w > urgency[previous.urgency].w) previous.urgency = urgencyValue;
-                    previous.service = Math.round((previous.service + service) / 2);
+                    previous.service = normalizeServiceMinutes((previous.service + service) / 2);
                     previous.tasks++;
                 } else {
                         grouped.set(identity, {
@@ -4242,7 +4252,7 @@ function importFile(file) {
                         lat: null,
                         lng: null,
                         urgency: urgencyValue,
-                        service: Math.max(10, Math.min(180, service)),
+                        service: normalizeServiceMinutes(service),
                         tasks: 1,
                         cnpj: value(row, ['cpf/cnpj', 'cnpj'])
                     });
