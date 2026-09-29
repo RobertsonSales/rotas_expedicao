@@ -176,7 +176,7 @@ footer.doc-foot{max-width:860px;margin-top:56px;padding-top:18px;border-top:1px 
 
 <main class="content" id="top">
   <div class="bar">
-    <div style="display:flex;align-items:center;gap:10px"><button class="btn menu-btn" id="menuBtn" aria-controls="toc" aria-expanded="false">☰ Índice</button><small>Manual de uso · versão 1.1 · setembro de 2026</small></div>
+    <div style="display:flex;align-items:center;gap:10px"><button class="btn menu-btn" id="menuBtn" aria-controls="toc" aria-expanded="false">☰ Índice</button><small>Manual de uso · versão 1.2 · setembro de 2026</small></div>
     <div class="bar-actions"><button class="btn" id="themeBtn" title="Alternar tema claro/escuro">☾ Tema</button><button class="btn" onclick="window.print()" title="Imprimir ou salvar este manual em PDF">▤ Imprimir / PDF</button></div>
   </div>
 
@@ -298,7 +298,7 @@ footer.doc-foot{max-width:860px;margin-top:56px;padding-top:18px;border-top:1px 
         <tr><td>Saída prevista</td><td>Horário de partida da base. É o ponto de início de todos os horários de chegada.</td></tr>
         <tr><td>Base de partida</td><td>Base de onde o condutor sai. A base <strong>Albérico Diniz</strong> é sempre a primeira opção; as demais vêm da planilha.</td></tr>
         <tr><td>Paradas da rota</td><td>Unidades já selecionadas. Aqui é possível trocar a urgência ou remover uma parada com <kbd>×</kbd>. <span class="ui">＋ Adicionar ponto</span> leva até a lista de unidades.</td></tr>
-        <tr><td>Dados do documento fiscal</td><td>Ao incluir uma unidade, aparece um formulário compacto para informar o <strong>número do documento fiscal</strong>, a <strong>data de emissão</strong> (preenchida automaticamente com a data do sistema) e o <strong>valor do documento</strong>. Os dados ficam vinculados à unidade selecionada e são mantidos no navegador.</td></tr>
+        <tr><td>Dados do documento fiscal</td><td>Ao marcar o checkbox ou clicar em <span class="ui">＋ Adicionar</span>, abre-se um formulário. O preenchimento do <strong>número do documento fiscal</strong>, da <strong>data de emissão</strong> (preenchida automaticamente com a data do sistema) e do <strong>valor do documento</strong> é obrigatório. A unidade só entra na rota após clicar em <span class="ui">Confirmar e incluir</span>.</td></tr>
         <tr><td>Retornar à base ao final</td><td>Ligado: a rota inclui o trecho de volta à base. Desligado: a rota termina na última unidade.</td></tr>
         <tr><td>Trânsito</td><td><em>Estimado por faixa horária</em> aplica fatores de trânsito conforme o horário; <em>Sem ajuste de trânsito</em> usa velocidade média constante (ver seção 7).</td></tr>
       </tbody>
@@ -313,8 +313,9 @@ footer.doc-foot{max-width:860px;margin-top:56px;padding-top:18px;border-top:1px 
     <ol class="steps">
       <li>Digite na <strong>busca inteligente</strong> parte do nome da unidade, do cliente, do endereço, do município, do código ou do CNPJ. Várias palavras podem ser combinadas: <em>“lab niteroi”</em> encontra unidades que contenham as duas.</li>
       <li>Role a lista pela barra de rolagem lateral para ver todos os registros. O contador no canto da tabela mostra quantas unidades atendem à busca, do total importado.</li>
-      <li>Clique em <span class="ui">＋ Adicionar</span> (ou na caixa de seleção) para incluir a unidade. Ela passa a exibir <span class="ui">✓ Incluída</span> e aparece em <strong>Paradas da rota</strong>.</li>
-      <li>No cartão da unidade incluída, preencha o pequeno formulário fiscal com o <strong>número do documento</strong>, a <strong>data de emissão</strong> e o <strong>valor</strong>. A data já vem preenchida com a data do sistema, mas pode ser alterada se necessário.</li>
+      <li>Clique em <span class="ui">＋ Adicionar</span> ou no checkbox da unidade. Antes de incluí-la, a aplicação abre o formulário de documento fiscal.</li>
+      <li>Preencha obrigatoriamente o <strong>número do documento</strong>, a <strong>data de emissão</strong> e o <strong>valor</strong>. A data já vem preenchida com a data do sistema, mas pode ser alterada se necessário.</li>
+      <li>Clique em <span class="ui">Confirmar e incluir</span>. Se cancelar, fechar o formulário ou deixar algum campo vazio, a unidade não será incluída na rota.</li>
       <li>Ajuste a urgência na coluna <strong>Urgência</strong>, quando necessário.</li>
     </ol>
     <h3>Níveis de urgência</h3>
@@ -327,7 +328,7 @@ footer.doc-foot{max-width:860px;margin-top:56px;padding-top:18px;border-top:1px 
         <tr><td><span class="pill p-baixa">Baixa</span></td><td>1</td><td>Entrega que pode ficar para o fim da rota.</td></tr>
       </tbody>
     </table></div>
-    <div class="note"><b>Dados fiscais</b>Os campos do documento fiscal são salvos automaticamente no navegador. Eles acompanham a unidade no histórico e aparecem na agenda exportada para Excel e no roteiro em PDF.</div>
+    <div class="note"><b>Dados fiscais obrigatórios</b>Os três campos do documento fiscal precisam ser preenchidos para confirmar a unidade na rota. Depois da inclusão, os dados são salvos automaticamente no navegador, acompanham a unidade no histórico e aparecem na agenda exportada para Excel e no roteiro em PDF.</div>
     <p>Qualquer alteração de seleção ou de urgência descarta a rota calculada; recalcule para atualizar a sequência. Alterações nos dados fiscais não mudam a sequência da rota, mas ficam registradas nos documentos emitidos.</p>
   </section>
 
@@ -496,7 +497,7 @@ footer.doc-foot{max-width:860px;margin-top:56px;padding-top:18px;border-top:1px 
 
   <div class="no-results" id="noResults">Nenhum trecho do manual corresponde à busca. Tente outra palavra, como “urgência”, “PDF” ou “planilha”.</div>
 
-  <footer class="doc-foot"><span>GRUPO LABMEDIC · Planejamento de Entregas · Manual de uso</span><span>Versão 1.1 · setembro de 2026</span></footer>
+  <footer class="doc-foot"><span>GRUPO LABMEDIC · Planejamento de Entregas · Manual de uso</span><span>Versão 1.2 · setembro de 2026</span></footer>
 </main>
 </div>
 <button class="totop" id="toTop" aria-label="Voltar ao topo">↑</button>
