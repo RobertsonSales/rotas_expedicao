@@ -1,0 +1,600 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Manual de uso · Planejamento de Entregas · GRUPO LABMEDIC</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#183345; --soft:#5f7477; --line:#dce8e3; --bg:#f4f8f7; --card:#ffffff;
+  --mint:#eaf6f1; --teal:#0d8c78; --teal-d:#0a6d5d; --navy:#172f3d; --navy-2:#1f3f50;
+  --super:#b42318; --alta:#d06b1e; --media:#9b7a19; --baixa:#18725b;
+  --warn-bg:#fff6e8; --warn:#9a4d10; --radius:12px;
+}
+:root[data-theme="dark"]{
+  --ink:#e0eeea; --soft:#9dbdb6; --line:#2d505d; --bg:#0c1d28; --card:#152a36;
+  --mint:#1b3744; --teal:#3cc6a6; --teal-d:#5ee2bf; --navy:#081620; --navy-2:#10283a;
+  --warn-bg:#3a2a14; --warn:#f3b77a;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:24px}
+body{margin:0;font-family:Manrope,"Segoe UI",system-ui,sans-serif;color:var(--ink);background:var(--bg);font-size:15px;line-height:1.65;padding-bottom:env(safe-area-inset-bottom,0)}
+a{color:var(--teal)}
+button{font:inherit;cursor:pointer}
+.layout{display:grid;grid-template-columns:290px minmax(0,1fr);min-height:100vh}
+
+/* Índice lateral */
+.toc{position:sticky;top:0;height:100vh;overflow-y:auto;background:var(--navy);color:#cfe0de;padding:26px 18px 30px;scrollbar-width:thin;scrollbar-color:#35596a transparent}
+.toc-brand{display:flex;gap:11px;align-items:center;padding:0 6px 22px;color:#fff}
+.toc-mark{width:34px;height:34px;border-radius:10px;background:#0d8c78;display:grid;place-items:center;font-size:19px;flex:none}
+.toc-brand strong{display:block;font-size:14px;letter-spacing:.2px}
+.toc-brand span{display:block;font-size:11px;color:#8fb0b1}
+.toc-search{position:relative;margin:0 4px 18px}
+.toc-search input{width:100%;padding:9px 11px 9px 32px;border-radius:9px;border:1px solid #ffffff22;background:#ffffff0d;color:#fff;font:inherit;font-size:13px}
+.toc-search input::placeholder{color:#8aa7aa}
+.toc-search input:focus{outline:2px solid #58d3b0;outline-offset:1px}
+.toc-search i{position:absolute;left:11px;top:50%;transform:translateY(-50%);font-style:normal;color:#8aa7aa;font-size:13px}
+.toc-group{font-size:11px;font-weight:700;color:#7f9ca0;padding:14px 10px 6px}
+.toc a{display:flex;gap:10px;align-items:baseline;padding:7px 10px;border-radius:8px;color:#c2d6d4;text-decoration:none;font-size:13.5px}
+.toc a b{font-weight:600;color:#7fb8aa;font-size:11px;min-width:18px}
+.toc a:hover{background:#ffffff0f;color:#fff}
+.toc a.active{background:#275264;color:#fff;box-shadow:inset 3px 0 #58d3b0}
+.toc a.hidden{display:none}
+.toc-empty{display:none;padding:8px 10px;font-size:12.5px;color:#8aa7aa}
+
+/* Conteúdo */
+.content{min-width:0;padding:0 56px 80px}
+.bar{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:18px 0;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--bg);z-index:5}
+.bar small{color:var(--soft);font-size:12.5px}
+.bar-actions{display:flex;gap:8px}
+.btn{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:9px;padding:8px 13px;font-size:13px;font-weight:600;display:inline-flex;align-items:center;gap:7px}
+.btn:hover{border-color:var(--teal);color:var(--teal)}
+.btn:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
+.menu-btn{display:none}
+
+.cover{margin:34px 0 10px;padding:42px 44px;border-radius:18px;background:linear-gradient(135deg,var(--navy) 0%,var(--navy-2) 70%,#0f5a55 130%);color:#e7f4f1;position:relative;overflow:hidden}
+.cover svg{position:absolute;right:-10px;bottom:-14px;width:360px;opacity:.55}
+.cover .kicker{font-size:13px;color:#8fe3cb;font-weight:600}
+.cover h1{font-family:"Playfair Display",Georgia,serif;font-size:40px;line-height:1.15;margin:10px 0 14px;max-width:620px;font-weight:700}
+.cover p{max-width:560px;margin:0;color:#c3dad6;font-size:15.5px}
+.cover .meta{display:flex;gap:22px;flex-wrap:wrap;margin-top:26px;font-size:12.5px;color:#9fc0bb}
+.cover .meta b{display:block;color:#fff;font-size:14px}
+
+section.doc{max-width:860px;padding-top:40px}
+section.doc.hidden{display:none}
+.sec-num{font-size:13px;font-weight:700;color:var(--teal)}
+h2{font-family:"Playfair Display",Georgia,serif;font-size:29px;line-height:1.2;margin:4px 0 14px;font-weight:700}
+h3{font-size:17px;margin:28px 0 8px}
+p{margin:0 0 14px}
+ul,ol{margin:0 0 16px;padding-left:22px}
+li{margin:5px 0}
+strong{font-weight:700}
+kbd{font-family:inherit;font-size:12px;font-weight:700;background:var(--card);border:1px solid var(--line);border-bottom-width:2px;border-radius:6px;padding:1px 7px}
+.ui{font-weight:700;color:var(--teal-d);white-space:nowrap}
+:root[data-theme="dark"] .ui{color:#7ce6c9}
+
+.steps{counter-reset:st;list-style:none;padding:0;margin:6px 0 20px}
+.steps li{counter-increment:st;position:relative;padding:12px 16px 12px 58px;background:var(--card);border:1px solid var(--line);border-radius:var(--radius);margin:8px 0}
+.steps li::before{content:counter(st);position:absolute;left:16px;top:12px;width:28px;height:28px;border-radius:50%;background:var(--mint);color:var(--teal-d);font-weight:800;display:grid;place-items:center;font-size:13px}
+:root[data-theme="dark"] .steps li::before{color:#7ce6c9}
+
+.note{border-left:4px solid var(--teal);background:var(--mint);padding:13px 16px;border-radius:0 var(--radius) var(--radius) 0;margin:16px 0;font-size:14.5px}
+.note.warn{border-left-color:var(--alta);background:var(--warn-bg);color:var(--ink)}
+.note b:first-child{display:block;margin-bottom:2px}
+
+.tablewrap{overflow-x:auto;margin:10px 0 20px;border:1px solid var(--line);border-radius:var(--radius);background:var(--card)}
+table{border-collapse:collapse;width:100%;font-size:14px;min-width:520px}
+th{text-align:left;background:var(--mint);font-size:12.5px;padding:10px 14px;border-bottom:1px solid var(--line)}
+td{padding:10px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+tr:last-child td{border-bottom:0}
+.pill{display:inline-block;padding:1px 10px;border-radius:99px;font-size:12px;font-weight:700}
+.p-super{background:#fff0ed;color:var(--super)} .p-alta{background:#fff6e8;color:var(--alta)}
+.p-media{background:#fffbe8;color:var(--media)} .p-baixa{background:#eaf8f2;color:var(--baixa)}
+
+/* Diagrama da tela */
+.screen{display:grid;grid-template-columns:70px 1fr;gap:0;border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;background:var(--card);margin:14px 0 22px;font-size:12px}
+.screen .s-side{background:var(--navy);padding:12px 8px;display:flex;flex-direction:column;gap:8px;align-items:center;color:#9fc0bb}
+.screen .s-side i{font-style:normal;width:30px;height:26px;border-radius:7px;display:grid;place-items:center}
+.screen .s-side i.on{background:#275264;color:#fff}
+.screen .s-main{padding:12px;display:grid;grid-template-columns:1fr 1.5fr;gap:10px}
+.screen .blk{border:1px dashed var(--line);border-radius:9px;padding:10px;min-height:70px;background:var(--bg)}
+.screen .blk b{display:block;color:var(--teal-d);font-size:12px}
+:root[data-theme="dark"] .screen .blk b{color:#7ce6c9}
+.screen .blk small{color:var(--soft)}
+.screen .wide{grid-column:1/-1}
+
+details.faq{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);margin:8px 0;padding:0 16px}
+details.faq summary{cursor:pointer;padding:13px 0;font-weight:700;list-style:none;display:flex;justify-content:space-between;gap:10px}
+details.faq summary::after{content:"+";color:var(--teal);font-size:18px;line-height:1}
+details.faq[open] summary::after{content:"–"}
+details.faq summary::-webkit-details-marker{display:none}
+details.faq > div{padding:0 0 14px;color:var(--ink)}
+
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin:12px 0 20px}
+.cards div{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px}
+.cards b{display:block;margin-bottom:3px}
+.cards small{color:var(--soft);font-size:13.5px;line-height:1.5;display:block}
+
+mark{background:#ffe89a;color:#183345;border-radius:3px;padding:0 1px}
+.no-results{display:none;max-width:860px;margin:40px 0;padding:22px;border:1px dashed var(--line);border-radius:var(--radius);color:var(--soft)}
+footer.doc-foot{max-width:860px;margin-top:56px;padding-top:18px;border-top:1px solid var(--line);color:var(--soft);font-size:12.5px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.totop{position:fixed;right:22px;bottom:calc(22px + env(safe-area-inset-bottom,0px));width:42px;height:42px;border-radius:50%;border:0;background:var(--teal);color:#fff;font-size:18px;box-shadow:0 8px 20px rgba(8,27,38,.25);opacity:0;pointer-events:none;transition:opacity .2s}
+.totop.show{opacity:1;pointer-events:auto}
+
+@media (max-width:980px){
+  .layout{grid-template-columns:1fr}
+  .toc{position:fixed;inset:0 auto 0 0;width:300px;z-index:40;transform:translateX(-100%);transition:transform .25s;padding-top:calc(26px + env(safe-area-inset-top,0px))}
+  .toc.open{transform:none;box-shadow:0 0 0 100vmax rgba(8,27,38,.45)}
+  .menu-btn{display:inline-flex}
+  .content{padding:0 20px 60px}
+  .bar{padding-top:calc(14px + env(safe-area-inset-top,0px))}
+  .cover{padding:30px 24px}
+  .cover h1{font-size:30px}
+  .cover svg{width:240px;opacity:.3}
+  .screen .s-main{grid-template-columns:1fr}
+}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}.toc,.totop{transition:none}}
+@media print{
+  .toc,.bar,.totop{display:none!important}
+  .layout{display:block}
+  .content{padding:0}
+  body{background:#fff;font-size:12pt}
+  .cover{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  section.doc{break-inside:auto;padding-top:22px}
+  details.faq{break-inside:avoid}
+  details.faq > div{display:block}
+}
+</style>
+</head>
+<body>
+<div class="layout">
+<nav class="toc" id="toc" aria-label="Índice do manual">
+  <div class="toc-brand"><div class="toc-mark">⌁</div><div><strong>GRUPO LABMEDIC</strong><span>Manual de uso · Planejamento de Entregas</span></div></div>
+  <div class="toc-search"><i>⌕</i><input id="q" type="search" placeholder="Buscar no manual" aria-label="Buscar no manual"></div>
+  <div class="toc-group">Começando</div>
+  <a href="#visao-geral"><b>1</b>Visão geral</a>
+  <a href="#acesso"><b>2</b>Acesso e navegação</a>
+  <a href="#planilha"><b>3</b>Preparar a planilha</a>
+  <a href="#importar"><b>4</b>Importar dados</a>
+  <div class="toc-group">Operação diária</div>
+  <a href="#planejamento"><b>5</b>Painel Planejamento</a>
+  <a href="#unidades"><b>6</b>Selecionar unidades</a>
+  <a href="#calculo"><b>7</b>Calcular a rota</a>
+  <a href="#mapa"><b>8</b>Mapa e detalhes do trecho</a>
+  <a href="#resultado"><b>9</b>Resumo e documentos</a>
+  <a href="#historico"><b>10</b>Salvar e consultar o histórico</a>
+  <div class="toc-group">Configuração e suporte</div>
+  <a href="#preferencias"><b>11</b>Preferências</a>
+  <a href="#dados"><b>12</b>Onde ficam os dados</a>
+  <a href="#problemas"><b>13</b>Solução de problemas</a>
+  <a href="#glossario"><b>14</b>Glossário e atalhos</a>
+  <div class="toc-empty" id="tocEmpty">Nenhuma seção corresponde à busca.</div>
+</nav>
+
+<main class="content" id="top">
+  <div class="bar">
+    <div style="display:flex;align-items:center;gap:10px"><button class="btn menu-btn" id="menuBtn" aria-controls="toc" aria-expanded="false">☰ Índice</button><small>Manual de uso · versão 1.0 · setembro de 2026</small></div>
+    <div class="bar-actions"><button class="btn" id="themeBtn" title="Alternar tema claro/escuro">☾ Tema</button><button class="btn" onclick="window.print()" title="Imprimir ou salvar este manual em PDF">▤ Imprimir / PDF</button></div>
+  </div>
+
+  <header class="cover">
+    <div class="kicker">Planejamento de Entregas · Logística assistencial</div>
+    <h1>Manual de uso da aplicação de rotas de expedição</h1>
+    <p>Guia completo para operadores: da importação da planilha de clientes à rota otimizada do condutor, com mapa, roteiro em PDF, agenda em Excel e histórico de planejamentos.</p>
+    <div class="meta"><div><b>Público</b>Operadores de expedição</div><div><b>Tempo de leitura</b>cerca de 15 minutos</div><div><b>Permanência por unidade</b>45 minutos</div></div>
+    <svg viewBox="0 0 360 170" aria-hidden="true"><path d="M20 140 C 90 140, 90 60, 160 70 S 250 130, 330 40" fill="none" stroke="#5ee2bf" stroke-width="3" stroke-dasharray="7 7"/><circle cx="20" cy="140" r="10" fill="#fff"/><text x="20" y="144" text-anchor="middle" font-size="11" font-weight="800" fill="#172f3d">B</text><circle cx="160" cy="70" r="9" fill="#d06b1e"/><text x="160" y="74" text-anchor="middle" font-size="10" font-weight="800" fill="#fff">1</text><circle cx="245" cy="112" r="9" fill="#9b7a19"/><text x="245" y="116" text-anchor="middle" font-size="10" font-weight="800" fill="#fff">2</text><circle cx="330" cy="40" r="9" fill="#b42318"/><text x="330" y="44" text-anchor="middle" font-size="10" font-weight="800" fill="#fff">3</text></svg>
+  </header>
+
+  <section class="doc" id="visao-geral">
+    <div class="sec-num">Seção 1</div>
+    <h2>Visão geral</h2>
+    <p>A aplicação organiza as entregas do dia em uma rota única para cada condutor. O operador importa a planilha com clientes, endereços e bases de partida, escolhe as unidades que serão visitadas, define a urgência de cada uma e pede o cálculo. O resultado é uma sequência de visitas com horário previsto de chegada, quilometragem e tempo de deslocamento por trecho.</p>
+    <div class="cards">
+      <div><b>Rota otimizada</b><small>Ordem de visitas por urgência e proximidade, com chegada prevista em cada unidade.</small></div>
+      <div><b>Mapa operacional</b><small>Pontos numerados, trajeto e detalhes de cada trecho com fotos das unidades.</small></div>
+      <div><b>Documentos prontos</b><small>Roteiro em PDF para o condutor e agenda em Excel para arquivamento.</small></div>
+      <div><b>Histórico</b><small>Rotas salvas por data, reabertas e exportadas quando necessário.</small></div>
+    </div>
+    <p>O fluxo de trabalho típico tem cinco etapas:</p>
+    <ol class="steps">
+      <li><strong>Importar</strong> a planilha de rede em <span class="ui">Importar dados</span> (só é necessário quando a planilha mudar).</li>
+      <li><strong>Configurar</strong> condutor, data, horário de saída e base de partida.</li>
+      <li><strong>Selecionar</strong> as unidades a visitar e ajustar a urgência de cada uma.</li>
+      <li><strong>Calcular</strong> a melhor rota e conferir o resumo e o mapa.</li>
+      <li><strong>Salvar e emitir</strong> o roteiro em PDF, a agenda em Excel ou abrir a rota no Google Maps.</li>
+    </ol>
+  </section>
+
+  <section class="doc" id="acesso">
+    <div class="sec-num">Seção 2</div>
+    <h2>Acesso e navegação</h2>
+    <p>Ao abrir a aplicação, a tela de apresentação mostra o botão <span class="ui">Acessar aplicação</span>. Depois de entrar, a tela é dividida em menu lateral e área de trabalho.</p>
+    <div class="screen" aria-label="Esquema da tela principal">
+      <div class="s-side"><i class="on">➤</i><i>▧</i><i>▦</i><i>☷</i><i>?</i></div>
+      <div class="s-main">
+        <div class="blk wide"><b>Indicadores</b><small>Unidades no planejamento · tempo de trânsito · urgências críticas · condutor</small></div>
+        <div class="blk"><b>01 · Configuração</b><small>Condutor, data, saída, base e paradas</small></div>
+        <div class="blk"><b>02 · Visualização</b><small>Mapa operacional e resumo da rota</small></div>
+        <div class="blk wide"><b>03 · Unidades disponíveis</b><small>Busca inteligente e lista completa com rolagem</small></div>
+      </div>
+    </div>
+    <h3>Menu lateral</h3>
+    <div class="tablewrap"><table>
+      <thead><tr><th>Item</th><th>Função</th></tr></thead>
+      <tbody>
+        <tr><td><span class="ui">➤ Planejamento</span></td><td>Montagem e cálculo da rota. O número ao lado indica quantas unidades estão selecionadas.</td></tr>
+        <tr><td><span class="ui">▧ Importar dados</span></td><td>Carregamento da planilha de rede (Excel ou CSV).</td></tr>
+        <tr><td><span class="ui">▦ Histórico</span></td><td>Rotas salvas, com filtros por período e exportação.</td></tr>
+        <tr><td><span class="ui">☷ Preferências</span></td><td>Tema, trânsito padrão, retorno à base, chave do Google Maps e limpeza de dados.</td></tr>
+        <tr><td><span class="ui">? Central de Ajuda</span></td><td>Abre este manual em uma nova aba do navegador.</td></tr>
+      </tbody>
+    </table></div>
+    <h3>Recolher e expandir o menu</h3>
+    <p>O botão circular na borda do menu (<kbd>«</kbd>) recolhe o menu lateral para uma coluna estreita só com ícones, ampliando a área do mapa e das tabelas. Clique novamente (<kbd>»</kbd>) para expandir. O atalho <kbd>Ctrl</kbd> + <kbd>B</kbd> (<kbd>⌘</kbd> + <kbd>B</kbd> no Mac) faz o mesmo. Com o menu recolhido, passe o mouse sobre um ícone para ver o nome do item. A escolha fica salva no navegador e é mantida na próxima vez que a aplicação for aberta.</p>
+    <p>No topo da área de trabalho, o botão <kbd>☾</kbd> alterna entre os temas claro e escuro.</p>
+  </section>
+
+  <section class="doc" id="planilha">
+    <div class="sec-num">Seção 3</div>
+    <h2>Preparar a planilha</h2>
+    <p>A aplicação lê arquivos <strong>.xlsx</strong>, <strong>.xls</strong> ou <strong>.csv</strong> de até 20 MB. O modelo de referência é a planilha <em>Rotas de entrega · Base de planejamento</em>, com uma aba chamada <strong>Tarefas</strong> e três colunas obrigatórias.</p>
+    <div class="tablewrap"><table>
+      <thead><tr><th>Coluna</th><th>Conteúdo</th><th>Exemplo</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Cliente</strong></td><td>Nome da unidade a visitar (também aceita Unidade, Estabelecimento ou Hospital).</td><td>ANGRA LAB</td></tr>
+        <tr><td><strong>Endereço</strong></td><td>Endereço completo da unidade: logradouro, número, bairro, cidade, UF e CEP.</td><td>Rua Álvares de Azevedo, 256, Icaraí, Niterói, RJ, 24.220-021</td></tr>
+        <tr><td><strong>Base</strong></td><td>Endereço da base de onde o condutor parte para atender esse cliente.</td><td>Avenida Albérico Diniz, 351 – Jardim Sulacap – RJ</td></tr>
+      </tbody>
+    </table></div>
+    <h3>Colunas opcionais reconhecidas</h3>
+    <ul>
+      <li><strong>Cidade</strong> ou <strong>Município</strong>: melhora a localização do endereço.</li>
+      <li><strong>Prioridade</strong>, <strong>Urgência</strong> ou <strong>Criticidade</strong>: define a urgência inicial (Super, Alta, Média ou Baixa). Sem essa coluna, todas as unidades entram como Média.</li>
+      <li><strong>Código do cliente</strong>, <strong>CNPJ</strong> ou <strong>CPF/CNPJ</strong>: permite localizar a unidade pela busca inteligente.</li>
+    </ul>
+    <div class="note"><b>Cabeçalho</b>A aplicação procura automaticamente a linha de cabeçalho, mesmo que existam linhas vazias acima dela. Mantenha os nomes das colunas na mesma linha e evite células mescladas.</div>
+    <div class="note warn"><b>Coluna de duração</b>Qualquer tempo de atendimento informado na planilha é ignorado. Para o cálculo da rota, cada unidade recebe sempre o tempo médio de permanência padrão de <strong>45 minutos</strong>.</div>
+    <h3>Boas práticas</h3>
+    <ul>
+      <li>Escreva o endereço completo, incluindo cidade e UF. Endereços abreviados podem ser localizados em outro município.</li>
+      <li>Use o mesmo texto para a mesma base em todas as linhas; variações criam bases duplicadas na lista.</li>
+      <li>Linhas repetidas do mesmo cliente são consolidadas em uma única unidade.</li>
+    </ul>
+  </section>
+
+  <section class="doc" id="importar">
+    <div class="sec-num">Seção 4</div>
+    <h2>Importar dados</h2>
+    <ol class="steps">
+      <li>No menu lateral, clique em <span class="ui">▧ Importar dados</span>.</li>
+      <li>Arraste a planilha para a área indicada ou clique em <span class="ui">⇧ Selecionar arquivo</span>.</li>
+      <li>Aguarde o indicador de progresso. Ao final, o quadro abaixo da área de envio mostra o nome do arquivo, o total de registros, as unidades únicas e as bases carregadas.</li>
+      <li>Se a planilha tiver várias abas com nomes diferentes, use <strong>Mapeamento de abas</strong> para indicar qual aba representa Cliente, Endereço e Base.</li>
+      <li>Volte ao <span class="ui">➤ Planejamento</span>: as unidades já estão disponíveis na seção 03.</li>
+    </ol>
+    <p>Importar uma nova planilha substitui a lista de unidades e limpa a seleção e a rota atuais. O histórico de rotas salvas não é afetado. Para trocar a planilha a qualquer momento, use <span class="ui">↻ Trocar arquivo</span> ou o link <span class="ui">Trocar planilha</span> no rodapé do painel Planejamento.</p>
+    <div class="note"><b>Privacidade</b>A leitura da planilha acontece no próprio navegador. O arquivo não é enviado a nenhum servidor.</div>
+  </section>
+
+  <section class="doc" id="planejamento">
+    <div class="sec-num">Seção 5</div>
+    <h2>Painel Planejamento</h2>
+    <h3>Indicadores do topo</h3>
+    <ul>
+      <li><strong>Unidades no planejamento</strong>: selecionadas / total importado.</li>
+      <li><strong>Tempo de trânsito estimado</strong>: soma dos deslocamentos da última rota calculada.</li>
+      <li><strong>Urgências críticas</strong>: unidades com urgência Super ou Alta.</li>
+      <li><strong>Condutor responsável</strong>: nome que aparecerá nos documentos.</li>
+    </ul>
+    <h3>01 · Configuração: monte a rota</h3>
+    <div class="tablewrap"><table>
+      <thead><tr><th>Campo</th><th>Como preencher</th></tr></thead>
+      <tbody>
+        <tr><td>Condutor</td><td>Escolha o condutor na lista. O campo de texto logo abaixo guarda o nome usado nos documentos e pode ser editado livremente.</td></tr>
+        <tr><td>Data da operação</td><td>Dia em que a rota será executada. Aparece no resumo, no PDF e no histórico.</td></tr>
+        <tr><td>Saída prevista</td><td>Horário de partida da base. É o ponto de início de todos os horários de chegada.</td></tr>
+        <tr><td>Base de partida</td><td>Base de onde o condutor sai. A base <strong>Albérico Diniz</strong> é sempre a primeira opção; as demais vêm da planilha.</td></tr>
+        <tr><td>Paradas da rota</td><td>Unidades já selecionadas. Aqui é possível trocar a urgência ou remover uma parada com <kbd>×</kbd>. <span class="ui">＋ Adicionar ponto</span> leva até a lista de unidades.</td></tr>
+        <tr><td>Retornar à base ao final</td><td>Ligado: a rota inclui o trecho de volta à base. Desligado: a rota termina na última unidade.</td></tr>
+        <tr><td>Trânsito</td><td><em>Estimado por faixa horária</em> aplica fatores de trânsito conforme o horário; <em>Sem ajuste de trânsito</em> usa velocidade média constante (ver seção 7).</td></tr>
+      </tbody>
+    </table></div>
+    <p><span class="ui">Limpar seleção ×</span> desmarca todas as unidades e descarta a rota atual, sem apagar a planilha importada.</p>
+  </section>
+
+  <section class="doc" id="unidades">
+    <div class="sec-num">Seção 6</div>
+    <h2>Selecionar unidades</h2>
+    <p>A seção <strong>03 · Unidades disponíveis</strong> fica recolhida por padrão para não ocupar espaço. Clique em <span class="ui">▾ Mostrar unidades</span> para abrir a lista e em <span class="ui">▴ Ocultar unidades</span> para fechá-la.</p>
+    <ol class="steps">
+      <li>Digite na <strong>busca inteligente</strong> parte do nome da unidade, do cliente, do endereço, do município, do código ou do CNPJ. Várias palavras podem ser combinadas: <em>“lab niteroi”</em> encontra unidades que contenham as duas.</li>
+      <li>Role a lista pela barra de rolagem lateral para ver todos os registros. O contador no canto da tabela mostra quantas unidades atendem à busca, do total importado.</li>
+      <li>Clique em <span class="ui">＋ Adicionar</span> (ou na caixa de seleção) para incluir a unidade. Ela passa a exibir <span class="ui">✓ Incluída</span> e aparece em <strong>Paradas da rota</strong>.</li>
+      <li>Ajuste a urgência na coluna <strong>Urgência</strong>, quando necessário.</li>
+    </ol>
+    <h3>Níveis de urgência</h3>
+    <div class="tablewrap"><table>
+      <thead><tr><th>Nível</th><th>Peso</th><th>Uso recomendado</th></tr></thead>
+      <tbody>
+        <tr><td><span class="pill p-super">Super</span></td><td>4</td><td>Entrega crítica que deve ser feita o quanto antes.</td></tr>
+        <tr><td><span class="pill p-alta">Alta</span></td><td>3</td><td>Entrega prioritária no período.</td></tr>
+        <tr><td><span class="pill p-media">Média</span></td><td>2</td><td>Entrega de rotina (padrão).</td></tr>
+        <tr><td><span class="pill p-baixa">Baixa</span></td><td>1</td><td>Entrega que pode ficar para o fim da rota.</td></tr>
+      </tbody>
+    </table></div>
+    <p>Qualquer alteração de seleção ou de urgência descarta a rota calculada; recalcule para atualizar a sequência.</p>
+  </section>
+
+  <section class="doc" id="calculo">
+    <div class="sec-num">Seção 7</div>
+    <h2>Calcular a rota</h2>
+    <p>Com as unidades selecionadas, clique em <span class="ui">⌁ Calcular melhor rota</span>. Um indicador acompanha as etapas: ordenação, localização dos endereços, cálculo dos trechos e montagem do resumo. <span class="ui">↻ Recalcular</span>, acima do mapa, repete o cálculo com os dados atuais.</p>
+    <h3>Como a sequência é definida</h3>
+    <ol>
+      <li>A partir da base, as unidades restantes são ordenadas por urgência (maior peso primeiro) e, em caso de empate, pela menor distância até o ponto atual.</li>
+      <li>Se existir uma unidade <strong>Super</strong> ou <strong>Alta</strong> a menos de 13 km do ponto atual, ela é visitada em seguida.</li>
+      <li>O processo se repete a partir de cada unidade visitada até que todas estejam na sequência.</li>
+    </ol>
+    <h3>Como os horários são calculados</h3>
+    <p>A chegada em cada unidade é o horário de saída somado aos deslocamentos anteriores e ao tempo de permanência em cada parada já feita.</p>
+    <div class="note"><b>Tempo de permanência</b>O condutor permanece <strong>45 minutos</strong> em cada unidade. Esse intervalo entra no horário da próxima chegada e no tempo total do roteiro, mas não altera a duração do trecho viário.</div>
+    <p>Exemplo: saída às 07:30, primeiro trecho de 25 min e segundo trecho de 20 min. Chegada na unidade 1 às 07:55; saída dela às 08:40; chegada na unidade 2 às 09:00.</p>
+    <h3>Origem das distâncias e tempos</h3>
+    <div class="tablewrap"><table>
+      <thead><tr><th>Situação</th><th>Fonte do cálculo</th></tr></thead>
+      <tbody>
+        <tr><td>Google Maps ativo</td><td>Endereços localizados pelo Google e trechos calculados pelo serviço de rotas do Google, com trânsito em tempo real quando disponível.</td></tr>
+        <tr><td>Sem chave do Google</td><td>Endereços localizados pelo OpenStreetMap e trechos pela malha viária pública (OSRM).</td></tr>
+        <tr><td>Nenhum serviço disponível</td><td>Estimativa local: distância em linha reta × 1,22, com velocidade ajustada pelo trânsito escolhido.</td></tr>
+      </tbody>
+    </table></div>
+    <h3>Fatores de trânsito da estimativa local</h3>
+    <div class="tablewrap"><table>
+      <thead><tr><th>Faixa horária</th><th>Fator</th><th>Classificação</th></tr></thead>
+      <tbody>
+        <tr><td>07h às 10h</td><td>× 1,42</td><td>Intenso</td></tr>
+        <tr><td>11h às 15h</td><td>× 1,18</td><td>Moderado</td></tr>
+        <tr><td>16h às 19h</td><td>× 1,50</td><td>Intenso</td></tr>
+        <tr><td>Demais horários</td><td>× 1,05</td><td>Fluido</td></tr>
+        <tr><td>Sem ajuste de trânsito</td><td>42 km/h constantes</td><td>sem ajuste</td></tr>
+      </tbody>
+    </table></div>
+    <p>O título do mapa indica a fonte usada no último cálculo, por exemplo <em>Rota otimizada · Google Maps · tempo real</em>.</p>
+  </section>
+
+  <section class="doc" id="mapa">
+    <div class="sec-num">Seção 8</div>
+    <h2>Mapa e detalhes do trecho</h2>
+    <p>O mapa da seção <strong>02 · Visualização</strong> mostra a base (<strong>B</strong>) e as unidades numeradas na ordem de visita. A cor de cada ponto segue a urgência. Antes do cálculo, a linha aparece tracejada como pré-visualização; após o cálculo, mostra o trajeto da rota.</p>
+    <h3>Controles de zoom</h3>
+    <div class="tablewrap"><table>
+      <thead><tr><th>Botão</th><th>Ação</th></tr></thead>
+      <tbody>
+        <tr><td><kbd>＋</kbd></td><td>Aproxima o mapa em um nível.</td></tr>
+        <tr><td><kbd>－</kbd></td><td>Afasta o mapa em um nível.</td></tr>
+        <tr><td><kbd>⌖</kbd></td><td>Reenquadra o mapa para mostrar todos os pontos da rota.</td></tr>
+      </tbody>
+    </table></div>
+    <p>Com o Google Maps ativo, também é possível arrastar o mapa e usar a roda do mouse para aproximar ou afastar.</p>
+    <h3>Modal de detalhes</h3>
+    <p>Clique em qualquer ponto do mapa para abrir os detalhes do trecho que termina nele:</p>
+    <ul>
+      <li>fotos e endereços da origem e do destino (quando disponíveis no Google);</li>
+      <li>tempo desde o ponto anterior e quilometragem calculada;</li>
+      <li>mapa do trecho, com os mesmos botões <kbd>＋</kbd> <kbd>－</kbd> <kbd>⌖</kbd>;</li>
+      <li>link <span class="ui">↗ Abrir rota no Google Maps</span> e verificação de Street View.</li>
+    </ul>
+    <p>Para fechar, clique em <kbd>×</kbd> ou fora da janela.</p>
+    <h3>Botões acima do mapa</h3>
+    <div class="tablewrap"><table>
+      <thead><tr><th>Botão</th><th>Função</th></tr></thead>
+      <tbody>
+        <tr><td><span class="ui">▤ Rotas do condutor</span></td><td>Mostra a rota do mapa atual no formato do roteiro em PDF.</td></tr>
+        <tr><td><span class="ui">🗺 Google Maps</span></td><td>Abre a rota em uma nova aba do Google Maps para navegação. Como o Google aceita até 9 paradas por link, rotas maiores são divididas em trechos sequenciais, listados em uma janela para abrir um após o outro.</td></tr>
+        <tr><td><span class="ui">▣ Salvar Rota</span></td><td>Grava a rota calculada no Histórico.</td></tr>
+        <tr><td><span class="ui">↻ Recalcular</span></td><td>Refaz o cálculo com a configuração atual.</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <section class="doc" id="resultado">
+    <div class="sec-num">Seção 9</div>
+    <h2>Resumo e documentos</h2>
+    <p>Abaixo do mapa, o <strong>Resumo da rota</strong> apresenta distância total, tempo de deslocamento, tempo de atendimento (45 minutos por unidade) e a agenda com a chegada prevista em cada parada, terminando no retorno à base ou no encerramento na última unidade.</p>
+    <h3>Roteiro em PDF</h3>
+    <p>O botão <span class="ui">▤ PDF</span> abre o roteiro profissional em A4 paisagem, com condutor, base, resumo e a agenda completa, incluindo a quilometragem de cada trecho. A janela de impressão abre automaticamente; escolha <em>Salvar como PDF</em> para gerar o arquivo. Se o navegador bloquear a janela, permita pop-ups para o endereço da aplicação.</p>
+    <h3>Agenda em Excel</h3>
+    <p>O botão <span class="ui">▧ Excel</span> baixa uma planilha com o resumo executivo e a agenda: ordem, unidade, endereço, município, urgência, chegada prevista, atendimento padrão, quilometragem e deslocamento de cada trecho.</p>
+  </section>
+
+  <section class="doc" id="historico">
+    <div class="sec-num">Seção 10</div>
+    <h2>Salvar e consultar o histórico</h2>
+    <ol class="steps">
+      <li>Depois de calcular, clique em <span class="ui">▣ Salvar Rota</span>. A rota vai para o Histórico com data, condutor e base.</li>
+      <li>Em <span class="ui">▦ Histórico</span>, informe o período nos campos <strong>De</strong> e <strong>Até</strong> e clique em <span class="ui">Filtrar</span>.</li>
+      <li>Em cada registro, use <span class="ui">Abrir</span> para carregar a rota no painel Planejamento, <span class="ui">PDF</span> e <span class="ui">Excel</span> para emitir os documentos, ou <span class="ui">Excluir</span> para removê-la.</li>
+      <li>Use <span class="ui">⇩ Exportar histórico</span> para baixar em uma única planilha todas as rotas do período filtrado.</li>
+    </ol>
+    <div class="note warn"><b>Arquivamento</b>O histórico fica salvo apenas no navegador em que foi criado. Para guardar registros por mais tempo ou compartilhá-los, exporte em PDF ou Excel regularmente.</div>
+  </section>
+
+  <section class="doc" id="preferencias">
+    <div class="sec-num">Seção 11</div>
+    <h2>Preferências</h2>
+    <div class="tablewrap"><table>
+      <thead><tr><th>Opção</th><th>Efeito</th></tr></thead>
+      <tbody>
+        <tr><td>Tema da aplicação</td><td>Claro ou escuro, incluindo o estilo do mapa.</td></tr>
+        <tr><td>Trânsito padrão</td><td>Valor inicial do campo Trânsito no painel Planejamento.</td></tr>
+        <tr><td>Retornar à base ao final</td><td>Valor inicial da opção de retorno.</td></tr>
+        <tr><td>Google Maps</td><td>Mostra se o Google Maps está ativo. Em ambiente publicado, a chave é carregada do servidor; em uso local, pode ser informada manualmente em <span class="ui">Salvar e conectar</span>. <span class="ui">↻ Testar conexão novamente</span> refaz a verificação.</td></tr>
+        <tr><td>Limpar dados ativos e reiniciar</td><td>Ver abaixo.</td></tr>
+      </tbody>
+    </table></div>
+    <h3>Limpar dados ativos e reiniciar</h3>
+    <p>Depois da confirmação, a aplicação apaga do navegador a planilha importada, a seleção de unidades, o formulário, a rota atual e o cache de localização de endereços. A tela <strong>não</strong> é recarregada: a janela de Preferências se fecha e você permanece no painel Planejamento, pronto para importar uma nova planilha.</p>
+    <p>São mantidos: o histórico de rotas salvas, o tema, as preferências de trânsito e retorno, a chave do Google Maps e o estado do menu lateral.</p>
+  </section>
+
+  <section class="doc" id="dados">
+    <div class="sec-num">Seção 12</div>
+    <h2>Onde ficam os dados</h2>
+    <p>Tudo é armazenado no próprio navegador (armazenamento local) e restaurado automaticamente ao reabrir a aplicação: planilha importada, seleção, formulário, última rota calculada, histórico e preferências.</p>
+    <ul>
+      <li>Os dados valem para aquele computador e aquele navegador. Outro navegador ou outro computador começa vazio.</li>
+      <li>Limpar os dados de navegação do navegador apaga também o histórico da aplicação.</li>
+      <li>Janelas anônimas não guardam os dados depois de fechadas.</li>
+      <li>Apenas os endereços são consultados nos serviços de mapa (Google ou OpenStreetMap) para localizar pontos e calcular trechos.</li>
+    </ul>
+  </section>
+
+  <section class="doc" id="problemas">
+    <div class="sec-num">Seção 13</div>
+    <h2>Solução de problemas</h2>
+    <details class="faq"><summary>A importação terminou, mas nenhuma unidade aparece</summary><div>Confirme que existe uma linha de cabeçalho com as colunas <strong>Cliente</strong>, <strong>Endereço</strong> e <strong>Base</strong>. Verifique também o <strong>Mapeamento de abas</strong> em Importar dados. Depois, abra a lista com <span class="ui">▾ Mostrar unidades</span> e confira se a busca inteligente está vazia.</div></details>
+    <details class="faq"><summary>Não encontro uma unidade na lista</summary><div>A lista mostra todas as unidades; role pela barra lateral da tabela. Para ir direto, digite parte do nome, do endereço ou do município na busca inteligente. Se a unidade não aparecer, ela não está na planilha importada.</div></details>
+    <details class="faq"><summary>O mapa mostra “Google Maps não configurado”</summary><div>A aplicação continua funcionando com o OpenStreetMap ou com a estimativa local. Para ativar o Google, abra <span class="ui">☷ Preferências</span> e use <span class="ui">↻ Testar conexão novamente</span>. Se o problema continuar, a chave do projeto precisa das APIs Maps JavaScript, Directions, Geocoding e Places habilitadas e de faturamento ativo; acione o responsável pela hospedagem.</div></details>
+    <details class="faq"><summary>Uma unidade ficou localizada no lugar errado</summary><div>O endereço na planilha provavelmente está incompleto ou abreviado. Corrija incluindo número, bairro, cidade e UF, importe novamente e, se necessário, use <span class="ui">Limpar dados ativos e reiniciar</span> para descartar a localização antiga guardada em cache.</div></details>
+    <details class="faq"><summary>Os horários de chegada parecem adiantados ou atrasados</summary><div>Confira o horário de saída e a opção de trânsito. Lembre-se de que cada parada soma 45 minutos de permanência antes do próximo deslocamento. Sem Google Maps, os tempos são estimativas.</div></details>
+    <details class="faq"><summary>O PDF não abre</summary><div>O roteiro abre em uma nova janela. Permita pop-ups para o endereço da aplicação nas configurações do navegador e tente de novo.</div></details>
+    <details class="faq"><summary>O menu lateral sumiu ou está estreito</summary><div>Ele foi recolhido. Clique no botão circular <kbd>»</kbd> na borda do menu ou pressione <kbd>Ctrl</kbd> + <kbd>B</kbd>. Em telas de celular, o menu aparece no topo da página e não pode ser recolhido.</div></details>
+    <details class="faq"><summary>O histórico sumiu</summary><div>O histórico fica no navegador em que foi criado. Verifique se você está no mesmo computador e navegador, fora de janela anônima, e se os dados de navegação não foram limpos. A opção <em>Limpar dados ativos</em> das Preferências não apaga o histórico.</div></details>
+  </section>
+
+  <section class="doc" id="glossario">
+    <div class="sec-num">Seção 14</div>
+    <h2>Glossário e atalhos</h2>
+    <div class="tablewrap"><table>
+      <thead><tr><th>Termo</th><th>Significado</th></tr></thead>
+      <tbody>
+        <tr><td>Base</td><td>Ponto de partida (e, opcionalmente, de retorno) do condutor.</td></tr>
+        <tr><td>Unidade</td><td>Cliente ou estabelecimento de saúde a ser visitado.</td></tr>
+        <tr><td>Parada</td><td>Unidade selecionada para a rota do dia.</td></tr>
+        <tr><td>Trecho</td><td>Deslocamento entre dois pontos consecutivos da rota.</td></tr>
+        <tr><td>Permanência</td><td>Tempo médio que o condutor fica em cada unidade: 45 minutos.</td></tr>
+        <tr><td>Roteiro</td><td>Documento em PDF com a agenda do condutor.</td></tr>
+        <tr><td>Agenda</td><td>Planilha Excel com a sequência de visitas e o resumo executivo.</td></tr>
+      </tbody>
+    </table></div>
+    <h3>Atalhos</h3>
+    <div class="tablewrap"><table>
+      <thead><tr><th>Atalho</th><th>Ação</th></tr></thead>
+      <tbody>
+        <tr><td><kbd>Ctrl</kbd> + <kbd>B</kbd></td><td>Recolher ou expandir o menu lateral.</td></tr>
+        <tr><td><kbd>/</kbd></td><td>Neste manual: ir para o campo de busca.</td></tr>
+        <tr><td><kbd>Ctrl</kbd> + <kbd>P</kbd></td><td>Neste manual: imprimir ou salvar em PDF.</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <div class="no-results" id="noResults">Nenhum trecho do manual corresponde à busca. Tente outra palavra, como “urgência”, “PDF” ou “planilha”.</div>
+
+  <footer class="doc-foot"><span>GRUPO LABMEDIC · Planejamento de Entregas · Manual de uso</span><span>Versão 1.0 · setembro de 2026</span></footer>
+</main>
+</div>
+<button class="totop" id="toTop" aria-label="Voltar ao topo">↑</button>
+
+<script>
+(function () {
+  var root = document.documentElement;
+  /* Usa o mesmo tema salvo pela aplicação, quando disponível. */
+  function getTheme() {
+    try { return localStorage.getItem('planiroute-theme') === 'dark' ? 'dark' : 'light'; } catch (e) { return 'light'; }
+  }
+  function applyTheme(t) {
+    root.setAttribute('data-theme', t);
+    document.getElementById('themeBtn').textContent = t === 'dark' ? '☀ Tema' : '☾ Tema';
+  }
+  applyTheme(getTheme());
+  document.getElementById('themeBtn').addEventListener('click', function () {
+    var t = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    applyTheme(t);
+    try { localStorage.setItem('planiroute-theme', t); } catch (e) {}
+  });
+
+  /* Índice móvel */
+  var toc = document.getElementById('toc'), menuBtn = document.getElementById('menuBtn');
+  function setMenu(open) { toc.classList.toggle('open', open); menuBtn.setAttribute('aria-expanded', open ? 'true' : 'false'); }
+  menuBtn.addEventListener('click', function () { setMenu(!toc.classList.contains('open')); });
+  toc.addEventListener('click', function (e) { if (e.target.closest('a')) setMenu(false); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') setMenu(false); });
+
+  /* Seção ativa no índice */
+  var links = Array.prototype.slice.call(toc.querySelectorAll('a[href^="#"]'));
+  var sections = links.map(function (a) { return document.querySelector(a.getAttribute('href')); });
+  if ('IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        if (en.isIntersecting) {
+          links.forEach(function (a) { a.classList.toggle('active', a.getAttribute('href') === '#' + en.target.id); });
+        }
+      });
+    }, { rootMargin: '-20% 0px -70% 0px' });
+    sections.forEach(function (s) { if (s) io.observe(s); });
+  }
+
+  /* Busca no manual: filtra seções e destaca termos */
+  var q = document.getElementById('q'), noResults = document.getElementById('noResults'), tocEmpty = document.getElementById('tocEmpty');
+  var originals = sections.map(function (s) { return s ? s.innerHTML : ''; });
+  function norm(t) { return String(t || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, ''); }
+  function highlight(node, terms) {
+    var walker = document.createTreeWalker(node, NodeFilter.SHOW_TEXT, null), texts = [], n;
+    while ((n = walker.nextNode())) { if (n.nodeValue.trim()) texts.push(n); }
+    texts.forEach(function (tn) {
+      var src = tn.nodeValue, low = norm(src), hits = [];
+      terms.forEach(function (t) { var i = low.indexOf(t); while (i > -1) { hits.push([i, i + t.length]); i = low.indexOf(t, i + t.length); } });
+      if (!hits.length) return;
+      hits.sort(function (a, b) { return a[0] - b[0]; });
+      var frag = document.createDocumentFragment(), pos = 0;
+      hits.forEach(function (h) {
+        if (h[0] < pos) return;
+        frag.appendChild(document.createTextNode(src.slice(pos, h[0])));
+        var m = document.createElement('mark'); m.textContent = src.slice(h[0], h[1]); frag.appendChild(m);
+        pos = h[1];
+      });
+      frag.appendChild(document.createTextNode(src.slice(pos)));
+      tn.parentNode.replaceChild(frag, tn);
+    });
+  }
+  var timer = null;
+  function runSearch() {
+    var terms = norm(q.value).split(/\s+/).filter(Boolean), any = false;
+    sections.forEach(function (s, i) {
+      if (!s) return;
+      s.innerHTML = originals[i];
+      var match = !terms.length || terms.every(function (t) { return norm(s.textContent).indexOf(t) > -1; });
+      s.classList.toggle('hidden', !match);
+      links[i].classList.toggle('hidden', !match);
+      if (match) {
+        any = true;
+        if (terms.length) {
+          highlight(s, terms);
+          s.querySelectorAll('details.faq').forEach(function (d) { if (d.querySelector('mark')) d.open = true; });
+        }
+      }
+    });
+    noResults.style.display = any ? 'none' : 'block';
+    tocEmpty.style.display = any ? 'none' : 'block';
+    document.querySelector('.cover').style.display = terms.length ? 'none' : '';
+  }
+  q.addEventListener('input', function () { clearTimeout(timer); timer = setTimeout(runSearch, 160); });
+  document.addEventListener('keydown', function (e) {
+    var tag = (e.target && e.target.tagName) || '';
+    if (e.key === '/' && tag !== 'INPUT' && tag !== 'TEXTAREA') { e.preventDefault(); if (window.innerWidth <= 980) setMenu(true); q.focus(); }
+  });
+
+  /* Voltar ao topo */
+  var toTop = document.getElementById('toTop');
+  window.addEventListener('scroll', function () { toTop.classList.toggle('show', window.scrollY > 600); }, { passive: true });
+  toTop.addEventListener('click', function () { window.scrollTo({ top: 0, behavior: 'smooth' }); });
+
+  /* Imprime o manual completo mesmo com busca ativa */
+  window.addEventListener('beforeprint', function () { if (q.value) { q.value = ''; runSearch(); } document.querySelectorAll('details.faq').forEach(function (d) { d.open = true; }); });
+})();
+</script>
+</body>
+</html>
