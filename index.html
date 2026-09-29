@@ -3109,6 +3109,45 @@ body.landing-lock {
 .side.collapsed .operator{justify-content:center;padding:13px 0 0}
 @media (max-width:768px){.side{height:auto;align-self:stretch}.side-toggle{display:none}.side.collapsed{width:100%;flex-basis:auto;padding:14px 14px 10px}.side.collapsed .nav-txt,.side.collapsed .brand-txt{display:initial}.side.collapsed .brand{justify-content:flex-start;padding:0 10px 28px}}
 @media (prefers-reduced-motion: reduce){.side,.side-toggle{transition:none}}
+
+/* ===== V5 · DESTAQUE DO QUADRO 03 + FILTRO POR ESTADO/CIDADE ===== */
+#unitsSection{position:relative;margin-top:36px;padding:26px 28px 24px;background:var(--card);border:2px solid var(--green);border-radius:22px;box-shadow:0 14px 38px rgba(13,140,120,.16)}
+#unitsSection::before{content:"";position:absolute;left:-2px;top:26px;bottom:26px;width:7px;border-radius:0 8px 8px 0;background:linear-gradient(180deg,#12b596,#0d8c78)}
+#unitsSection>.section{flex-wrap:wrap;align-items:center;gap:16px;margin-bottom:16px}
+#unitsSection>.section .over{font-size:13px;letter-spacing:1.4px;font-weight:800;color:var(--green)}
+#unitsSection>.section h3{font-size:26px;margin-top:6px;letter-spacing:-.8px}
+#unitsToggleBtn{display:inline-flex;align-items:center;gap:12px;padding:13px 24px;font-size:18px;font-weight:800;line-height:1;color:#fff;background:linear-gradient(135deg,#12a488,#0d8c78);border:0;border-radius:14px;cursor:pointer;box-shadow:0 8px 20px rgba(13,140,120,.32);transition:transform .15s ease,box-shadow .15s ease,filter .15s ease}
+#unitsToggleBtn:hover{transform:translateY(-1px);filter:brightness(1.06);box-shadow:0 12px 26px rgba(13,140,120,.4)}
+#unitsToggleBtn:focus-visible{outline:3px solid #9af0d5;outline-offset:3px}
+#unitsToggleBtn .ut-ico{display:inline-block;font-size:34px;line-height:.7;transition:transform .3s ease}
+#unitsSection.is-open #unitsToggleBtn .ut-ico{transform:rotate(180deg)}
+#smartSearch #search{font-size:13px;padding:11px 13px}
+.geo-filter{display:grid;grid-template-columns:minmax(210px,1.3fr) minmax(170px,1fr) minmax(200px,1.2fr) auto;gap:14px;align-items:end;padding:16px 18px;margin-bottom:6px;background:var(--mint);border:1px solid var(--line);border-radius:16px}
+.geo-filter .gf-title{display:flex;gap:11px;align-items:center}
+.geo-filter .gf-ico{width:38px;height:38px;flex:none;display:grid;place-items:center;border-radius:11px;background:var(--green);color:#fff;font-size:20px}
+.geo-filter .gf-title b{display:block;font-size:14px;color:var(--ink)}
+.geo-filter .gf-title small{display:block;font-size:11px;color:var(--soft,#6d7e80);line-height:1.35;margin-top:2px}
+.geo-filter label{display:block;font-size:10px;font-weight:800;letter-spacing:.7px;text-transform:uppercase;color:var(--soft,#6d7e80)}
+.geo-filter select{display:block;width:100%;margin:5px 0 0;padding:10px 11px;font-size:13px;font-weight:600;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:10px}
+.geo-filter .gf-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.geo-filter .gf-actions button{font-size:12px;padding:10px 13px;white-space:nowrap}
+.geo-filter .gf-actions .link{font-size:12px}
+.geo-filter .gf-info{grid-column:1/-1;font-size:12px;color:var(--ink);font-weight:600}
+.geo-filter .gf-info b{color:var(--green)}
+.geo-fb{margin-left:6px;font-style:normal;font-size:11px;cursor:help}
+.colmap{display:grid;gap:6px;margin-top:12px}
+.colrow{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:11px;padding:8px 11px;border:1px solid var(--line);border-radius:9px}
+.colrow span small{display:block;color:var(--soft,#6d7e80);font-size:10px}
+.colrow em{font-style:normal;font-weight:800;white-space:nowrap}
+.colrow.ok em{color:var(--green)}
+.colrow.miss em{color:#c0392b}
+.dark #unitsSection{background:#152a36;border-color:#2f8f80;box-shadow:0 14px 38px rgba(0,0,0,.35)}
+.dark #unitsSection>.section .over{color:#5fdcbf}
+.dark .geo-filter{background:#1a3a45;border-color:#2e5564}
+.dark .geo-filter select{background:#1b3744;border-color:#2e5564;color:#e0eeea}
+.dark .geo-filter .gf-info,.dark .geo-filter .gf-title b{color:#e0eeea}
+@media (max-width:980px){.geo-filter{grid-template-columns:1fr 1fr}.geo-filter .gf-title,.geo-filter .gf-actions{grid-column:1/-1}#unitsSection{padding:20px 16px}#unitsSection>.section h3{font-size:21px}}
+@media (max-width:480px){.geo-filter{grid-template-columns:1fr}#unitsToggleBtn{width:100%;justify-content:center}}
 </style>
 </head>
 <body>
@@ -3171,8 +3210,8 @@ body.landing-lock {
 <section class="summary"><div class="card"><div class="ico">▣</div><div><span>Unidades no planejamento</span><b id="sumStops">5<small> / 8</small></b></div></div><div class="card"><div class="ico">◷</div><div><span>Tempo de trânsito estimado</span><b id="sumTravel">—</b></div><span class="trend" id="sumTravelSub">aguardando rota</span></div><div class="card"><div class="ico">◔</div><div><span>Urgências críticas</span><b id="sumCritical">4</b></div><span class="trend" id="sumCriticalSub">2 super · 2 alta</span></div><div class="card"><div class="ico">♙</div><div><span>Condutor responsável</span><b style="font-size:14px" id="sumDriver">Reginaldo Braga</b></div><span class="trend">dia 28</span></div></section>
 <div class="grid"><section><div class="section"><div><div class="over">01 · Configuração</div><h3>Monte a rota</h3></div><button class="link" id="clearBtn">Limpar seleção ×</button></div><div class="card form"><label>Condutor<select id="driver"><option>Reginaldo Braga</option><option>Marcelo Medeiros</option></option></select><input id="driverName" type="text" value="Reginaldo Braga" placeholder="Nome utilizado nos documentos" style="margin-top:7px"></label><div class="two"><label>Data da operação<input id="date" type="date" value="2026-09-28"></label><label>Saída prevista<input id="departure" type="time" value="07:30"></label></div><label>Base de partida<select id="baseSelect"></select></label><div class="base"><div class="base-icon">⌖</div><div><b id="baseName"></b><small id="baseAddr"></small></div><span class="ok">✓</span></div><div class="divider"></div><div class="labelrow"><label>Paradas da rota <span id="selectedLabel">5 selecionadas</span></label><button id="addPoint">＋ Adicionar ponto</button></div><div class="selected" id="selectedList"></div><div class="options"><label class="switchline"><input id="returnBase" type="checkbox" checked><span class="switch"></span>Retornar à base ao final</label><label>Trânsito<select id="traffic"><option value="estimated">Estimado por faixa horária</option><option value="off">Sem ajuste de trânsito</option></select></label></div><button class="primary" id="calcBtn">⌁ Calcular melhor rota <span>↑</span></button><div class="foot">✓ O cálculo considera distância, janela de saída, tempo de atendimento e urgência.</div></div></section>
 <section><div class="section"><div><div class="over">02 · Visualização</div><h3 id="mapTitle">Mapa operacional</h3></div><div class="map-actions"><button class="outline" id="driverRoutesBtn" title="Ver todas as rotas deste condutor no formato do roteiro PDF">▤ Rotas do condutor</button><button class="outline" id="gmapsOpenBtn" title="Abrir a rota selecionada e otimizada no Google Maps, em uma nova aba">🗺 Google Maps</button><button class="outline" id="saveRouteBtn">▣ Salvar Rota</button><button class="outline" id="recalcBtn">↻ Recalcular</button></div></div><div class="card map"><div class="mapcanvas" id="mapCanvas"><div id="fallbackMap" class="fallback-map"><div class="road r1"></div><div class="road r2"></div><div class="road r3"></div><span class="maplabel l1">ZONA NORTE</span><span class="maplabel l2">CENTRO EXPANDIDO</span><span class="maplabel l3">ZONA SUL</span><svg class="route" id="routeSvg" viewBox="0 0 100 100" preserveAspectRatio="none"></svg></div><div id="gmap" class="gmap-container" style="display:none"></div><div class="zoom-controls" id="mapZoomCtrls" aria-label="Controles de zoom do mapa do painel" data-target="panel"><button class="zoom-btn" data-zoom="in" title="Aumentar zoom">＋</button><button class="zoom-btn" data-zoom="out" title="Diminuir zoom">－</button><button class="zoom-btn" data-zoom="reset" title="Ajustar à área">⌖</button></div><div class="float"><i id="gmapsDot" class="gdot off"></i><span id="gmapsLabel">Google Maps não configurado</span><br><small id="mapSub">pré-visualização da seleção</small></div></div><div class="legend"><span><i class="dot db"></i>Base</span><span><i class="dot dg"></i>Rota planejada</span><span><i class="dot do"></i>Urgência</span><small>⌁ Rota real via Google Maps (ou estimativa local por distância e horário, sem chave)</small></div></div><div class="card result" id="result"><div class="empty"><div class="circle">⌁</div><h3>A rota aparecerá aqui</h3><p>Selecione as unidades, defina a urgência e clique em <b>Calcular melhor rota</b>.</p></div></div></section></div>
-<section class="units" id="unitsSection"><div class="section"><div><div class="over">03 · Unidades disponíveis</div><h3>Escolha os pontos de ligação</h3></div><div class="filters" id="smartSearch"><input id="search" placeholder="🔎  Busca inteligente · unidade, cliente, endereço ou código"><button class="link units-toggle" id="unitsToggleBtn" aria-expanded="false" title="Expandir a lista completa de unidades">▾ Mostrar unidades</button></div></div><div class="card table units-body" id="unitsBody"><div class="thead"><span id="tableCount">5 de 8</span><span>Unidade de saúde</span><span>Município</span><span>Urgência</span><span>Atendimento</span><span>Ação</span></div><div id="unitRows"></div></div></section><div class="footer"><span>✓ Dados processados localmente neste navegador</span><span>Última atualização: agora · <button data-tab="import">Trocar planilha</button></span></div></section>
-<section id="importPage" class="import-page" style="display:none"><div class="importhero"><div><div class="eyebrow" style="color:#71d8bc">⇧ Entrada de dados</div><h2>Traga sua planilha.<br><em>O restante fica organizado.</em></h2><p>Selecione um arquivo Excel ou CSV com as abas Cliente, Endereço e Base. A leitura acontece no navegador.</p></div><div style="font-size:58px;color:#9af0d5">▧</div></div><div class="importgrid"><div class="card upload"><div class="drop" id="dropZone"><div class="uploadicon">⇧</div><h3>Arraste sua planilha aqui</h3><p>ou clique para procurar no computador</p><small>Formatos aceitos: .xlsx, .xls e .csv · até 20 MB</small><button class="primary" style="width:auto;margin-top:17px" id="fileBtn">⇧ Selecionar arquivo</button></div><input id="fileInput" type="file" accept=".xlsx,.xls,.csv" hidden><div class="file-status"><div style="font-size:20px;color:#0d8c78">▧</div><div><b id="fileName">Planilha de rede · aguardando importação</b><small id="fileInfo">Nenhum arquivo carregado ainda</small></div></div></div><div class="card mapping"><div class="over">Mapeamento de abas</div><h3>Defina a origem dos dados</h3><p>As abas podem ter outros nomes. Escolha qual representa cada tipo de informação.</p><div class="maprow"><span><b>Cliente</b><small>unidades a visitar</small></span><select id="sheetStop"><option>Cliente</option></select></div><div class="maprow"><span><b>Endereço</b><small>localização e endereço</small></span><select id="sheetAddress"><option>Endereço</option></select></div><div class="maprow"><span><b>Base</b><small>pontos de saída</small></span><select id="sheetBase"><option>Base</option></select></div><button class="outline" style="width:100%;justify-content:center;margin-top:15px" id="changeFile">↻ Trocar arquivo</button></div><div class="card guide"><b>Como preparar a planilha?</b><p>Use a primeira linha como cabeçalho. Para melhor precisão, inclua <strong>Unidade, Endereço, Município, Latitude e Longitude</strong>. A urgência pode ser ajustada depois no planejamento.</p></div></div></section>
+<section class="units" id="unitsSection"><div class="section"><div><div class="over">03 · Unidades disponíveis</div><h3>Escolha os pontos de ligação</h3></div><div class="filters" id="smartSearch"><input id="search" placeholder="🔎  Busca inteligente · unidade, cliente, endereço ou código"><button class="link units-toggle" id="unitsToggleBtn" type="button" aria-expanded="false" aria-controls="unitsBody" title="Expandir a lista completa de unidades"><span class="ut-ico" aria-hidden="true">▾</span><span class="ut-txt">Mostrar unidades</span></button></div></div><div class="geo-filter" id="geoFilter"><div class="gf-title"><span class="gf-ico" aria-hidden="true">⌖</span><div><b>Marcar por localidade</b><small>Filtre por estado e cidade e marque de uma vez todas as unidades exibidas.</small></div></div><label>Estado<select id="filterUF"><option value="">Todos os estados</option></select></label><label>Cidade<select id="filterCity"><option value="">Todas as cidades</option></select></label><div class="gf-actions"><button class="outline" id="markFiltered" type="button">✓ Marcar filtradas</button><button class="outline" id="unmarkFiltered" type="button">✕ Desmarcar</button><button class="link" id="clearGeoFilter" type="button">Limpar filtro</button></div><div class="gf-info" id="geoInfo"></div></div><div class="card table units-body" id="unitsBody"><div class="thead"><span id="tableCount">5 de 8</span><span>Unidade de saúde</span><span>Município</span><span>Urgência</span><span>Atendimento</span><span>Ação</span></div><div id="unitRows"></div></div></section><div class="footer"><span>✓ Dados processados localmente neste navegador</span><span>Última atualização: agora · <button data-tab="import">Trocar planilha</button></span></div></section>
+<section id="importPage" class="import-page" style="display:none"><div class="importhero"><div><div class="eyebrow" style="color:#71d8bc">⇧ Entrada de dados</div><h2>Traga sua planilha.<br><em>O restante fica organizado.</em></h2><p>Selecione o arquivo Excel ou CSV com a aba de tarefas. São lidas as colunas Base, Endereço (padronizado), Cidade, UF, Latitude e Longitude. A leitura acontece no navegador.</p></div><div style="font-size:58px;color:#9af0d5">▧</div></div><div class="importgrid"><div class="card upload"><div class="drop" id="dropZone"><div class="uploadicon">⇧</div><h3>Arraste sua planilha aqui</h3><p>ou clique para procurar no computador</p><small>Formatos aceitos: .xlsx, .xls e .csv · até 20 MB</small><button class="primary" style="width:auto;margin-top:17px" id="fileBtn">⇧ Selecionar arquivo</button></div><input id="fileInput" type="file" accept=".xlsx,.xls,.csv" hidden><div class="file-status"><div style="font-size:20px;color:#0d8c78">▧</div><div><b id="fileName">Planilha de rede · aguardando importação</b><small id="fileInfo">Nenhum arquivo carregado ainda</small></div></div></div><div class="card mapping"><div class="over">Leitura da planilha</div><h3>Aba e colunas utilizadas</h3><p>A aba com a coluna <b>Endereço (padronizado)</b> é detectada automaticamente e abas “-Ant” são ignoradas. Se necessário, escolha outra aba.</p><div class="maprow"><span><b>Aba de dados</b><small>unidades e bases</small></span><select id="sheetStop"><option>Tarefas</option></select></div><div class="colmap" id="colMap"><div class="colrow"><span><b>Cliente</b><small>nome da unidade</small></span><em>aguardando</em></div><div class="colrow"><span><b>Base</b><small>pontos de saída</small></span><em>aguardando</em></div><div class="colrow"><span><b>Endereço (padronizado)</b><small>enviado ao Google Maps</small></span><em>aguardando</em></div><div class="colrow"><span><b>Cidade</b><small>filtro por cidade</small></span><em>aguardando</em></div><div class="colrow"><span><b>UF (estado)</b><small>filtro por estado</small></span><em>aguardando</em></div><div class="colrow"><span><b>Latitude</b><small>só se o Google falhar</small></span><em>aguardando</em></div><div class="colrow"><span><b>Longitude</b><small>só se o Google falhar</small></span><em>aguardando</em></div></div><button class="outline" style="width:100%;justify-content:center;margin-top:15px" id="changeFile">↻ Trocar arquivo</button></div><div class="card guide"><b>Como preparar a planilha?</b><p>Use a primeira linha como cabeçalho e inclua <strong>Cliente, Base, Endereço (padronizado), Cidade, UF, Latitude e Longitude</strong>. Os endereços são localizados pelo Google Maps; <strong>Latitude e Longitude só são usadas se essa pesquisa falhar</strong>. A urgência pode ser ajustada depois no planejamento.</p></div></div></section>
 <section id="historyPage" class="history-page" style="display:none"><div class="historyhead"><div><div class="over">Registro de operações</div><h2>Histórico de planejamentos</h2><p>Revisite, reabra e exporte os cenários calculados nesta sessão.</p></div><div style="display:flex;align-items:end;gap:7px;flex-wrap:wrap"><label class="muted">De<input id="historyFrom" type="date" style="display:block;margin-top:4px;padding:7px;border:1px solid var(--line);border-radius:7px;background:var(--card);color:var(--ink)"></label><label class="muted">Até<input id="historyTo" type="date" style="display:block;margin-top:4px;padding:7px;border:1px solid var(--line);border-radius:7px;background:var(--card);color:var(--ink)"></label><button class="outline" id="applyHistoryFilter">Filtrar</button><button class="outline" id="exportHistoryBtn">⇩ Exportar histórico</button></div></div><div class="card" id="historyList"><div class="history-empty">Nenhuma rota calculada ainda. Calcule uma rota para que ela apareça aqui.</div></div><div class="notice">△ As rotas ficam salvas neste navegador. Use PDF ou Excel para arquivamento operacional externo.</div></section>
 <div id="modalRoot"></div>
 </main></div>
@@ -3228,6 +3267,12 @@ let bases = [DEFAULT_BASE];
    As unidades só aparecem após (1) importar uma planilha ou (2) reabrir uma
    rota salva no painel Histórico. */
 let stops = [];
+const UF_LIST = ['AC','AL','AP','AM','BA','CE','DF','ES','GO','MA','MT','MS','MG','PA','PB','PR','PE','PI','RJ','RN','RS','RO','RR','SC','SP','SE','TO'];
+const UF_NAMES = {acre:'AC',alagoas:'AL',amapa:'AP',amazonas:'AM',bahia:'BA',ceara:'CE',distritofederal:'DF',espiritosanto:'ES',goias:'GO',maranhao:'MA',matogrosso:'MT',matogrossodosul:'MS',minasgerais:'MG',para:'PA',paraiba:'PB',parana:'PR',pernambuco:'PE',piaui:'PI',riodejaneiro:'RJ',riograndedonorte:'RN',riograndedosul:'RS',rondonia:'RO',roraima:'RR',santacatarina:'SC',saopaulo:'SP',sergipe:'SE',tocantins:'TO'};
+/* Filtro da seção "03 · Unidades disponíveis" (estado + cidade). */
+const geoFilter = { uf: '', city: '', cityUF: '' };
+let filteredUnits = [];
+let geoFilterSig = '';
 let selected = new Set(),
     route = null;
 /* Mudança de versão invalida rotas persistidas que ainda possam conter
@@ -3317,7 +3362,8 @@ function restoreState() {
         if (dataset && Array.isArray(dataset.stops) && dataset.stops.length) {
             stops = dataset.stops.map(function(stop) {
                 return Object.assign({}, stop, {
-                    service: normalizeServiceMinutes(stop.service)
+                    service: normalizeServiceMinutes(stop.service),
+                    state: stop.state || inferUF(stop.address)
                 });
             });
             bases = withDefaultBase(Array.isArray(dataset.bases) ? dataset.bases : []);
@@ -3380,6 +3426,67 @@ function hav(a, b) {
         d2 = (b.lng - a.lng) * Math.PI / 180,
         x = Math.sin(d1 / 2) ** 2 + Math.cos(a.lat * Math.PI / 180) * Math.cos(b.lat * Math.PI / 180) * Math.sin(d2 / 2) ** 2;
     return 2 * r * Math.asin(Math.sqrt(x))
+}
+
+/* ---- V5 · UF, coordenadas da planilha e consulta de endereço ---- */
+function normalizeUF(value) {
+    const text = norm(value);
+    if (!text) return '';
+    const up = text.toUpperCase();
+    if (UF_LIST.includes(up)) return up;
+    return UF_NAMES[key(text)] || '';
+}
+
+function inferUF(text) {
+    const matches = Array.from(String(text || '').toUpperCase().matchAll(/[\s,–-]([A-Z]{2})(?=\s*(?:[,–-]|$))/g));
+    for (let i = matches.length - 1; i >= 0; i--) {
+        if (UF_LIST.includes(matches[i][1])) return matches[i][1];
+    }
+    return '';
+}
+
+function parseCoord(value) {
+    let text = norm(value).replace(/\s/g, '');
+    if (!text) return null;
+    if (text.includes(',') && !text.includes('.')) text = text.replace(',', '.');
+    else text = text.replace(/,/g, '');
+    const n = Number(text);
+    return Number.isFinite(n) ? n : null;
+}
+
+/* Faixa aproximada do território brasileiro: descarta latitude/longitude
+   trocadas, zeradas ou digitadas com erro. */
+function validBrazilCoord(lat, lng) {
+    return lat !== null && lng !== null && lat >= -34 && lat <= 6 && lng >= -74 && lng <= -32 && !(lat === 0 && lng === 0);
+}
+
+/* Texto enviado ao Google: endereço padronizado (já contém cidade/UF) e,
+   somente se faltar, complementa com cidade, UF e Brasil. */
+function addressQuery(point) {
+    const addr = norm(point.address);
+    const parts = [addr];
+    if (point.city && !key(addr).includes(key(point.city))) parts.push(norm(point.city));
+    if (point.state && !new RegExp('(^|[^a-z])' + point.state.toLowerCase() + '([^a-z]|$)').test(addr.toLowerCase())) parts.push(point.state);
+    parts.push('Brasil');
+    return parts.filter(Boolean).join(', ');
+}
+
+/* Latitude/Longitude da planilha: usadas APENAS quando a pesquisa por
+   endereço (Google, ou OpenStreetMap se não houver chave Google) falha. */
+function applySheetCoordinates(point) {
+    if (point.sheetLat === null || point.sheetLat === undefined || point.sheetLng === null || point.sheetLng === undefined) return point;
+    const la = Number(point.sheetLat),
+        ln = Number(point.sheetLng);
+    if (!Number.isFinite(la) || !Number.isFinite(ln)) return point;
+    if (point.geoProvider === 'google' && hasValidCoordinates(point)) return point;
+    point.lat = la;
+    point.lng = ln;
+    point.geoReady = true;
+    point.geoSource = 'planilha';
+    point.geoProvider = 'planilha';
+    point.geoQuery = 'Latitude/Longitude da planilha';
+    point.geoFallback = true;
+    return point;
 }
 
 function hasValidCoordinates(point) {
@@ -3637,7 +3744,7 @@ async function geocodePointGoogle(point, options) {
     /* O endereço completo é a primeira tentativa; o texto antigo com nome
        da unidade fica como alternativa porque alguns cadastros têm endereço
        abreviado, mas são encontrados pelo nome oficial no Google. */
-    addQuery([point.address, point.city || '', 'Brasil'].filter(Boolean).join(', '));
+    addQuery(addressQuery(point));
     addQuery(point.searchText);
     addQuery([point.name, point.address, point.city || '', 'Brasil'].filter(Boolean).join(', '));
     for (const query of queries) {
@@ -3651,6 +3758,7 @@ async function geocodePointGoogle(point, options) {
                     point.geoReady = true;
                     point.geoSource = 'google';
                     point.geoProvider = 'google';
+                    point.geoFallback = false;
                     point.geoQuery = query;
                     point.googleFormattedAddress = cached.formattedAddress || '';
                     return point;
@@ -3673,6 +3781,7 @@ async function geocodePointGoogle(point, options) {
                 point.geoReady = true;
                 point.geoSource = 'google';
                 point.geoProvider = 'google';
+                point.geoFallback = false;
                 point.geoQuery = query;
                 point.googleFormattedAddress = result.formatted_address || '';
                 try {
@@ -3686,7 +3795,8 @@ async function geocodePointGoogle(point, options) {
             }
         } catch (e) {}
     }
-    return point;
+    /* Google não localizou o endereço: recorre à Latitude/Longitude da planilha. */
+    return applySheetCoordinates(point);
 }
 
 async function geocodePointPublic(point) {
@@ -3696,6 +3806,7 @@ async function geocodePointPublic(point) {
         const q = norm(value);
         if (q && !queries.includes(q)) queries.push(q);
     }
+    addQuery(addressQuery(point));
     addQuery(point.searchText);
     addQuery([point.name, point.city || '', 'Brasil'].filter(Boolean).join(', '));
     addQuery([point.name, point.address, point.city || '', 'Brasil'].filter(Boolean).join(', '));
@@ -3718,12 +3829,14 @@ async function geocodePointPublic(point) {
                 point.lng = Number(result.lon);
                 point.geoReady = true;
                 point.geoSource = 'nominatim';
+                point.geoFallback = false;
                 point.geoQuery = query;
                 return point;
             }
         } catch (e) {}
     }
-    return point;
+    /* Pesquisa por endereço falhou: usa a Latitude/Longitude da planilha. */
+    return applySheetCoordinates(point);
 }
 
 async function getPublicRoute(base, ordered, returnToBase) {
@@ -4149,6 +4262,7 @@ function render() {
     $('sumCriticalSub').textContent = `${stops.filter(s=>s.urgency==='Super').length} super · ${stops.filter(s=>s.urgency==='Alta').length} alta`;
     $('sumDriver').textContent = driverValue();
     renderSelected();
+    rebuildGeoFilters(false);
     renderUnits();
     drawMap(route ? route.ordered : stops.filter(s => selected.has(s.id)), route?.legs || [])
 }
@@ -4162,14 +4276,18 @@ function renderUnits() {
     const query = norm($('search').value).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
     const tokens = query.split(/\s+/).filter(Boolean);
     const list = stops.filter(function(stop) {
-        const hay = [stop.name, stop.client, stop.address, stop.city, stop.code || '', stop.cnpj || ''].join(' ').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+        if (geoFilter.uf && stop.state !== geoFilter.uf) return false;
+        if (geoFilter.city && (stop.city !== geoFilter.city || (geoFilter.cityUF && stop.state !== geoFilter.cityUF))) return false;
+        const hay = [stop.name, stop.client, stop.address, stop.city, stop.state || '', stop.code || '', stop.cnpj || ''].join(' ').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
         return tokens.every(function(token) {
             return hay.includes(token);
         });
     });
+    filteredUnits = list;
     $('tableCount').textContent = list.length + ' de ' + stops.length;
+    updateGeoInfo();
     $('unitRows').innerHTML = list.map(function(s) {
-        return `<div class="unit ${selected.has(s.id)?'chosen':''}"><button class="check ${selected.has(s.id)?'on':''}" data-toggle="${s.id}">${selected.has(s.id)?'✓':''}</button><div class="unitname"><b>${s.name}</b><small>${s.client} · ${s.address}</small></div><span class="muted">${s.city}</span><select class="urg" data-u="${s.id}" style="color:${urgency[s.urgency].c};background:${urgency[s.urgency].bg}"><option ${s.urgency==='Super'?'selected':''}>Super</option><option ${s.urgency==='Alta'?'selected':''}>Alta</option><option ${s.urgency==='Média'?'selected':''}>Média</option><option ${s.urgency==='Baixa'?'selected':''}>Baixa</option></select><span class="muted">${FIXED_DELIVERY_MINUTES} min</span><button class="${selected.has(s.id)?'included':'add'}" data-toggle="${s.id}">${selected.has(s.id)?'✓ Incluída':'＋ Adicionar'}</button></div>`
+        return `<div class="unit ${selected.has(s.id)?'chosen':''}"><button class="check ${selected.has(s.id)?'on':''}" data-toggle="${s.id}">${selected.has(s.id)?'✓':''}</button><div class="unitname"><b>${s.name}${s.geoFallback?'<em class="geo-fb" title="Endereço não localizado no Google Maps: usando a Latitude/Longitude da planilha">📍</em>':''}</b><small>${s.client} · ${s.address}</small></div><span class="muted">${s.city}${s.state?' · '+s.state:''}</span><select class="urg" data-u="${s.id}" style="color:${urgency[s.urgency].c};background:${urgency[s.urgency].bg}"><option ${s.urgency==='Super'?'selected':''}>Super</option><option ${s.urgency==='Alta'?'selected':''}>Alta</option><option ${s.urgency==='Média'?'selected':''}>Média</option><option ${s.urgency==='Baixa'?'selected':''}>Baixa</option></select><span class="muted">${FIXED_DELIVERY_MINUTES} min</span><button class="${selected.has(s.id)?'included':'add'}" data-toggle="${s.id}">${selected.has(s.id)?'✓ Incluída':'＋ Adicionar'}</button></div>`
     }).join('') || '<div style="padding:25px;text-align:center;color:#9aa7a7">Nenhuma unidade encontrada para a busca atual.</div>';
 }
 
@@ -5238,7 +5356,136 @@ $('driverRoutesBtn').onclick = openDriverRoutes;
 attachZoomControls('mapZoomCtrls', 'mapCanvas', function() {
     return gmapsReady && gmap && $('gmap') && $('gmap').style.display !== 'none' ? gmap : null;
 }, function() { return panelMapBounds; }, 60);
-if($('unitsToggleBtn')){const ub=$('unitsToggleBtn');ub.onclick=function(){const opened=$('unitsSection').classList.toggle('is-open');ub.setAttribute('aria-expanded',opened?'true':'false');ub.textContent=opened?'▴ Ocultar unidades':'▾ Mostrar unidades';};}
+if ($('unitsToggleBtn')) {
+    $('unitsToggleBtn').onclick = function() {
+        setUnitsOpen(!$('unitsSection').classList.contains('is-open'));
+    };
+}
+/* ================================================================
+   V5 · FILTRO POR ESTADO E CIDADE (seção 03 · Unidades disponíveis)
+   ================================================================ */
+function rebuildGeoFilters(force) {
+    const ufSel = $('filterUF'),
+        citySel = $('filterCity');
+    if (!ufSel || !citySel) return;
+    const sig = stops.length + '|' + (stops[0] ? stops[0].id : '') + '|' + (stops.length ? stops[stops.length - 1].id : '');
+    if (!force && sig === geoFilterSig) return;
+    if (sig !== geoFilterSig) {
+        geoFilterSig = sig;
+        geoFilter.uf = '';
+        geoFilter.city = '';
+        geoFilter.cityUF = '';
+    }
+    const ufCount = new Map();
+    stops.forEach(function(s) {
+        if (s.state) ufCount.set(s.state, (ufCount.get(s.state) || 0) + 1);
+    });
+    ufSel.innerHTML = '<option value="">Todos os estados (' + stops.length + ')</option>' + Array.from(ufCount.keys()).sort().map(function(uf) {
+        return '<option value="' + uf + '">' + uf + ' (' + ufCount.get(uf) + ')</option>';
+    }).join('');
+    ufSel.value = geoFilter.uf;
+    const cityCount = new Map();
+    stops.forEach(function(s) {
+        if (geoFilter.uf && s.state !== geoFilter.uf) return;
+        const k = (s.state || '') + '|' + s.city;
+        cityCount.set(k, (cityCount.get(k) || 0) + 1);
+    });
+    const withUF = !geoFilter.uf;
+    citySel.innerHTML = '<option value="">Todas as cidades</option>' + Array.from(cityCount.keys()).sort(function(a, b) {
+        return a.split('|')[1].localeCompare(b.split('|')[1], 'pt-BR');
+    }).map(function(k) {
+        const p = k.split('|');
+        return '<option value="' + escHtml(k) + '">' + escHtml(p[1]) + (withUF && p[0] ? ' · ' + p[0] : '') + ' (' + cityCount.get(k) + ')</option>';
+    }).join('');
+    citySel.value = geoFilter.city ? (geoFilter.cityUF || '') + '|' + geoFilter.city : '';
+}
+
+function updateGeoInfo() {
+    const info = $('geoInfo');
+    if (!info) return;
+    const total = filteredUnits.length;
+    const marked = filteredUnits.filter(function(s) {
+        return selected.has(s.id);
+    }).length;
+    if (!stops.length) {
+        info.innerHTML = 'Importe a planilha para habilitar o filtro por estado e cidade.';
+    } else {
+        info.innerHTML = '<b>' + total + '</b> unidade' + (total === 1 ? '' : 's') + ' no filtro · <b>' + marked + '</b> já marcada' + (marked === 1 ? '' : 's') + ' · <b>' + selected.size + '</b> na rota';
+    }
+    if ($('markFiltered')) $('markFiltered').disabled = !total || marked === total;
+    if ($('unmarkFiltered')) $('unmarkFiltered').disabled = !marked;
+}
+
+function setUnitsOpen(open) {
+    const sec = $('unitsSection'),
+        btn = $('unitsToggleBtn');
+    if (!sec || !btn) return;
+    sec.classList.toggle('is-open', !!open);
+    btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    btn.title = open ? 'Recolher a lista de unidades' : 'Expandir a lista completa de unidades';
+    const txt = btn.querySelector('.ut-txt');
+    if (txt) txt.textContent = open ? 'Ocultar unidades' : 'Mostrar unidades';
+}
+
+function applySelectionChange() {
+    route = null;
+    renderResult();
+    render();
+    persistSelected();
+    persistRoute();
+}
+
+function markFilteredUnits(mark) {
+    const list = filteredUnits.slice();
+    if (!list.length) return;
+    if (mark) {
+        const add = list.filter(function(s) {
+            return !selected.has(s.id);
+        });
+        if (!add.length) return;
+        const total = selected.size + add.length;
+        if (total > 25 && !confirm('Você vai marcar ' + add.length + ' unidades (total de ' + total + ' na rota).\nO Google Maps Directions aceita no máximo 25 paradas por rota.\n\nDeseja continuar mesmo assim?')) return;
+        add.forEach(function(s) {
+            selected.add(s.id);
+        });
+    } else {
+        list.forEach(function(s) {
+            selected.delete(s.id);
+        });
+    }
+    applySelectionChange();
+}
+if ($('filterUF')) {
+    $('filterUF').onchange = function() {
+        geoFilter.uf = this.value;
+        geoFilter.city = '';
+        geoFilter.cityUF = '';
+        rebuildGeoFilters(true);
+        renderUnits();
+        if (geoFilter.uf) setUnitsOpen(true);
+    };
+    $('filterCity').onchange = function() {
+        const p = this.value ? this.value.split('|') : ['', ''];
+        geoFilter.cityUF = p[0];
+        geoFilter.city = p[1];
+        renderUnits();
+        if (geoFilter.city) setUnitsOpen(true);
+    };
+    $('clearGeoFilter').onclick = function() {
+        geoFilter.uf = '';
+        geoFilter.city = '';
+        geoFilter.cityUF = '';
+        rebuildGeoFilters(true);
+        renderUnits();
+    };
+    $('markFiltered').onclick = function() {
+        markFilteredUnits(true);
+    };
+    $('unmarkFiltered').onclick = function() {
+        markFilteredUnits(false);
+    };
+}
+
 if ($('landingPage')) {
     document.body.classList.add('landing-lock');
     $('enterAppBtn').onclick = function() {
@@ -5252,6 +5499,248 @@ if ($('landingPage')) {
     };
 }
 
+let importedWorkbook = null;
+let importedFileName = '';
+
+/* Localiza a linha de cabeçalho (Cliente/Base + Endereço) dentro da aba. */
+function detectHeader(sheet) {
+    const matrix = XLSX.utils.sheet_to_json(sheet, {
+        header: 1,
+        defval: '',
+        raw: false
+    });
+    let headerIndex = -1;
+    for (let i = 0; i < Math.min(matrix.length, 30); i++) {
+        const text = matrix[i].map(function(v) {
+            return key(v);
+        }).join('|');
+        if (text.includes('endereco') && (text.includes('cliente') || text.includes('base'))) {
+            headerIndex = i;
+            break;
+        }
+    }
+    return {
+        matrix: matrix,
+        headerIndex: headerIndex,
+        headers: headerIndex >= 0 ? matrix[headerIndex].map(function(v) {
+            return norm(v);
+        }) : []
+    };
+}
+
+/* Escolhe automaticamente a aba certa: a que contém "Endereço (padronizado)"
+   e as demais colunas da nova estrutura. Abas terminadas em "-Ant" (versão
+   anterior) são penalizadas para nunca serem lidas por engano. */
+function pickSheetName(workbook) {
+    let best = workbook.SheetNames[0],
+        bestScore = -Infinity;
+    workbook.SheetNames.forEach(function(name, idx) {
+        const info = detectHeader(workbook.Sheets[name]);
+        const ks = info.headers.map(key);
+        let score = info.headerIndex >= 0 ? 10 : 0;
+        if (ks.includes('enderecopadronizado')) score += 8;
+        ['cliente', 'base', 'cidade', 'uf', 'latitude', 'longitude'].forEach(function(k) {
+            if (ks.includes(k)) score += 1;
+        });
+        if (/(ant|anterior|antigo|old|bkp|backup)$/.test(key(name))) score -= 6;
+        score -= idx * 0.01;
+        if (score > bestScore) {
+            bestScore = score;
+            best = name;
+        }
+    });
+    return best;
+}
+
+/* Casa o cabeçalho pelo nome exato (sem acentos/pontuação) e só depois por
+   trecho. Cabeçalhos "Base – Latitude" e "URL …" nunca são confundidos com
+   as colunas de unidade. */
+function findColumn(headers, exact, partial) {
+    for (const e of exact) {
+        const found = headers.find(function(x) {
+            return key(x) === e;
+        });
+        if (found !== undefined) return found;
+    }
+    for (const p of (partial || [])) {
+        const found = headers.find(function(x) {
+            const k = key(x);
+            return k.includes(p) && !k.startsWith('base') && !k.startsWith('url');
+        });
+        if (found !== undefined) return found;
+    }
+    return null;
+}
+
+const COL_SPECS = [
+    ['name', 'Cliente', 'nome da unidade'],
+    ['base', 'Base', 'pontos de saída'],
+    ['address', 'Endereço (padronizado)', 'enviado ao Google Maps'],
+    ['city', 'Cidade', 'filtro por cidade'],
+    ['uf', 'UF (estado)', 'filtro por estado'],
+    ['lat', 'Latitude', 'só se o Google falhar'],
+    ['lng', 'Longitude', 'só se o Google falhar']
+];
+
+function renderColMap(cols, stats) {
+    const box = $('colMap');
+    if (!box) return;
+    box.innerHTML = COL_SPECS.map(function(spec) {
+        const found = cols ? cols[spec[0]] : null;
+        let extra = '';
+        if (cols && found && (spec[0] === 'lat' || spec[0] === 'lng') && stats) extra = ' · ' + stats.coords + ' válidas';
+        const cls = !cols ? '' : (found ? 'ok' : 'miss');
+        const state = !cols ? 'aguardando' : (found ? '✓ ' + escHtml(found) + extra : '✕ não encontrada');
+        return '<div class="colrow ' + cls + '"><span><b>' + spec[1] + '</b><small>' + spec[2] + '</small></span><em>' + state + '</em></div>';
+    }).join('');
+}
+
+function processSheet(sheetName) {
+    const sheet = importedWorkbook.Sheets[sheetName];
+    const info = detectHeader(sheet);
+    const headerIndex = info.headerIndex < 0 ? 0 : info.headerIndex;
+    const headers = (info.matrix[headerIndex] || []).map(function(v) {
+        return norm(v);
+    });
+    const cols = {
+        name: findColumn(headers, ['cliente', 'unidade', 'estabelecimento', 'hospital'], ['cliente', 'unidade', 'estabelecimento']),
+        address: findColumn(headers, ['enderecopadronizado', 'enderecopadr', 'endereco'], ['endereco', 'logradouro', 'address']),
+        addressAlt: findColumn(headers, ['endereco'], []),
+        base: findColumn(headers, ['base'], []),
+        city: findColumn(headers, ['cidade', 'municipio', 'city'], ['cidade', 'municipio']),
+        uf: findColumn(headers, ['uf', 'estado'], ['estado']),
+        lat: findColumn(headers, ['latitude', 'lat'], ['latitude']),
+        lng: findColumn(headers, ['longitude', 'lng', 'long', 'lon'], ['longitude']),
+        urgency: findColumn(headers, ['prioridade', 'urgencia', 'criticidade'], ['prioridade', 'urgencia', 'criticidade']),
+        code: findColumn(headers, ['codigodocliente', 'codigocliente', 'idcliente'], ['codigodocliente', 'codigocliente']),
+        cnpj: findColumn(headers, ['cpfcnpj', 'cnpj'], ['cnpj'])
+    };
+    if (!cols.address) {
+        renderColMap(cols, null);
+        const err = new Error('missing-address');
+        err.userMessage = 'A aba "' + sheetName + '" não tem a coluna "Endereço (padronizado)" (nem "Endereço"). Escolha outra aba em "Aba de dados" ou confira o cabeçalho.';
+        throw err;
+    }
+    const rows = XLSX.utils.sheet_to_json(sheet, {
+        range: headerIndex,
+        defval: '',
+        raw: false
+    });
+    showProgress('Consolidando registros únicos e bases…', 58);
+
+    function value(row, column) {
+        return column && row[column] !== undefined ? norm(row[column]) : '';
+    }
+    const grouped = new Map();
+    const baseMap = new Map();
+    const stats = {
+        coords: 0,
+        noCoords: 0,
+        noUF: 0,
+        noCity: 0,
+        skipped: 0
+    };
+    rows.forEach(function(row, index) {
+        const rawName = value(row, cols.name);
+        const address = value(row, cols.address) || (cols.addressAlt ? value(row, cols.addressAlt) : '');
+        if (!rawName && !address) {
+            stats.skipped++;
+            return;
+        }
+        /* Coluna Base: 1 ponto de saída por texto distinto (espaços extras ignorados). */
+        const baseValue = value(row, cols.base).replace(/\s+/g, ' ');
+        if (baseValue && !baseMap.has(baseValue)) {
+            const isDefault = key(baseValue) === key(DEFAULT_BASE.name) || key(baseValue).includes('albericodiniz');
+            baseMap.set(baseValue, {
+                id: 'base' + baseMap.size,
+                name: isDefault ? DEFAULT_BASE.name : baseValue,
+                address: isDefault ? DEFAULT_BASE.address : baseValue,
+                searchText: isDefault ? DEFAULT_BASE.searchText : baseValue + ', Brasil',
+                /* Sem coordenadas inventadas: o Google Geocoder localiza a base
+                   no cálculo da rota. */
+                lat: null,
+                lng: null
+            });
+        }
+        const name = rawName || 'Unidade ' + (index + 1);
+        let state = normalizeUF(value(row, cols.uf)) || inferUF(address);
+        const city = value(row, cols.city) || 'Sem cidade';
+        if (!state) stats.noUF++;
+        if (!value(row, cols.city)) stats.noCity++;
+        const lat = parseCoord(value(row, cols.lat)),
+            lng = parseCoord(value(row, cols.lng));
+        const okCoord = validBrazilCoord(lat, lng);
+        okCoord ? stats.coords++ : stats.noCoords++;
+        const finalAddress = address || 'Endereço não informado';
+        const code = value(row, cols.code);
+        const identity = code || key(name + '|' + finalAddress);
+        const rawUrgency = value(row, cols.urgency);
+        const urgencyValue = Object.keys(urgency).find(function(item) {
+            return key(rawUrgency).includes(key(item));
+        }) || 'Média';
+        /* Cada entrega usa exatamente 45 minutos, qualquer que seja a planilha. */
+        const service = FIXED_DELIVERY_MINUTES;
+        const previous = grouped.get(identity);
+        if (previous) {
+            if (urgency[urgencyValue].w > urgency[previous.urgency].w) previous.urgency = urgencyValue;
+            previous.service = normalizeServiceMinutes((previous.service + service) / 2);
+            previous.tasks++;
+        } else {
+            const unit = {
+                id: 'imp' + grouped.size,
+                code: code,
+                name: name,
+                photoSearchName: name,
+                client: name,
+                address: finalAddress,
+                city: city,
+                state: state,
+                baseName: baseValue,
+                lat: null,
+                lng: null,
+                sheetLat: okCoord ? lat : null,
+                sheetLng: okCoord ? lng : null,
+                urgency: urgencyValue,
+                service: normalizeServiceMinutes(service),
+                tasks: 1,
+                cnpj: value(row, cols.cnpj)
+            };
+            unit.searchText = addressQuery(unit);
+            grouped.set(identity, unit);
+        }
+    });
+    stops = Array.from(grouped.values());
+    bases = withDefaultBase(Array.from(baseMap.values()));
+    showProgress('Atualizando unidades disponíveis e filtros…', 84);
+    $('baseSelect').innerHTML = bases.map(function(base) {
+        return '<option value=\"' + base.id + '\">' + escHtml(base.name) + '</option>';
+    }).join('');
+    selected = new Set();
+    route = null;
+    geoFilter.uf = '';
+    geoFilter.city = '';
+    geoFilter.cityUF = '';
+    geoFilterSig = '';
+    rebuildGeoFilters(true);
+    render();
+    renderColMap(cols, stats);
+    const ufs = new Set(stops.map(function(s) {
+        return s.state;
+    }).filter(Boolean)).size;
+    const cities = new Set(stops.map(function(s) {
+        return s.state + '|' + s.city;
+    })).size;
+    let info2 = rows.length.toLocaleString('pt-BR') + ' registros · ' + stops.length.toLocaleString('pt-BR') + ' unidades únicas · ' + bases.length + ' bases · ' + ufs + ' UF · ' + cities + ' cidades · aba "' + sheetName + '" · cabeçalho na linha ' + (headerIndex + 1);
+    if (stats.noUF || stats.noCity) info2 += ' · atenção: ' + stats.noUF + ' sem UF e ' + stats.noCity + ' sem cidade';
+    $('fileInfo').textContent = info2;
+    persistDataset();
+    persistSelected();
+    persistRoute();
+    persistForm();
+    showProgress('Importação concluída.', 100);
+    setTimeout(hideProgress, 450);
+}
+
 function importFile(file) {
     showProgress('Abrindo a planilha selecionada…', 10);
     const reader = new FileReader();
@@ -5262,137 +5751,35 @@ function importFile(file) {
                 raw: false
             });
             showProgress('Lendo abas e identificando cabeçalhos…', 32);
+            importedWorkbook = workbook;
+            importedFileName = file.name;
             const names = workbook.SheetNames;
-            ['sheetStop', 'sheetAddress', 'sheetBase'].forEach(function(id, index) {
-                $(id).innerHTML = names.map(function(name) {
-                    return '<option>' + name + '</option>';
-                }).join('');
-                $(id).selectedIndex = Math.min(index, names.length - 1);
-            });
-            $('fileName').textContent = file.name;
-            const sheetName = names[0],
-                sheet = workbook.Sheets[sheetName];
-            const matrix = XLSX.utils.sheet_to_json(sheet, {
-                header: 1,
-                defval: '',
-                raw: false
-            });
-            let headerIndex = matrix.findIndex(function(row) {
-                const text = row.map(function(v) {
-                    return key(v);
-                }).join('|');
-                return text.includes('cliente') && text.includes('endereco');
-            });
-            if (headerIndex < 0) headerIndex = 0;
-            const headers = (matrix[headerIndex] || []).map(function(v) {
-                return norm(v);
-            });
-            const rows = XLSX.utils.sheet_to_json(sheet, {
-                range: headerIndex,
-                defval: '',
-                raw: false
-            });
-            showProgress('Consolidando registros únicos e bases…', 58);
-
-            function value(row, keys) {
-                const found = Object.keys(row).find(function(column) {
-                    return keys.some(function(item) {
-                        return key(column).includes(item);
-                    });
-                });
-                return found ? norm(row[found]) : '';
-            }
-
-            function coord(text, base, spread) {
-                let hash = 0;
-                for (let i = 0; i < text.length; i++) {
-                    hash = (hash * 31 + text.charCodeAt(i)) % 100000;
-                }
-                return base + ((hash / 100000) - .5) * spread;
-            }
-            const grouped = new Map();
-            const baseMap = new Map();
-            rows.forEach(function(row, index) {
-                const baseValue = value(row, ['base']);
-                if (baseValue && !baseMap.has(baseValue)) {
-                    const isDefault = key(baseValue) === key(DEFAULT_BASE.name) || key(baseValue).includes('albericodiniz');
-                    const baseAddress = isDefault ? DEFAULT_BASE.address : (value(row, ['endereco da base', 'endereco base', 'logradouro base', 'local base']) || baseValue);
-                    const baseCity = value(row, ['cidade base', 'municipio base', 'município base']) || 'Brasil';
-                    baseMap.set(baseValue, {
-                        id: 'base' + baseMap.size,
-                        name: isDefault ? DEFAULT_BASE.name : baseValue,
-                        address: isDefault ? DEFAULT_BASE.address : baseAddress + ' · ' + baseCity,
-                        searchText: isDefault ? DEFAULT_BASE.searchText : baseValue + ', ' + baseAddress + ', ' + baseCity + ', Brasil',
-                        /* Não inventar coordenadas. Elas serão preenchidas
-                           pelo Google Geocoder no cálculo da rota (ou pelo
-                           geocodificador público somente sem chave Google). */
-                        lat: null,
-                        lng: null
-                    });
-                }
-                const name = value(row, ['cliente', 'unidade', 'estabelecimento', 'hospital']) || 'Unidade ' + (index + 1);
-                const address = value(row, ['endereco', 'logradouro', 'rua', 'address']) || 'Endereço não informado';
-                const city = value(row, ['cidade', 'municipio', 'município', 'city']) || ((address.split(',').slice(-1)[0] || '').trim()) || 'Brasil';
-                const code = value(row, ['codigo do cliente', 'codigo cliente', 'id do cliente', 'cnpj', 'cpf/cnpj']);
-                const identity = code || key(name + '|' + address);
-                const rawUrgency = value(row, ['prioridade', 'urgencia', 'criticidade']);
-                const urgencyValue = Object.keys(urgency).find(function(item) {
-                    return key(rawUrgency).includes(key(item));
-                }) || 'Média';
-                /* A nova planilha terá apenas Base, Endereço e Cliente. Todo
-                   tempo eventualmente existente em colunas antigas é
-                   ignorado: cada entrega usa exatamente 45 minutos. */
-                const service = FIXED_DELIVERY_MINUTES;
-                const previous = grouped.get(identity);
-                if (previous) {
-                    if (urgency[urgencyValue].w > urgency[previous.urgency].w) previous.urgency = urgencyValue;
-                    previous.service = normalizeServiceMinutes((previous.service + service) / 2);
-                    previous.tasks++;
-                } else {
-                        grouped.set(identity, {
-                        id: 'imp' + grouped.size,
-                        code: code,
-                        name: name,
-                        photoSearchName: name,
-                        client: name,
-                        address: address,
-                        city: city,
-                        searchText: name + ', ' + address + ', ' + city + ', Brasil',
-                        /* Coordenadas hash eram apenas um placeholder e
-                           podiam levar o Directions para outra cidade. */
-                        lat: null,
-                        lng: null,
-                        urgency: urgencyValue,
-                        service: normalizeServiceMinutes(service),
-                        tasks: 1,
-                        cnpj: value(row, ['cpf/cnpj', 'cnpj'])
-                    });
-                }
-            });
-            stops = Array.from(grouped.values());
-            bases = withDefaultBase(Array.from(baseMap.values()));
-            showProgress('Atualizando unidades disponíveis e filtros…', 84);
-            $('baseSelect').innerHTML = bases.map(function(base) {
-                return '<option value=\"' + base.id + '\">' + base.name + '</option>';
+            const picked = pickSheetName(workbook);
+            $('sheetStop').innerHTML = names.map(function(name) {
+                return '<option' + (name === picked ? ' selected' : '') + '>' + escHtml(name) + '</option>';
             }).join('');
-            selected = new Set();
-            route = null;
-            render();
-            $('fileInfo').textContent = rows.length.toLocaleString('pt-BR') + ' registros · ' + stops.length.toLocaleString('pt-BR') + ' unidades únicas · ' + bases.length + ' bases carregadas · cabeçalho na linha ' + (headerIndex + 1);
-            persistDataset();
-            persistSelected();
-            persistRoute();
-            persistForm();
-            showProgress('Importação concluída.', 100);
-            setTimeout(hideProgress, 450);
+            $('sheetStop').value = picked;
+            $('fileName').textContent = file.name;
+            processSheet(picked);
         } catch (error) {
             console.error(error);
             hideProgress();
-            alert('Não foi possível ler a planilha. Verifique o formato e a linha de cabeçalho.');
+            alert(error && error.userMessage ? error.userMessage : 'Não foi possível ler a planilha. Verifique o formato e a linha de cabeçalho.');
         }
     };
     reader.readAsArrayBuffer(file);
 }
+if ($('sheetStop')) $('sheetStop').onchange = function() {
+    if (!importedWorkbook) return;
+    showProgress('Lendo a aba "' + this.value + '"…', 40);
+    try {
+        processSheet(this.value);
+    } catch (error) {
+        console.error(error);
+        hideProgress();
+        alert(error && error.userMessage ? error.userMessage : 'Não foi possível ler a aba selecionada.');
+    }
+};
 $('fileBtn').onclick = () => $('fileInput').click();
 $('changeFile').onclick = () => $('fileInput').click();
 $('dropZone').onclick = e => {
@@ -5569,9 +5956,15 @@ function resetActiveData() {
     $('baseSelect').value = DEFAULT_BASE.id;
     $('fileName').textContent = 'Planilha de rede · aguardando importação';
     $('fileInfo').textContent = 'Nenhum arquivo carregado ainda';
-    ['sheetStop', 'sheetAddress', 'sheetBase'].forEach(function(id, i) {
-        if ($(id)) $(id).innerHTML = '<option>' + ['Cliente', 'Endereço', 'Base'][i] + '</option>';
-    });
+    importedWorkbook = null;
+    importedFileName = '';
+    if ($('sheetStop')) $('sheetStop').innerHTML = '<option>Tarefas</option>';
+    renderColMap(null, null);
+    geoFilter.uf = '';
+    geoFilter.city = '';
+    geoFilter.cityUF = '';
+    geoFilterSig = '';
+    setUnitsOpen(false);
     if ($('fileInput')) $('fileInput').value = '';
     $('search').value = '';
     $('driverName').value = $('driver').value;
