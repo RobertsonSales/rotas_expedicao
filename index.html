@@ -1576,6 +1576,77 @@ svg.route {
     font-size: 10px
 }
 
+/* ================================================================
+   ANÁLISE DE MÉTRICAS · dashboard operacional e relatório A4
+   ================================================================ */
+.metrics-page {
+    max-width: 1220px;
+    margin: 30px auto
+}
+.metrics-head {
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-end;
+    gap:18px;
+    margin-bottom:18px
+}
+.metrics-head h2 { margin:6px 0 5px; font-size:27px; letter-spacing:-1px }
+.metrics-head p { margin:0; color:var(--muted); font-size:11px }
+.metrics-actions { display:flex; gap:8px; flex-wrap:wrap }
+.metrics-actions button { white-space:nowrap }
+.metrics-filters {
+    display:grid;
+    grid-template-columns:1.1fr 1fr 1fr 1fr auto;
+    gap:10px;
+    padding:15px 17px;
+    margin-bottom:16px
+}
+.metrics-filters label { color:var(--soft); font-size:9px; font-weight:800; text-transform:uppercase; letter-spacing:.4px }
+.metrics-filters input, .metrics-filters select {
+    display:block; width:100%; margin-top:5px; padding:8px 9px;
+    border:1px solid var(--line); border-radius:7px; background:var(--card); color:var(--ink); font-size:11px
+}
+.metrics-filter-actions { display:flex; align-items:flex-end; gap:7px }
+.metric-cards { display:grid; grid-template-columns:repeat(4,1fr); gap:11px; margin-bottom:16px }
+.metric-card { padding:15px 16px; min-height:104px; position:relative; overflow:hidden }
+.metric-card:after { content:""; position:absolute; right:-18px; bottom:-28px; width:75px; height:75px; border-radius:50%; background:var(--mint); opacity:.8 }
+.metric-card .metric-ico { font-size:18px; color:var(--green); margin-bottom:7px; position:relative; z-index:1 }
+.metric-card span { display:block; color:var(--muted); font-size:9px; position:relative; z-index:1 }
+.metric-card b { display:block; margin-top:3px; color:var(--ink); font-size:22px; letter-spacing:-.8px; position:relative; z-index:1 }
+.metric-card small { display:block; margin-top:4px; color:var(--soft); font-size:9px; position:relative; z-index:1 }
+.metrics-grid { display:grid; grid-template-columns:1.05fr .95fr; gap:16px; align-items:start }
+.metrics-panel { padding:18px }
+.metrics-panel h3 { margin:0 0 4px; font-size:14px }
+.metrics-panel .panel-sub { margin:0 0 14px; color:var(--muted); font-size:10px }
+.metrics-chart { display:flex; align-items:flex-end; gap:8px; height:185px; padding:12px 4px 24px; border-bottom:1px solid var(--line); overflow-x:auto }
+.metric-bar-col { min-width:38px; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; gap:4px }
+.metric-bar-value { font-size:8px; color:var(--soft); white-space:nowrap }
+.metric-bar { width:24px; min-height:3px; background:linear-gradient(180deg,#42c6a3,var(--green)); border-radius:5px 5px 2px 2px }
+.metric-bar-label { font-size:8px; color:var(--muted); white-space:nowrap; transform:rotate(-35deg); transform-origin:center top; margin-top:9px }
+.metric-table { width:100%; border-collapse:collapse; font-size:10px }
+.metric-table th { color:var(--muted); text-align:left; font-size:8px; text-transform:uppercase; letter-spacing:.5px; padding:7px 5px; border-bottom:1px solid var(--line) }
+.metric-table td { padding:8px 5px; border-bottom:1px solid #edf2ef; color:var(--ink) }
+.metric-table tr:last-child td { border-bottom:0 }
+.metric-table td:not(:first-child), .metric-table th:not(:first-child) { text-align:right }
+.rank { width:22px; height:22px; display:inline-grid; place-items:center; border-radius:7px; background:var(--mint); color:var(--green); font-size:9px; font-weight:800; margin-right:5px }
+.mini-bar-wrap { display:inline-block; width:62px; height:6px; margin-right:6px; vertical-align:middle; background:#edf3f0; border-radius:8px; overflow:hidden }
+.mini-bar-wrap i { display:block; height:100%; background:var(--green); border-radius:inherit }
+.urgency-list { display:grid; gap:10px; margin-top:12px }
+.urgency-row { display:grid; grid-template-columns:70px 1fr 42px; gap:8px; align-items:center; font-size:10px }
+.urgency-row .u-track { height:8px; background:#edf3f0; border-radius:8px; overflow:hidden }
+.urgency-row .u-track i { display:block; height:100%; border-radius:inherit }
+.insights { display:grid; gap:9px }
+.insight { padding:11px 12px 11px 36px; border:1px solid var(--line); border-radius:9px; position:relative; background:var(--card); font-size:10px; line-height:1.45; color:var(--soft) }
+.insight b { display:block; color:var(--ink); font-size:10px; margin-bottom:2px }
+.insight:before { content:'✦'; position:absolute; left:12px; top:11px; color:var(--green); font-size:15px }
+.metrics-empty { padding:38px 20px; text-align:center; color:var(--muted); font-size:11px }
+.metrics-foot { margin-top:14px; color:var(--muted); font-size:9px }
+.dark .metrics-filters input, .dark .metrics-filters select { background:#142c38 }
+.dark .metric-table td { border-color:#26434a }
+@media(max-width:1050px) { .metrics-filters { grid-template-columns:repeat(3,1fr) } .metrics-filter-actions { align-items:center } .metric-cards { grid-template-columns:repeat(2,1fr) } }
+@media(max-width:760px) { .metrics-head { flex-direction:column; align-items:flex-start } .metrics-filters { grid-template-columns:1fr 1fr } .metrics-grid { grid-template-columns:1fr } .metric-cards { grid-template-columns:1fr 1fr } }
+@media(max-width:520px) { .metrics-filters { grid-template-columns:1fr } .metric-cards { grid-template-columns:1fr } }
+
 @media(max-width:1100px) {
     .main {
         padding: 0 25px 20px
@@ -3290,7 +3361,7 @@ body.landing-lock {
     </div>
 </div>
 <div class="app">
-<aside class="side" id="sideNav"><button class="side-toggle" id="sideToggle" type="button" aria-controls="sideNav" aria-expanded="true" title="Recolher menu lateral (Ctrl + B)"><span aria-hidden="true">«</span></button><div class="brand"><div class="brand-mark">⌁</div><div class="brand-txt"><strong>GRUPO LABMEDIC</strong><span>Planejamento de Entregas</span></div></div><div class="workspace"><div class="eyebrow">Workspace ativo</div><div class="workspace-row"><i></i>Logística assistencial<b>⌄</b></div></div><div class="nav"><div class="nav-label">Operação</div><button class="active" data-tab="plan" title="Planejamento"><i class="nav-ico">➤</i><em class="nav-txt">Planejamento</em> <span id="navCount">5</span></button><button data-tab="import" title="Importar dados"><i class="nav-ico">▧</i><em class="nav-txt">Importar dados</em></button><button data-tab="history" title="Histórico"><i class="nav-ico">▦</i><em class="nav-txt">Histórico</em></button><div class="nav-label second">Configuração</div><button id="preferencesBtn" title="Preferências"><i class="nav-ico">☷</i><em class="nav-txt">Preferências</em></button><button id="helpBtn" title="Central de Ajuda · abre o manual de uso em uma nova aba"><i class="nav-ico">?</i><em class="nav-txt">Central de Ajuda</em><small class="nav-ext" aria-hidden="true">↗</small></button></div><div class="operator"><div class="avatar">MC</div><div class="operator-txt"><b>Marina Costa</b><small>Operadora · Rede SP</small></div></div></aside>
+<aside class="side" id="sideNav"><button class="side-toggle" id="sideToggle" type="button" aria-controls="sideNav" aria-expanded="true" title="Recolher menu lateral (Ctrl + B)"><span aria-hidden="true">«</span></button><div class="brand"><div class="brand-mark">⌁</div><div class="brand-txt"><strong>GRUPO LABMEDIC</strong><span>Planejamento de Entregas</span></div></div><div class="workspace"><div class="eyebrow">Workspace ativo</div><div class="workspace-row"><i></i>Logística assistencial<b>⌄</b></div></div><div class="nav"><div class="nav-label">Operação</div><button class="active" data-tab="plan" title="Planejamento"><i class="nav-ico">➤</i><em class="nav-txt">Planejamento</em> <span id="navCount">5</span></button><button data-tab="import" title="Importar dados"><i class="nav-ico">▧</i><em class="nav-txt">Importar dados</em></button><button data-tab="history" title="Histórico"><i class="nav-ico">▦</i><em class="nav-txt">Histórico</em></button><button data-tab="metrics" title="Análise de Métricas"><i class="nav-ico">◈</i><em class="nav-txt">Análise de Métricas</em><span id="metricsCount">0</span></button><div class="nav-label second">Configuração</div><button id="preferencesBtn" title="Preferências"><i class="nav-ico">☷</i><em class="nav-txt">Preferências</em></button><button id="helpBtn" title="Central de Ajuda · abre o manual de uso em uma nova aba"><i class="nav-ico">?</i><em class="nav-txt">Central de Ajuda</em><small class="nav-ext" aria-hidden="true">↗</small></button></div><div class="operator"><div class="avatar">MC</div><div class="operator-txt"><b>Marina Costa</b><small>Operadora · Rede SP</small></div></div></aside>
 <main class="main"><header class="top"><div><div class="eyebrow">Centro de controle / <span id="crumb">Planejamento de rotas de entrega</span></div><h1 id="pageTitle">Planejamento de rotas</h1></div><div style="display:flex;align-items:center;gap:10px"><button class="theme-btn" id="themeBtn" title="Alternar tema">☾</button><div class="status"><i></i>API oficial Google</div></div></header>
 <section id="planPage"><section class="hero"><div><div class="eyebrow" style="color:#71d8bc">✦ Uso da API oficial do Google Maps</div><h2>Previsibilidade de rotas em poucos cliques<br><em>Monitore o trajeto dos condutores</em></h3><p>Você pode salvar as rotas diariamente, ganhando assim uma importante ferramenta de rastreabilidade histórica. </p></div><div class="hero-art"><div class="orbit o1"></div><div class="orbit o2"></div><div class="route-line"></div><div class="node n1">⌖</div><div class="node n2">⌖</div><div class="node n3">⌖</div></div></section>
 <section class="summary"><div class="card"><div class="ico">▣</div><div><span>Unidades no planejamento</span><b id="sumStops">5<small> / 8</small></b></div></div><div class="card"><div class="ico">◷</div><div><span>Tempo de trânsito estimado</span><b id="sumTravel">—</b></div><span class="trend" id="sumTravelSub">aguardando rota</span></div><div class="card"><div class="ico">◔</div><div><span>Urgências críticas</span><b id="sumCritical">4</b></div><span class="trend" id="sumCriticalSub">2 super · 2 alta</span></div><div class="card"><div class="ico">♙</div><div><span>Condutor responsável</span><b style="font-size:14px" id="sumDriver">Reginaldo Braga</b></div><span class="trend">dia 28</span></div></section>
@@ -3299,6 +3370,11 @@ body.landing-lock {
 <section class="units" id="unitsSection"><div class="section"><div><div class="over">03 · Unidades disponíveis</div><h3>Escolha os pontos de ligação</h3></div><div class="filters" id="smartSearch"><input id="search" placeholder="🔎  Busca inteligente · unidade, cliente, endereço ou código"><button class="link units-toggle" id="unitsToggleBtn" type="button" aria-expanded="false" aria-controls="unitsBody" title="Expandir a lista completa de unidades"><span class="ut-ico" aria-hidden="true">▾</span><span class="ut-txt">Mostrar unidades</span></button></div></div><div class="geo-filter" id="geoFilter"><div class="gf-title"><span class="gf-ico" aria-hidden="true">⌖</span><div><b>Marcar por localidade</b><small>Filtre por estado e cidade e marque de uma vez todas as unidades exibidas.</small></div></div><label>Estado<select id="filterUF"><option value="">Todos os estados</option></select></label><label>Cidade<select id="filterCity"><option value="">Todas as cidades</option></select></label><div class="gf-actions"><button class="outline" id="markFiltered" type="button">✓ Marcar filtradas</button><button class="outline" id="unmarkFiltered" type="button">✕ Desmarcar</button><button class="link" id="clearGeoFilter" type="button">Limpar filtro</button></div><div class="gf-info" id="geoInfo"></div></div><div class="card table units-body" id="unitsBody"><div class="thead"><span id="tableCount">5 de 8</span><span>Unidade de saúde</span><span>Município</span><span>Urgência</span><span>Atendimento</span><span>Ação</span></div><div id="unitRows"></div></div></section><div class="footer"><span>✓ Dados processados localmente neste navegador</span><span>Última atualização: agora · <button data-tab="import">Trocar planilha</button></span></div></section>
 <section id="importPage" class="import-page" style="display:none"><div class="importhero"><div><div class="eyebrow" style="color:#71d8bc">⇧ Entrada de dados</div><h2>Traga sua planilha.<br><em>O restante fica organizado.</em></h2><p>Selecione o arquivo Excel ou CSV com a aba de tarefas. São lidas as colunas Base, Endereço (padronizado), Cidade, UF, Latitude e Longitude. A leitura acontece no navegador.</p></div><div style="font-size:58px;color:#9af0d5">▧</div></div><div class="importgrid"><div class="card upload"><div class="drop" id="dropZone"><div class="uploadicon">⇧</div><h3>Arraste sua planilha aqui</h3><p>ou clique para procurar no computador</p><small>Formatos aceitos: .xlsx, .xls e .csv · até 20 MB</small><button class="primary" style="width:auto;margin-top:17px" id="fileBtn">⇧ Selecionar arquivo</button></div><input id="fileInput" type="file" accept=".xlsx,.xls,.csv" hidden><div class="file-status"><div style="font-size:20px;color:#0d8c78">▧</div><div><b id="fileName">Planilha de rede · aguardando importação</b><small id="fileInfo">Nenhum arquivo carregado ainda</small></div></div></div><div class="card mapping"><div class="over">Leitura da planilha</div><h3>Aba e colunas utilizadas</h3><p>A aba com a coluna <b>Endereço (padronizado)</b> é detectada automaticamente e abas “-Ant” são ignoradas. Se necessário, escolha outra aba.</p><div class="maprow"><span><b>Aba de dados</b><small>unidades e bases</small></span><select id="sheetStop"><option>Tarefas</option></select></div><div class="colmap" id="colMap"><div class="colrow"><span><b>Cliente</b><small>nome da unidade</small></span><em>aguardando</em></div><div class="colrow"><span><b>Base</b><small>pontos de saída</small></span><em>aguardando</em></div><div class="colrow"><span><b>Endereço (padronizado)</b><small>enviado ao Google Maps</small></span><em>aguardando</em></div><div class="colrow"><span><b>Cidade</b><small>filtro por cidade</small></span><em>aguardando</em></div><div class="colrow"><span><b>UF (estado)</b><small>filtro por estado</small></span><em>aguardando</em></div><div class="colrow"><span><b>Latitude</b><small>só se o Google falhar</small></span><em>aguardando</em></div><div class="colrow"><span><b>Longitude</b><small>só se o Google falhar</small></span><em>aguardando</em></div></div><button class="outline" style="width:100%;justify-content:center;margin-top:15px" id="changeFile">↻ Trocar arquivo</button></div><div class="card guide"><b>Como preparar a planilha?</b><p>Use a primeira linha como cabeçalho e inclua <strong>Cliente, Base, Endereço (padronizado), Cidade, UF, Latitude e Longitude</strong>. Os endereços são localizados pelo Google Maps; <strong>Latitude e Longitude só são usadas se essa pesquisa falhar</strong>. A urgência pode ser ajustada depois no planejamento.</p></div></div></section>
 <section id="historyPage" class="history-page" style="display:none"><div class="historyhead"><div><div class="over">Registro de operações</div><h2>Histórico de planejamentos</h2><p>Revisite, reabra e exporte os cenários calculados nesta sessão.</p></div><div style="display:flex;align-items:end;gap:7px;flex-wrap:wrap"><label class="muted">De<input id="historyFrom" type="date" style="display:block;margin-top:4px;padding:7px;border:1px solid var(--line);border-radius:7px;background:var(--card);color:var(--ink)"></label><label class="muted">Até<input id="historyTo" type="date" style="display:block;margin-top:4px;padding:7px;border:1px solid var(--line);border-radius:7px;background:var(--card);color:var(--ink)"></label><button class="outline" id="applyHistoryFilter">Filtrar</button><button class="outline" id="exportHistoryBtn">⇩ Exportar histórico</button></div></div><div class="card" id="historyList"><div class="history-empty">Nenhuma rota calculada ainda. Calcule uma rota para que ela apareça aqui.</div></div><div class="notice">△ As rotas ficam salvas neste navegador. Use PDF ou Excel para arquivamento operacional externo.</div></section>
+<section id="metricsPage" class="metrics-page" style="display:none">
+  <div class="metrics-head"><div><div class="over">Inteligência operacional</div><h2>Análise de Métricas</h2><p>Indicadores consolidados a partir das diligências salvas no histórico.</p></div><div class="metrics-actions"><button class="outline" id="metricsRefresh">↻ Atualizar</button><button class="primary" id="metricsPdf" style="width:auto;margin-top:0">▤ Visualizar PDF A4</button></div></div>
+  <div class="card metrics-filters"><label>Condutor<select id="metricsDriver"><option value="">Todos os condutores</option></select></label><label>De<input id="metricsFrom" type="date"></label><label>Até<input id="metricsTo" type="date"></label><label>Base<select id="metricsBase"><option value="">Todas as bases</option></select></label><div class="metrics-filter-actions"><button class="link" id="metricsClear">Limpar filtros</button></div></div>
+  <div id="metricsContent"><div class="metrics-empty">Nenhum planejamento salvo no histórico. Salve uma rota para começar a acompanhar as métricas.</div></div>
+</section>
 <div id="modalRoot"></div>
 </main></div>
 <script>
@@ -5956,14 +6032,77 @@ $('dropZone').onclick = e => {
 };
 $('fileInput').onchange = e => e.target.files[0] && importFile(e.target.files[0]);
 
+/* ================================================================
+   ANÁLISE DE MÉTRICAS · histórico operacional
+   ================================================================ */
+function metricHistoryData() {
+    const driver = $('metricsDriver')?.value || '', from = $('metricsFrom')?.value || '', to = $('metricsTo')?.value || '', base = $('metricsBase')?.value || '';
+    return getHistory().filter(function(item) {
+        const meta=item.meta||{};
+        return (!driver || meta.driver===driver) && (!from || String(meta.date||'')>=from) && (!to || String(meta.date||'')<=to) && (!base || meta.base===base);
+    });
+}
+function metricNum(v) { const n=Number(v); return Number.isFinite(n)?n:0 }
+function metricFmtMoney(v) { return metricNum(v).toLocaleString('pt-BR',{style:'currency',currency:'BRL',maximumFractionDigits:2}) }
+function metricFmtHours(minutes) { const n=Math.round(metricNum(minutes)); return Math.floor(n/60)+'h '+String(n%60).padStart(2,'0')+'min' }
+function metricEsc(v) { return escHtml(String(v ?? '')) }
+function populateMetricFilters() {
+    const history=getHistory(), driver=$('metricsDriver'), base=$('metricsBase'), oldD=driver.value, oldB=base.value;
+    const drivers=[...new Set(history.map(x=>x.meta?.driver).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'pt-BR'));
+    const bases=[...new Set(history.map(x=>x.meta?.base).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'pt-BR'));
+    driver.innerHTML='<option value="">Todos os condutores</option>'+drivers.map(x=>'<option value="'+metricEsc(x)+'">'+metricEsc(x)+'</option>').join('');
+    base.innerHTML='<option value="">Todas as bases</option>'+bases.map(x=>'<option value="'+metricEsc(x)+'">'+metricEsc(x)+'</option>').join('');
+    if (drivers.includes(oldD)) driver.value=oldD; if (bases.includes(oldB)) base.value=oldB;
+    $('metricsCount').textContent=history.length;
+}
+function metricSummary(items) {
+    const routes=items.length, stops=items.reduce((a,x)=>a+metricNum(x.meta?.stops||x.ordered?.length),0), km=items.reduce((a,x)=>a+metricNum(x.meta?.km||x.km),0), travel=items.reduce((a,x)=>a+metricNum(x.meta?.travel||x.travel),0), fiscal=items.reduce((a,x)=>a+(x.ordered||[]).reduce((b,s)=>b+metricNum(s.fiscal?.amount),0),0);
+    const drivers={}; items.forEach(x=>{const d=x.meta?.driver||'Não informado'; if(!drivers[d])drivers[d]={routes:0,stops:0,km:0,travel:0}; drivers[d].routes++; drivers[d].stops+=metricNum(x.meta?.stops||x.ordered?.length); drivers[d].km+=metricNum(x.meta?.km||x.km); drivers[d].travel+=metricNum(x.meta?.travel||x.travel)});
+    const urg={Super:0,Alta:0,'Média':0,Baixa:0}; items.forEach(x=>(x.ordered||[]).forEach(s=>{if(urg[s.urgency]!==undefined)urg[s.urgency]++}));
+    const byDate={}; items.forEach(x=>{const d=String(x.meta?.date||'Sem data').slice(0,10); if(!byDate[d])byDate[d]={routes:0,stops:0,km:0}; byDate[d].routes++;byDate[d].stops+=metricNum(x.meta?.stops||x.ordered?.length);byDate[d].km+=metricNum(x.meta?.km||x.km)});
+    return {routes,stops,km,travel,fiscal,drivers,urg,byDate,avgStops:routes?stops/routes:0,avgKm:routes?km/routes:0,avgTravel:routes?travel/routes:0,days:Object.keys(byDate).length};
+}
+function renderMetrics() {
+    populateMetricFilters(); const items=metricHistoryData(), c=$('metricsContent');
+    if(!items.length){c.innerHTML='<div class="card metrics-empty">Nenhum planejamento atende aos filtros selecionados.</div>'; return;}
+    const d=metricSummary(items), top=Object.entries(d.drivers).sort((a,b)=>b[1].stops-a[1].stops), urgTotal=Object.values(d.urg).reduce((a,b)=>a+b,0), maxUrg=Math.max(1,...Object.values(d.urg));
+    const dates=Object.entries(d.byDate).sort((a,b)=>a[0].localeCompare(b[0])).slice(-12), maxKm=Math.max(1,...dates.map(x=>x[1].km));
+    const topDriver=top[0]?.[0]||'—', topDriverStops=top[0]?.[1].stops||0, avgStops= d.avgStops.toFixed(1), avgKm=d.avgKm.toFixed(1);
+    const critical=d.urg.Super+d.urg.Alta, fiscalCount=items.reduce((a,x)=>a+(x.ordered||[]).filter(s=>s.fiscal?.amount!==''&&s.fiscal?.amount!=null).length,0);
+    let insight1=topDriver==='—'?'Ainda não há dados suficientes para apontar um condutor líder.':topDriver+' concentra '+topDriverStops+' diligência(s), o maior volume no recorte selecionado.';
+    let insight2=critical&&urgTotal?'Urgências Super/Alta representam '+Math.round(critical/urgTotal*100)+'% das paradas, indicando o nível de prioridade predominante.':'Não há distribuição de urgência suficiente para gerar alerta.';
+    let insight3=d.routes>1?'Cada rota tem, em média, '+avgStops+' paradas e '+avgKm+' km. Use esse valor como referência para dimensionar a operação.':'Com uma rota, os indicadores servirão como linha de base para comparações futuras.';
+    let insight4=fiscalCount?'Foram registrados '+metricFmtMoney(d.fiscal)+' em valores fiscais nas diligências filtradas.':'Não foram encontrados valores fiscais preenchidos neste recorte.';
+    c.innerHTML='<div class="metric-cards">'+[
+      ['◫','Diligências salvas',d.routes,d.days+' dia(s) com operação'],['⌖','Unidades visitadas',d.stops,avgStops+' por rota, em média'],['↗','Distância total',d.km.toFixed(1)+' km',avgKm+' km por rota'],['◷','Tempo de deslocamento',metricFmtHours(d.travel),metricFmtHours(d.avgTravel)+' por rota, em média'],
+      ['♙','Condutores ativos',Object.keys(d.drivers).length,topDriver==='—'?'sem ranking disponível':'líder: '+topDriver],['◇','Valor fiscal apurado',metricFmtMoney(d.fiscal),fiscalCount+' unidade(s) com valor informado'],['◎','Paradas críticas',critical,urgTotal?Math.round(critical/urgTotal*100)+'% do total de paradas':'sem paradas'],['▣','Média de paradas',avgStops,d.routes+' rota(s) analisada(s)']
+    ].map(x=>'<div class="card metric-card"><div class="metric-ico">'+x[0]+'</div><span>'+x[1]+'</span><b>'+x[2]+'</b><small>'+x[3]+'</small></div>').join('')+'</div>'+
+    '<div class="metrics-grid"><section class="card metrics-panel"><h3>Evolução da distância</h3><p class="panel-sub">Quilômetros planejados por data, até as 12 datas mais recentes.</p><div class="metrics-chart">'+(dates.length?dates.map(x=>'<div class="metric-bar-col"><span class="metric-bar-value">'+x[1].km.toFixed(0)+' km</span><i class="metric-bar" style="height:'+Math.max(3,x[1].km/maxKm*135)+'px"></i><span class="metric-bar-label">'+metricEsc(x[0].slice(5))+'</span></div>').join(''):'<span class="metrics-empty">Sem série temporal</span>')+'</div></section>'+
+    '<section class="card metrics-panel"><h3>Distribuição de urgências</h3><p class="panel-sub">Prioridade registrada nas unidades das rotas filtradas.</p><div class="urgency-list">'+Object.entries(d.urg).map(x=>'<div class="urgency-row"><span>'+x[0]+'</span><div class="u-track"><i style="width:'+(x[1]/maxUrg*100)+'%;background:'+(urgency[x[0]]?.c||'#0d8c78')+'"></i></div><b>'+x[1]+'</b></div>').join('')+'</div></section>'+
+    '<section class="card metrics-panel"><h3>Desempenho por condutor</h3><p class="panel-sub">Volume de paradas, rotas e distância acumulada.</p><table class="metric-table"><thead><tr><th>Condutor</th><th>Rotas</th><th>Paradas</th><th>Km</th><th>Média/rota</th></tr></thead><tbody>'+top.map((x,i)=>'<tr><td><span class="rank">'+(i+1)+'</span>'+metricEsc(x[0])+'</td><td>'+x[1].routes+'</td><td><span class="mini-bar-wrap"><i style="width:'+Math.min(100,x[1].stops/Math.max(1,top[0][1].stops)*100)+'%"></i></span>'+x[1].stops+'</td><td>'+x[1].km.toFixed(1)+'</td><td>'+(x[1].routes? (x[1].stops/x[1].routes).toFixed(1):'0')+'</td></tr>').join('')+'</tbody></table></section>'+
+    '<section class="card metrics-panel"><h3>Resumo executivo e insights</h3><p class="panel-sub">Leituras automáticas para apoiar a gestão da operação.</p><div class="insights"><div class="insight"><b>Condutor com maior volume</b>'+metricEsc(insight1)+'</div><div class="insight"><b>Prioridade operacional</b>'+metricEsc(insight2)+'</div><div class="insight"><b>Referência de produtividade</b>'+metricEsc(insight3)+'</div><div class="insight"><b>Rastreabilidade fiscal</b>'+metricEsc(insight4)+'</div></div></section></div><div class="metrics-foot">Fonte: histórico local de planejamentos salvos. Os valores refletem apenas o recorte atual de condutor, período e base.</div>';
+}
+function metricsPdf() {
+    const items=metricHistoryData(); if(!items.length)return alert('Nenhum planejamento atende aos filtros selecionados.');
+    const d=metricSummary(items), top=Object.entries(d.drivers).sort((a,b)=>b[1].stops-a[1].stops), critical=d.urg.Super+d.urg.Alta, totalUrg=Object.values(d.urg).reduce((a,b)=>a+b,0), from=$('metricsFrom').value||'Início',to=$('metricsTo').value||'Atual',driver=$('metricsDriver').value||'Todos os condutores',base=$('metricsBase').value||'Todas as bases';
+    const rows=top.map((x,i)=>'<tr><td>'+(i+1)+'</td><td>'+metricEsc(x[0])+'</td><td>'+x[1].routes+'</td><td>'+x[1].stops+'</td><td>'+x[1].km.toFixed(1)+' km</td><td>'+(x[1].routes ? (x[1].stops/x[1].routes).toFixed(1) : '0')+'</td></tr>').join('');
+    const urgRows=Object.entries(d.urg).map(x=>'<tr><td>'+x[0]+'</td><td>'+x[1]+'</td><td>'+(totalUrg?Math.round(x[1]/totalUrg*100):0)+'%</td></tr>').join('');
+    const insights=[top[0]?'O condutor com maior volume é '+top[0][0]+', com '+top[0][1].stops+' paradas.':'Não há líder de volume no recorte.',critical&&totalUrg?'Paradas Super/Alta correspondem a '+Math.round(critical/totalUrg*100)+'% do total.':'Não foi possível calcular concentração de urgências.',d.routes>1?'A média operacional é de '+d.avgStops.toFixed(1)+' paradas e '+d.avgKm.toFixed(1)+' km por rota.':'Uma única rota foi analisada; use-a como linha de base.',d.fiscal?'O valor fiscal acumulado informado é '+metricFmtMoney(d.fiscal)+'.':'Não há valores fiscais informados no período.'];
+    const w=window.open('','_blank'); if(!w)return alert('Permita pop-ups para gerar o relatório.');
+    w.document.write('<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>Relatório de métricas · GRUPO LABMEDIC</title><style>@page{size:A4 landscape;margin:12mm}*{box-sizing:border-box}body{font-family:Arial,sans-serif;color:#183345;margin:0;font-size:11px}h1{font-size:25px;color:#0d806d;margin:0 0 4px}h2{font-size:14px;color:#193345;border-bottom:2px solid #0d806d;padding-bottom:6px;margin:20px 0 10px}.sub{color:#718184;font-size:11px}.brand{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:1px solid #dce8e3;padding-bottom:12px}.meta{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:14px 0}.box{background:#eff8f4;border-radius:7px;padding:10px}.box small{display:block;color:#718184;font-size:9px}.box b{display:block;font-size:16px;margin-top:4px;color:#183345}.filters{padding:8px 10px;background:#f6f9f8;border:1px solid #e0e9e5;color:#607175;font-size:9px}.cols{display:grid;grid-template-columns:1.25fr .75fr;gap:16px}table{width:100%;border-collapse:collapse}th{background:#193345;color:#fff;text-align:left;padding:7px;font-size:9px}td{padding:7px;border-bottom:1px solid #e0e9e5}td:not(:first-child),th:not(:first-child){text-align:right}.insight{padding:8px 10px;border-left:3px solid #0d8c78;background:#eff8f4;margin-bottom:7px;line-height:1.35}.foot{margin-top:18px;padding-top:8px;border-top:1px solid #dce8e3;color:#718184;font-size:8px}button{padding:8px 12px;background:#0d806d;color:#fff;border:0;border-radius:5px;cursor:pointer}@media print{.toolbar{display:none}}</style></head><body><div class="toolbar" style="display:flex;justify-content:flex-end;margin-bottom:10px"><button onclick="window.print()">Imprimir / Salvar como PDF</button></div><div class="brand"><div><h1>GRUPO LABMEDIC</h1><div class="sub">Relatório executivo de análise de métricas operacionais</div></div><div class="sub">Gerado em '+new Date().toLocaleString('pt-BR')+'</div></div><div class="filters"><b>Filtros aplicados:</b> Condutor: '+metricEsc(driver)+' · Período: '+metricEsc(from)+' a '+metricEsc(to)+' · Base: '+metricEsc(base)+'</div><div class="meta">'+[['Diligências',d.routes],['Unidades visitadas',d.stops],['Distância total',d.km.toFixed(1)+' km'],['Tempo de deslocamento',metricFmtHours(d.travel)],['Condutores',Object.keys(d.drivers).length],['Média de paradas/rota',d.avgStops.toFixed(1)],['Valor fiscal',metricFmtMoney(d.fiscal)],['Paradas críticas',critical]].map(x=>'<div class="box"><small>'+x[0]+'</small><b>'+x[1]+'</b></div>').join('')+'</div><div class="cols"><div><h2>Desempenho por condutor</h2><table><thead><tr><th>#</th><th>Condutor</th><th>Rotas</th><th>Paradas</th><th>Distância</th><th>Média/rota</th></tr></thead><tbody>'+rows+'</tbody></table><h2>Insights executivos</h2>'+insights.map(x=>'<div class="insight">'+metricEsc(x)+'</div>').join('')+'</div><div><h2>Distribuição de urgências</h2><table><thead><tr><th>Nível</th><th>Paradas</th><th>Participação</th></tr></thead><tbody>'+urgRows+'</tbody></table><h2>Resumo da leitura</h2><div class="insight">O relatório considera '+d.routes+' planejamento(s) salvos, '+d.stops+' unidade(s) visitada(s) e '+d.km.toFixed(1)+' km de deslocamento acumulado.</div><div class="insight">A média de deslocamento por rota foi de '+metricFmtHours(d.avgTravel)+', com '+d.avgStops.toFixed(1)+' parada(s) por rota.</div></div></div><div class="foot">Fonte: histórico local de planejamentos · Documento gerado pelo módulo Análise de Métricas · Formato A4 horizontal.</div></body></html>'); w.document.close();
+}
+function initMetrics() { populateMetricFilters(); renderMetrics(); }
+
 function tabs(tab) {
     if (tab === 'history') renderHistory();
+    if (tab === 'metrics') initMetrics();
     document.querySelectorAll('[data-tab]').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
     $('planPage').style.display = tab === 'plan' ? 'block' : 'none';
     $('importPage').style.display = tab === 'import' ? 'block' : 'none';
     $('historyPage').style.display = tab === 'history' ? 'block' : 'none';
-    $('pageTitle').textContent = tab === 'plan' ? 'Planejamento de rotas' : tab === 'import' ? 'Importar e organizar dados' : 'Histórico de planejamentos';
-    $('crumb').textContent = tab === 'plan' ? 'Planejamento de rotas' : tab === 'import' ? 'Importação de dados' : 'Histórico'
+    $('metricsPage').style.display = tab === 'metrics' ? 'block' : 'none';
+    $('pageTitle').textContent = tab === 'plan' ? 'Planejamento de rotas' : tab === 'import' ? 'Importar e organizar dados' : tab === 'history' ? 'Histórico de planejamentos' : 'Análise de Métricas';
+    $('crumb').textContent = tab === 'plan' ? 'Planejamento de rotas' : tab === 'import' ? 'Importação de dados' : tab === 'history' ? 'Histórico' : 'Análise de métricas'
 }
 document.querySelectorAll('[data-tab]').forEach(b => b.onclick = () => tabs(b.dataset.tab));
 const savedTheme = localStorage.getItem('planiroute-theme') || 'light';
@@ -5990,6 +6129,10 @@ $('applyHistoryFilter').onclick = function() {
     renderHistory();
 };
 $('historyList').onclick = handleHistory;
+$('metricsRefresh').onclick = renderMetrics;
+$('metricsPdf').onclick = metricsPdf;
+$('metricsClear').onclick = function() { $('metricsDriver').value=''; $('metricsFrom').value=''; $('metricsTo').value=''; $('metricsBase').value=''; renderMetrics(); };
+['metricsDriver','metricsFrom','metricsTo','metricsBase'].forEach(function(id) { $(id).addEventListener('change', renderMetrics); });
 $('exportHistoryBtn').onclick = function() {
     const from = $('historyFrom').value,
         to = $('historyTo').value,
