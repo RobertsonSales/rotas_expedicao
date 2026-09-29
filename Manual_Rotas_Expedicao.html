@@ -176,7 +176,7 @@ footer.doc-foot{max-width:860px;margin-top:56px;padding-top:18px;border-top:1px 
 
 <main class="content" id="top">
   <div class="bar">
-    <div style="display:flex;align-items:center;gap:10px"><button class="btn menu-btn" id="menuBtn" aria-controls="toc" aria-expanded="false">☰ Índice</button><small>Manual de uso · versão 1.2 · setembro de 2026</small></div>
+    <div style="display:flex;align-items:center;gap:10px"><button class="btn menu-btn" id="menuBtn" aria-controls="toc" aria-expanded="false">☰ Índice</button><small>Manual de uso · versão 1.3 · setembro de 2026</small></div>
     <div class="bar-actions"><button class="btn" id="themeBtn" title="Alternar tema claro/escuro">☾ Tema</button><button class="btn" onclick="window.print()" title="Imprimir ou salvar este manual em PDF">▤ Imprimir / PDF</button></div>
   </div>
 
@@ -228,6 +228,7 @@ footer.doc-foot{max-width:860px;margin-top:56px;padding-top:18px;border-top:1px 
         <tr><td><span class="ui">➤ Planejamento</span></td><td>Montagem e cálculo da rota. O número ao lado indica quantas unidades estão selecionadas.</td></tr>
         <tr><td><span class="ui">▧ Importar dados</span></td><td>Carregamento da planilha de rede (Excel ou CSV).</td></tr>
         <tr><td><span class="ui">▦ Histórico</span></td><td>Rotas salvas, com filtros por período e exportação.</td></tr>
+        <tr><td><span class="ui">◈ Análise de Métricas</span></td><td>Dashboard com indicadores do histórico, filtros por condutor, período e base, resumos, insights e relatório profissional em PDF A4 horizontal.</td></tr>
         <tr><td><span class="ui">☷ Preferências</span></td><td>Tema, trânsito padrão, retorno à base, chave do Google Maps e limpeza de dados.</td></tr>
         <tr><td><span class="ui">? Central de Ajuda</span></td><td>Abre este manual em uma nova aba do navegador.</td></tr>
       </tbody>
@@ -426,8 +427,23 @@ footer.doc-foot{max-width:860px;margin-top:56px;padding-top:18px;border-top:1px 
     <div class="note warn"><b>Arquivamento</b>O histórico fica salvo apenas no navegador em que foi criado. Para guardar registros por mais tempo ou compartilhá-los, exporte em PDF ou Excel regularmente.</div>
   </section>
 
-  <section class="doc" id="preferencias">
+  <section class="doc" id="metricas">
     <div class="sec-num">Seção 11</div>
+    <h2>Análise de Métricas</h2>
+    <p>O menu lateral <span class="ui">◈ Análise de Métricas</span> consolida os planejamentos salvos no histórico para apoiar o acompanhamento da operação. O painel não altera as rotas armazenadas: ele apenas interpreta os dados disponíveis.</p>
+    <h3>Filtros e indicadores</h3>
+    <ul>
+      <li>Use <strong>Condutor</strong>, <strong>De</strong>, <strong>Até</strong> e <strong>Base</strong> para delimitar o recorte analisado. Os filtros são aplicados imediatamente.</li>
+      <li>Os cards mostram diligências salvas, unidades visitadas, distância, tempo de deslocamento, condutores ativos, valor fiscal, paradas críticas e média de paradas por rota.</li>
+      <li>O dashboard inclui evolução da distância, distribuição de urgências, ranking por condutor e insights automáticos sobre volume, prioridade, produtividade e rastreabilidade fiscal.</li>
+    </ul>
+    <h3>Relatório profissional</h3>
+    <p>Clique em <span class="ui">▤ Visualizar PDF A4</span> para abrir uma janela própria do navegador. O documento é gerado em formato <strong>A4 horizontal</strong>, respeita os filtros selecionados e apresenta primeiro a página de resumo executivo. Em seguida, há uma seção com a listagem completa das unidades visitadas, com cabeçalho repetido e quebra inteligente entre páginas. Use <span class="ui">▤ Imprimir / Salvar como PDF</span> ou <span class="ui">⇩ Baixar relatório</span> na própria janela.</p>
+    <div class="note"><b>Fonte dos dados</b>As métricas são extraídas exclusivamente das rotas salvas no Histórico deste navegador. Se não houver planejamentos no histórico, o painel exibirá uma orientação para salvar a primeira rota.</div>
+  </section>
+
+  <section class="doc" id="preferencias">
+    <div class="sec-num">Seção 12</div>
     <h2>Preferências</h2>
     <div class="tablewrap"><table>
       <thead><tr><th>Opção</th><th>Efeito</th></tr></thead>
@@ -445,7 +461,7 @@ footer.doc-foot{max-width:860px;margin-top:56px;padding-top:18px;border-top:1px 
   </section>
 
   <section class="doc" id="dados">
-    <div class="sec-num">Seção 12</div>
+    <div class="sec-num">Seção 13</div>
     <h2>Onde ficam os dados</h2>
     <p>Tudo é armazenado no próprio navegador (armazenamento local) e restaurado automaticamente ao reabrir a aplicação: planilha importada, seleção, formulário, última rota calculada, histórico e preferências.</p>
     <ul>
@@ -457,7 +473,7 @@ footer.doc-foot{max-width:860px;margin-top:56px;padding-top:18px;border-top:1px 
   </section>
 
   <section class="doc" id="problemas">
-    <div class="sec-num">Seção 13</div>
+    <div class="sec-num">Seção 14</div>
     <h2>Solução de problemas</h2>
     <details class="faq"><summary>A importação terminou, mas nenhuma unidade aparece</summary><div>Confirme que existe uma linha de cabeçalho com as colunas <strong>Cliente</strong>, <strong>Endereço</strong> e <strong>Base</strong>. Verifique também o <strong>Mapeamento de abas</strong> em Importar dados. Depois, abra a lista com <span class="ui">▾ Mostrar unidades</span> e confira se a busca inteligente está vazia.</div></details>
     <details class="faq"><summary>Não encontro uma unidade na lista</summary><div>A lista mostra todas as unidades; role pela barra lateral da tabela. Para ir direto, digite parte do nome, do endereço ou do município na busca inteligente. Se a unidade não aparecer, ela não está na planilha importada.</div></details>
@@ -470,7 +486,7 @@ footer.doc-foot{max-width:860px;margin-top:56px;padding-top:18px;border-top:1px 
   </section>
 
   <section class="doc" id="glossario">
-    <div class="sec-num">Seção 14</div>
+    <div class="sec-num">Seção 15</div>
     <h2>Glossário e atalhos</h2>
     <div class="tablewrap"><table>
       <thead><tr><th>Termo</th><th>Significado</th></tr></thead>
@@ -497,7 +513,7 @@ footer.doc-foot{max-width:860px;margin-top:56px;padding-top:18px;border-top:1px 
 
   <div class="no-results" id="noResults">Nenhum trecho do manual corresponde à busca. Tente outra palavra, como “urgência”, “PDF” ou “planilha”.</div>
 
-  <footer class="doc-foot"><span>GRUPO LABMEDIC · Planejamento de Entregas · Manual de uso</span><span>Versão 1.2 · setembro de 2026</span></footer>
+  <footer class="doc-foot"><span>GRUPO LABMEDIC · Planejamento de Entregas · Manual de uso</span><span>Versão 1.3 · setembro de 2026</span></footer>
 </main>
 </div>
 <button class="totop" id="toTop" aria-label="Voltar ao topo">↑</button>
