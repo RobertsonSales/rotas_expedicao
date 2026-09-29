@@ -4299,7 +4299,17 @@ async function calc() {
             rem = rem.filter(s => s.id !== next.id);
             cur = next;
         }
-        if (!gmapsReady) {
+        /* As unidades importadas não têm coordenadas. Elas precisam ser
+           localizadas ANTES do cálculo: com o Google, pelo Geocoder (várias
+           variações do endereço, com cache); sem o Google, pelo OpenStreetMap.
+           Sem esta etapa, qualquer falha do Directions deixava a rota sem
+           coordenadas e o resumo exibia Infinity km / NaN. */
+        if (gmapsReady && geocoderG) {
+            showProgress('Localizando endereços com o Google Maps…', 30);
+            await geocodeAllWithProgress([base].concat(ordered), function(p) {
+                return p.geoProvider === 'google' && hasValidCoordinates(p) ? p : geocodePointGoogle(p);
+            }, 'Google', 45000);
+        } else {
             showProgress('Localizando endereços para calcular a rota viária…', 30);
             await geocodeAllWithProgress([base].concat(ordered), geocodePointPublic, 'OpenStreetMap', 30000);
         }
@@ -4391,6 +4401,19 @@ async function calc() {
                 routeSource = 'OpenStreetMap · rota viária';
             }
         }
+        /* Nunca exibe uma rota com distância/tempo inválidos. */
+        if (!Number.isFinite(route.km) || !Number.isFinite(route.travel) || !Number.isFinite(route.end)) {
+            const notFound = [base].concat(ordered).filter(function(p) {
+                return !hasValidCoordinates(p);
+            }).map(function(p) {
+                return p.name;
+            });
+            const err = new Error(notFound.length ?
+                'Não foi possível localizar no mapa: ' + notFound.join('; ') + '. Revise o endereço na planilha (logradouro, número, bairro, cidade e UF), remova a unidade da seleção ou tente novamente.' :
+                'O serviço de rotas não retornou distâncias válidas. Tente recalcular em alguns instantes.');
+            err.userFacing = true;
+            throw err;
+        }
         $('mapTitle').textContent = 'Rota otimizada · ' + routeSource;
         showProgress('Renderizando resumo e agenda…', 88);
         $('sumTravel').textContent = fmt(route.travel);
@@ -4398,6 +4421,7 @@ async function calc() {
         $('mapSub').textContent = `${legs.length} trechos calculados`;
         render();
         renderResult();
+        persistDataset(); /* guarda as coordenadas localizadas das unidades */
         persistForm();
         persistSelected();
         persistRoute();
@@ -4406,7 +4430,8 @@ async function calc() {
         console.error('PlaniRoute: falha ao calcular a rota:', error);
         route = null;
         renderResult();
-        alert('Não foi possível calcular a rota. Verifique a chave/permissões do Google Maps e os endereços da planilha. Detalhe: ' + (error && error.message ? error.message : error));
+        render();
+        alert(error && error.userFacing ? error.message : 'Não foi possível calcular a rota. Verifique a chave/permissões do Google Maps e os endereços da planilha. Detalhe: ' + (error && error.message ? error.message : error));
     } finally {
         hideProgress();
     }
