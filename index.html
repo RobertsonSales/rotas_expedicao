@@ -5279,41 +5279,52 @@ function exportExcel(item) {
 }
 
 function saveHistory() {
-    const item = {
-        id: Date.now(),
-        engineVersion: ROUTE_ENGINE_VERSION,
-        meta: {
-            driver: driverValue(),
-            date: $('date').value,
-            base: $('baseName').textContent,
-            departure: $('departure').value,
-            stops: route.ordered.length,
+    if (!route || !Array.isArray(route.ordered) || !route.ordered.length) return false;
+    try {
+        /* A seleção pode ter recebido dados fiscais depois do último cálculo.
+           Reassocia cada parada calculada ao cadastro atual antes de gravar. */
+        const ordered = route.ordered.map(function(item) {
+            const current = stops.find(function(stop) { return String(stop.id) === String(item.id); }) || item;
+            const copy = { ...item, ...current };
+            copy.fiscal = { ...ensureFiscalData(current) };
+            return copy;
+        });
+        const incomplete = ordered.filter(function(stop) { return !hasCompleteFiscalData(stop); });
+        if (incomplete.length) {
+            alert('Não foi possível salvar: há unidade(s) sem documento fiscal completo na rota.');
+            return false;
+        }
+        const item = {
+            id: Date.now(),
+            engineVersion: ROUTE_ENGINE_VERSION,
+            meta: {
+                driver: driverValue(),
+                date: $('date').value,
+                base: $('baseName').textContent,
+                departure: $('departure').value,
+                stops: ordered.length,
+                km: route.km,
+                travel: route.travel,
+                service: route.service,
+                end: $('returnBase').checked ? clock(route.end) : '—'
+            },
+            ordered,
+            legs: (route.legs || []).map(function(l) { return { ...l }; }),
+            geometry: route.geometry || null,
             km: route.km,
             travel: route.travel,
             service: route.service,
-            end: $('returnBase').checked ? clock(route.end) : '—'
-        },
-        ordered: route.ordered.map(function(s) {
-            const copy = { ...s };
-            copy.fiscal = { ...ensureFiscalData(s) };
-            return copy;
-        }),
-        legs: route.legs.map(function(l) {
-            return {
-                ...l
-            };
-        }),
-        geometry: route.geometry || null,
-        km: route.km,
-        travel: route.travel,
-        service: route.service,
-        end: route.end
-    };
-    const list = JSON.parse(localStorage.getItem('planiroute-history') || '[]').filter(function(x) {
-        return Date.now() - x.id < 7776000000;
-    });
-    list.unshift(item);
-    localStorage.setItem('planiroute-history', JSON.stringify(list.slice(0, 25)));
+            end: route.end
+        };
+        const list = getHistory().filter(function(x) {
+            return Date.now() - Number(x.id || 0) < 7776000000;
+        });
+        list.unshift(item);
+        return saveJSON('planiroute-history', list.slice(0, 25));
+    } catch (e) {
+        console.error('GRUPO LABMEDIC - não foi possível salvar a rota no histórico.', e);
+        return false;
+    }
 }
 
 function getHistory() {
@@ -5563,7 +5574,8 @@ document.addEventListener('change', e => {
 });
 $('saveRouteBtn').onclick = function() {
     if (!route) return alert('Calcule uma rota antes de salvar.');
-    saveHistory();
+    const saved = saveHistory();
+    if (!saved) return alert('Não foi possível salvar a rota no Histórico. Verifique os dados fiscais e o espaço disponível no navegador.');
     renderHistory();
     alert('Rota salva no Histórico.');
 };
@@ -6083,14 +6095,26 @@ function renderMetrics() {
     '<section class="card metrics-panel"><h3>Resumo executivo e insights</h3><p class="panel-sub">Leituras automáticas para apoiar a gestão da operação.</p><div class="insights"><div class="insight"><b>Condutor com maior volume</b>'+metricEsc(insight1)+'</div><div class="insight"><b>Prioridade operacional</b>'+metricEsc(insight2)+'</div><div class="insight"><b>Referência de produtividade</b>'+metricEsc(insight3)+'</div><div class="insight"><b>Rastreabilidade fiscal</b>'+metricEsc(insight4)+'</div></div></section></div><div class="metrics-foot">Fonte: histórico local de planejamentos salvos. Os valores refletem apenas o recorte atual de condutor, período e base.</div>';
 }
 function metricsPdf() {
-    const items=metricHistoryData(); if(!items.length)return alert('Nenhum planejamento atende aos filtros selecionados.');
+    const items=metricHistoryData();
+    if(!items.length)return alert('Nenhum planejamento atende aos filtros selecionados.');
     const d=metricSummary(items), top=Object.entries(d.drivers).sort((a,b)=>b[1].stops-a[1].stops), critical=d.urg.Super+d.urg.Alta, totalUrg=Object.values(d.urg).reduce((a,b)=>a+b,0), from=$('metricsFrom').value||'Início',to=$('metricsTo').value||'Atual',driver=$('metricsDriver').value||'Todos os condutores',base=$('metricsBase').value||'Todas as bases';
     const rows=top.map((x,i)=>'<tr><td>'+(i+1)+'</td><td>'+metricEsc(x[0])+'</td><td>'+x[1].routes+'</td><td>'+x[1].stops+'</td><td>'+x[1].km.toFixed(1)+' km</td><td>'+(x[1].routes ? (x[1].stops/x[1].routes).toFixed(1) : '0')+'</td></tr>').join('');
     const urgRows=Object.entries(d.urg).map(x=>'<tr><td>'+x[0]+'</td><td>'+x[1]+'</td><td>'+(totalUrg?Math.round(x[1]/totalUrg*100):0)+'%</td></tr>').join('');
+    const details=[];
+    items.slice().sort((a,b)=>String(a.meta?.date||'').localeCompare(String(b.meta?.date||''))).forEach(function(item){
+        (item.ordered||[]).forEach(function(stop,i){
+            const leg=(item.legs||[])[i]||{}, fiscal=ensureFiscalData(stop);
+            details.push('<tr><td>'+metricEsc(item.meta?.date||'—')+'</td><td>'+metricEsc(item.meta?.driver||'—')+'</td><td>'+metricEsc(item.meta?.base||'—')+'</td><td>'+ (i+1) +'</td><td><strong>'+metricEsc(stop.name||'—')+'</strong><small>'+metricEsc([stop.address,stop.city,stop.state].filter(Boolean).join(' · '))+'</small></td><td>'+metricEsc(stop.urgency||'—')+'</td><td>'+metricEsc(leg.arrival!==undefined?clock(leg.arrival):'—')+'</td><td>'+metricNum(leg.km).toFixed(1)+' km</td><td>'+metricEsc(fiscal.number||'—')+'</td><td>'+metricEsc(fiscal.issueDate||'—')+'</td><td>'+metricEsc(formatMoney(fiscal.amount))+'</td></tr>');
+        });
+    });
     const insights=[top[0]?'O condutor com maior volume é '+top[0][0]+', com '+top[0][1].stops+' paradas.':'Não há líder de volume no recorte.',critical&&totalUrg?'Paradas Super/Alta correspondem a '+Math.round(critical/totalUrg*100)+'% do total.':'Não foi possível calcular concentração de urgências.',d.routes>1?'A média operacional é de '+d.avgStops.toFixed(1)+' paradas e '+d.avgKm.toFixed(1)+' km por rota.':'Uma única rota foi analisada; use-a como linha de base.',d.fiscal?'O valor fiscal acumulado informado é '+metricFmtMoney(d.fiscal)+'.':'Não há valores fiscais informados no período.'];
-    const w=window.open('','_blank'); if(!w)return alert('Permita pop-ups para gerar o relatório.');
-    w.document.write('<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>Relatório de métricas · GRUPO LABMEDIC</title><style>@page{size:A4 landscape;margin:12mm}*{box-sizing:border-box}body{font-family:Arial,sans-serif;color:#183345;margin:0;font-size:11px}h1{font-size:25px;color:#0d806d;margin:0 0 4px}h2{font-size:14px;color:#193345;border-bottom:2px solid #0d806d;padding-bottom:6px;margin:20px 0 10px}.sub{color:#718184;font-size:11px}.brand{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:1px solid #dce8e3;padding-bottom:12px}.meta{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:14px 0}.box{background:#eff8f4;border-radius:7px;padding:10px}.box small{display:block;color:#718184;font-size:9px}.box b{display:block;font-size:16px;margin-top:4px;color:#183345}.filters{padding:8px 10px;background:#f6f9f8;border:1px solid #e0e9e5;color:#607175;font-size:9px}.cols{display:grid;grid-template-columns:1.25fr .75fr;gap:16px}table{width:100%;border-collapse:collapse}th{background:#193345;color:#fff;text-align:left;padding:7px;font-size:9px}td{padding:7px;border-bottom:1px solid #e0e9e5}td:not(:first-child),th:not(:first-child){text-align:right}.insight{padding:8px 10px;border-left:3px solid #0d8c78;background:#eff8f4;margin-bottom:7px;line-height:1.35}.foot{margin-top:18px;padding-top:8px;border-top:1px solid #dce8e3;color:#718184;font-size:8px}button{padding:8px 12px;background:#0d806d;color:#fff;border:0;border-radius:5px;cursor:pointer}@media print{.toolbar{display:none}}</style></head><body><div class="toolbar" style="display:flex;justify-content:flex-end;margin-bottom:10px"><button onclick="window.print()">Imprimir / Salvar como PDF</button></div><div class="brand"><div><h1>GRUPO LABMEDIC</h1><div class="sub">Relatório executivo de análise de métricas operacionais</div></div><div class="sub">Gerado em '+new Date().toLocaleString('pt-BR')+'</div></div><div class="filters"><b>Filtros aplicados:</b> Condutor: '+metricEsc(driver)+' · Período: '+metricEsc(from)+' a '+metricEsc(to)+' · Base: '+metricEsc(base)+'</div><div class="meta">'+[['Diligências',d.routes],['Unidades visitadas',d.stops],['Distância total',d.km.toFixed(1)+' km'],['Tempo de deslocamento',metricFmtHours(d.travel)],['Condutores',Object.keys(d.drivers).length],['Média de paradas/rota',d.avgStops.toFixed(1)],['Valor fiscal',metricFmtMoney(d.fiscal)],['Paradas críticas',critical]].map(x=>'<div class="box"><small>'+x[0]+'</small><b>'+x[1]+'</b></div>').join('')+'</div><div class="cols"><div><h2>Desempenho por condutor</h2><table><thead><tr><th>#</th><th>Condutor</th><th>Rotas</th><th>Paradas</th><th>Distância</th><th>Média/rota</th></tr></thead><tbody>'+rows+'</tbody></table><h2>Insights executivos</h2>'+insights.map(x=>'<div class="insight">'+metricEsc(x)+'</div>').join('')+'</div><div><h2>Distribuição de urgências</h2><table><thead><tr><th>Nível</th><th>Paradas</th><th>Participação</th></tr></thead><tbody>'+urgRows+'</tbody></table><h2>Resumo da leitura</h2><div class="insight">O relatório considera '+d.routes+' planejamento(s) salvos, '+d.stops+' unidade(s) visitada(s) e '+d.km.toFixed(1)+' km de deslocamento acumulado.</div><div class="insight">A média de deslocamento por rota foi de '+metricFmtHours(d.avgTravel)+', com '+d.avgStops.toFixed(1)+' parada(s) por rota.</div></div></div><div class="foot">Fonte: histórico local de planejamentos · Documento gerado pelo módulo Análise de Métricas · Formato A4 horizontal.</div></body></html>'); w.document.close();
+    const w=window.open('','_blank');
+    if(!w)return alert('Permita pop-ups para gerar o relatório.');
+    const html='<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>Relatório de métricas · GRUPO LABMEDIC</title><style>@page{size:A4 landscape;margin:12mm}*{box-sizing:border-box}body{font-family:Arial,sans-serif;color:#183345;margin:0;font-size:10px}.toolbar{display:flex;justify-content:flex-end;gap:8px;margin-bottom:10px}.toolbar button{padding:8px 12px;background:#0d806d;color:#fff;border:0;border-radius:5px;cursor:pointer}.toolbar button.alt{background:#193345}h1{font-size:25px;color:#0d806d;margin:0 0 4px}h2{font-size:14px;color:#193345;border-bottom:2px solid #0d806d;padding-bottom:6px;margin:20px 0 10px}.sub{color:#718184;font-size:11px}.brand{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:1px solid #dce8e3;padding-bottom:12px}.filters{padding:8px 10px;background:#f6f9f8;border:1px solid #e0e9e5;color:#607175;font-size:9px;margin-top:12px}.meta{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:14px 0}.box{background:#eff8f4;border-radius:7px;padding:10px}.box small{display:block;color:#718184;font-size:9px}.box b{display:block;font-size:16px;margin-top:4px;color:#183345}.cols{display:grid;grid-template-columns:1.25fr .75fr;gap:16px}table{width:100%;border-collapse:collapse;table-layout:fixed}thead{display:table-header-group}th{background:#193345;color:#fff;text-align:left;padding:7px;font-size:8px}td{padding:7px;border-bottom:1px solid #e0e9e5;vertical-align:top;word-break:break-word}td:not(:first-child),th:not(:first-child){text-align:right}tr{break-inside:avoid;page-break-inside:avoid}td small{display:block;color:#718184;font-size:8px;margin-top:3px;text-align:left}.insight{padding:8px 10px;border-left:3px solid #0d8c78;background:#eff8f4;margin-bottom:7px;line-height:1.35}.details-page{break-before:page;page-break-before:always}.details-title{display:flex;justify-content:space-between;align-items:end}.details-title small{color:#718184;font-size:9px}.details-table{font-size:8px}.details-table th{font-size:7px;padding:6px}.details-table td{padding:5px}.details-table th:nth-child(1){width:7%}.details-table th:nth-child(2){width:9%}.details-table th:nth-child(3){width:10%}.details-table th:nth-child(4){width:4%}.details-table th:nth-child(5){width:23%}.details-table th:nth-child(6){width:7%}.details-table th:nth-child(7){width:7%}.details-table th:nth-child(8){width:7%}.details-table th:nth-child(9){width:10%}.details-table th:nth-child(10){width:8%}.details-table th:nth-child(11){width:8%}.foot{margin-top:18px;padding-top:8px;border-top:1px solid #dce8e3;color:#718184;font-size:8px}@media print{.toolbar{display:none}.summary-page{break-after:page;page-break-after:always}.details-page{break-before:auto;page-break-before:auto}}@media screen{body{max-width:1400px;margin:0 auto;padding:12px;background:#fff}.details-page{margin-top:20px;padding-top:8px;border-top:5px solid #eaf4f0}}</style></head><body><div class="toolbar"><button onclick="window.print()">▤ Imprimir / Salvar como PDF</button><button class="alt" onclick="downloadReport()">⇩ Baixar relatório</button></div><section class="summary-page"><div class="brand"><div><h1>GRUPO LABMEDIC</h1><div class="sub">Relatório executivo de análise de métricas operacionais</div></div><div class="sub">Gerado em '+new Date().toLocaleString('pt-BR')+'</div></div><div class="filters"><b>Filtros aplicados:</b> Condutor: '+metricEsc(driver)+' · Período: '+metricEsc(from)+' a '+metricEsc(to)+' · Base: '+metricEsc(base)+'</div><div class="meta">'+[['Diligências',d.routes],['Unidades visitadas',d.stops],['Distância total',d.km.toFixed(1)+' km'],['Tempo de deslocamento',metricFmtHours(d.travel)],['Condutores',Object.keys(d.drivers).length],['Média de paradas/rota',d.avgStops.toFixed(1)],['Valor fiscal',metricFmtMoney(d.fiscal)],['Paradas críticas',critical]].map(x=>'<div class="box"><small>'+x[0]+'</small><b>'+x[1]+'</b></div>').join('')+'</div><div class="cols"><div><h2>Desempenho por condutor</h2><table><thead><tr><th>#</th><th>Condutor</th><th>Rotas</th><th>Paradas</th><th>Distância</th><th>Média/rota</th></tr></thead><tbody>'+rows+'</tbody></table><h2>Insights executivos</h2>'+insights.map(x=>'<div class="insight">'+metricEsc(x)+'</div>').join('')+'</div><div><h2>Distribuição de urgências</h2><table><thead><tr><th>Nível</th><th>Paradas</th><th>Participação</th></tr></thead><tbody>'+urgRows+'</tbody></table><h2>Resumo da leitura</h2><div class="insight">O relatório considera '+d.routes+' planejamento(s) salvos, '+d.stops+' unidade(s) visitada(s) e '+d.km.toFixed(1)+' km de deslocamento acumulado.</div><div class="insight">A média de deslocamento por rota foi de '+metricFmtHours(d.avgTravel)+', com '+d.avgStops.toFixed(1)+' parada(s) por rota.</div></div></div><div class="foot">Página de resumo · Fonte: histórico local de planejamentos · Documento gerado pelo módulo Análise de Métricas.</div></section><section class="details-page"><div class="details-title"><div><h1 style="font-size:20px">Unidades visitadas</h1><div class="sub">Listagem detalhada das unidades incluídas nas diligências filtradas</div></div><small>'+details.length+' unidade(s) · quebra automática por página</small></div><table class="details-table"><thead><tr><th>Data</th><th>Condutor</th><th>Base</th><th>#</th><th>Unidade / endereço</th><th>Urgência</th><th>Chegada</th><th>Km trecho</th><th>Documento fiscal</th><th>Emissão</th><th>Valor</th></tr></thead><tbody>'+details.join('')+'</tbody></table><div class="foot">Página(s) de detalhamento · As linhas são mantidas inteiras e o cabeçalho é repetido automaticamente quando houver quebra de página.</div></section><script>function downloadReport(){const blob=new Blob([document.documentElement.outerHTML],{type:"text/html;charset=utf-8"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="GRUPO LABMEDIC - Relatorio de Metricas.html";a.click();setTimeout(function(){URL.revokeObjectURL(a.href)},500)}<\/script></body></html>';
+    w.document.write(html);
+    w.document.close();
 }
+
 function initMetrics() { populateMetricFilters(); renderMetrics(); }
 
 function tabs(tab) {
