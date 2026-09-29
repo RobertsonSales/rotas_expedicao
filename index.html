@@ -630,6 +630,43 @@ button {
     text-align: right
 }
 
+.fiscal-modal-intro {
+    margin: 0 0 14px;
+    color: var(--soft);
+    font-size: 11px;
+    line-height: 1.5
+}
+
+.fiscal-modal-form label {
+    display: block;
+    margin: 0 0 12px;
+    color: var(--soft);
+    font-size: 10px;
+    font-weight: 800
+}
+
+.fiscal-modal-form input {
+    display: block;
+    width: 100%;
+    margin-top: 5px;
+    padding: 9px 10px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: var(--card);
+    color: var(--ink)
+}
+
+.fiscal-modal-form input:invalid:not(:placeholder-shown) {
+    border-color: #c26b55
+}
+
+.fiscal-modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 16px
+}
+
 @media (max-width: 620px) {
     .fiscal-form {
         grid-template-columns: 1fr 1fr;
@@ -3466,13 +3503,12 @@ function restoreState() {
         const selectedIds = loadJSON('planiroute-selected', []);
         if (Array.isArray(selectedIds) && selectedIds.length) {
             selected = new Set(selectedIds.filter(function(id) {
-                return stops.some(function(s) {
-                    return s.id === id;
-                });
+                const stop = stops.find(function(s) { return s.id === id; });
+                return stop && hasCompleteFiscalData(stop);
             }));
         }
         const savedRoute = loadJSON('planiroute-route', null);
-        if (savedRoute && savedRoute.engineVersion === ROUTE_ENGINE_VERSION && Array.isArray(savedRoute.ordered) && savedRoute.ordered.length) {
+        if (savedRoute && savedRoute.engineVersion === ROUTE_ENGINE_VERSION && Array.isArray(savedRoute.ordered) && savedRoute.ordered.length && savedRoute.ordered.every(hasCompleteFiscalData)) {
             route = savedRoute;
         } else if (savedRoute) {
             /* Não reutiliza pernas calculadas antes da geocodificação real.
@@ -4340,7 +4376,7 @@ function renderSelected() {
     const arr = stops.filter(s => selected.has(s.id));
     $('selectedList').innerHTML = arr.length ? arr.map((s, i) => {
         const fiscal = ensureFiscalData(s);
-        return `<div class="stop"><div class="num">${i+1}</div><div class="stop-main"><b>${escHtml(s.name)}</b><small>${escHtml(s.city)} · ${escHtml(s.address)}</small></div><select data-u="${s.id}" class="urg"><option ${s.urgency==='Super'?'selected':''}>Super</option><option ${s.urgency==='Alta'?'selected':''}>Alta</option><option ${s.urgency==='Média'?'selected':''}>Média</option><option ${s.urgency==='Baixa'?'selected':''}>Baixa</option></select><button class="trash" data-remove="${s.id}" title="Remover da rota">×</button><div class="fiscal-form" data-fiscal-form="${s.id}"><label>Nº do documento fiscal<input type="text" maxlength="40" placeholder="Ex.: NF 12345" data-fiscal="number" data-stop="${s.id}" value="${escHtml(fiscal.number)}"></label><label>Data de emissão<input type="date" data-fiscal="issueDate" data-stop="${s.id}" value="${escHtml(fiscal.issueDate)}"></label><label>Valor do documento (R$)<input class="amount-input" type="number" min="0" step="0.01" inputmode="decimal" placeholder="0,00" data-fiscal="amount" data-stop="${s.id}" value="${escHtml(fiscal.amount)}"></label></div></div>`;
+        return `<div class="stop"><div class="num">${i+1}</div><div class="stop-main"><b>${escHtml(s.name)}</b><small>${escHtml(s.city)} · ${escHtml(s.address)}</small><small>Doc. fiscal: ${escHtml(fiscal.number)} · Emissão: ${escHtml(fiscal.issueDate)} · Valor: ${escHtml(formatMoney(fiscal.amount))}</small></div><select data-u="${s.id}" class="urg"><option ${s.urgency==='Super'?'selected':''}>Super</option><option ${s.urgency==='Alta'?'selected':''}>Alta</option><option ${s.urgency==='Média'?'selected':''}>Média</option><option ${s.urgency==='Baixa'?'selected':''}>Baixa</option></select><button class="link" data-fiscal-edit="${s.id}" title="Editar documento fiscal">Editar documento</button><button class="trash" data-remove="${s.id}" title="Remover da rota">×</button></div>`;
     }).join('') : `<div style="padding:20px;text-align:center;color:#9da9aa;border:1px dashed #dce6e3;border-radius:9px">Adicione unidades abaixo para montar esta rota.</div>`;
 }
 
@@ -4464,6 +4500,11 @@ async function calc() {
     }
     if (!selected.size) {
         alert('Marque ao menos uma unidade para visitação antes de calcular.');
+        return;
+    }
+    const incompleteFiscal = stops.filter(function(s) { return selected.has(s.id) && !hasCompleteFiscalData(s); });
+    if (incompleteFiscal.length) {
+        alert('Há unidade(s) sem dados fiscais completos. Remova-as da seleção ou informe o documento fiscal antes de calcular a rota.');
         return;
     }
     showProgress('Ordenando unidades por urgência e distância…', 18);
@@ -5364,14 +5405,34 @@ function openHelp() {
     }
 }
 
-function toggle(id) {
-    if (selected.has(id)) {
-        selected.delete(id);
-    } else {
-        const stop = stops.find(function(s) { return s.id === id; });
-        if (stop) ensureFiscalData(stop);
-        selected.add(id);
-    }
+function hasCompleteFiscalData(stop) {
+    const fiscal = ensureFiscalData(stop);
+    return !!norm(fiscal.number) && !!norm(fiscal.issueDate) && fiscal.amount !== '' && Number.isFinite(Number(fiscal.amount)) && Number(fiscal.amount) >= 0;
+}
+
+function requestFiscalData(stop, onComplete) {
+    const fiscal = ensureFiscalData(stop);
+    const title = 'Documento fiscal · ' + escHtml(stop.name);
+    const body = `<p class="fiscal-modal-intro">Preencha todos os campos obrigatórios para incluir esta unidade na rota.</p><form class="fiscal-modal-form" id="fiscalModalForm"><label>Nº do documento fiscal *<input id="fiscalNumber" type="text" maxlength="40" required placeholder="Ex.: NF 12345" value="${escHtml(fiscal.number)}"></label><label>Data de emissão *<input id="fiscalIssueDate" type="date" required value="${escHtml(fiscal.issueDate)}"></label><label>Valor do documento (R$) *<input id="fiscalAmount" type="number" min="0" step="0.01" inputmode="decimal" required placeholder="0,00" value="${escHtml(fiscal.amount)}"></label><div class="fiscal-modal-actions"><button type="button" class="outline" id="fiscalCancel">Cancelar</button><button type="submit" class="primary" style="width:auto;margin-top:0">Confirmar e incluir</button></div></form>`;
+    openModal(title, body, 'modal-sm');
+    $('fiscalCancel').onclick = closeModal;
+    $('fiscalModalForm').onsubmit = function(e) {
+        e.preventDefault();
+        if (!this.reportValidity()) return;
+        const number = $('fiscalNumber').value.trim();
+        const issueDate = $('fiscalIssueDate').value;
+        const amount = $('fiscalAmount').value;
+        if (!number || !issueDate || amount === '' || !Number.isFinite(Number(amount)) || Number(amount) < 0) {
+            alert('Preencha corretamente o número, a data de emissão e o valor do documento fiscal.');
+            return;
+        }
+        stop.fiscal = { number, issueDate, amount };
+        closeModal();
+        if (typeof onComplete === 'function') onComplete(stop.fiscal);
+    };
+}
+
+function commitSelection() {
     route = null;
     renderResult();
     render();
@@ -5379,30 +5440,35 @@ function toggle(id) {
     persistSelected();
     persistRoute();
 }
+
+function toggle(id) {
+    if (selected.has(id)) {
+        selected.delete(id);
+        commitSelection();
+        return;
+    }
+    const stop = stops.find(function(s) { return s.id === id; });
+    if (!stop) return;
+    requestFiscalData(stop, function() {
+        selected.add(id);
+        commitSelection();
+    });
+}
 $('unitRows').onclick = e => {
     const b = e.target.closest('[data-toggle]');
     if (b) toggle(b.dataset.toggle)
 };
-$('selectedList').addEventListener('input', function(e) {
-    const input = e.target.closest('[data-fiscal]');
-    if (!input) return;
-    const stop = stops.find(function(s) { return s.id === input.dataset.stop; });
-    if (!stop) return;
-    const fiscal = ensureFiscalData(stop);
-    fiscal[input.dataset.fiscal] = input.value;
-    persistDataset();
-    persistSelected();
-});
-$('selectedList').addEventListener('change', function(e) {
-    const input = e.target.closest('[data-fiscal]');
-    if (!input) return;
-    const stop = stops.find(function(s) { return s.id === input.dataset.stop; });
-    if (!stop) return;
-    ensureFiscalData(stop)[input.dataset.fiscal] = input.value;
-    persistDataset();
-    persistSelected();
-});
 $('selectedList').onclick = e => {
+    const edit = e.target.closest('[data-fiscal-edit]');
+    if (edit) {
+        const stop = stops.find(function(s) { return s.id === edit.dataset.fiscalEdit; });
+        if (stop) requestFiscalData(stop, function() {
+            render();
+            persistDataset();
+            persistSelected();
+        });
+        return;
+    }
     const b = e.target.closest('[data-remove]');
     if (b) toggle(b.dataset.remove)
 };
@@ -5534,32 +5600,28 @@ function setUnitsOpen(open) {
 }
 
 function applySelectionChange() {
-    route = null;
-    renderResult();
-    render();
-    persistDataset();
-    persistSelected();
-    persistRoute();
+    commitSelection();
 }
 
 function markFilteredUnits(mark) {
     const list = filteredUnits.slice();
     if (!list.length) return;
     if (mark) {
-        const add = list.filter(function(s) {
-            return !selected.has(s.id);
-        });
+        const add = list.filter(function(s) { return !selected.has(s.id); });
         if (!add.length) return;
         const total = selected.size + add.length;
         if (total > 25 && !confirm('Você vai marcar ' + add.length + ' unidades (total de ' + total + ' na rota).\nO Google Maps Directions aceita no máximo 25 paradas por rota.\n\nDeseja continuar mesmo assim?')) return;
-        add.forEach(function(s) {
-            selected.add(s.id);
-        });
-    } else {
-        list.forEach(function(s) {
-            selected.delete(s.id);
-        });
+        function next(index) {
+            if (index >= add.length) return applySelectionChange();
+            requestFiscalData(add[index], function() {
+                selected.add(add[index].id);
+                next(index + 1);
+            });
+        }
+        next(0);
+        return;
     }
+    list.forEach(function(s) { selected.delete(s.id); });
     applySelectionChange();
 }
 if ($('filterUF')) {
