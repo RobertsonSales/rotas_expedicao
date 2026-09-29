@@ -810,6 +810,31 @@ button {
     background: #08705f
 }
 
+/* Indica que a seleção/configuração mudou depois do último cálculo. */
+.primary.needs-recalc {
+    background: #c56b2f;
+    box-shadow: 0 7px 16px #c56b2f44;
+    animation: recalcPulse 1.8s ease-in-out infinite;
+}
+.primary.needs-recalc:hover {
+    background: #a95321;
+}
+@keyframes recalcPulse {
+    0%, 100% { filter: brightness(1); }
+    50% { filter: brightness(1.12); }
+}
+.recalc-notice {
+    display: none;
+    margin: 8px 0 0;
+    color: #a95321;
+    font-size: 10px;
+    font-weight: 800;
+    line-height: 1.35;
+}
+.recalc-notice.is-visible { display: block; }
+.dark .primary.needs-recalc { background: #d77c3b; color: #fff; }
+.dark .recalc-notice { color: #f0ae76; }
+
 .foot {
     display: flex;
     align-items: center;
@@ -3365,7 +3390,7 @@ body.landing-lock {
 <main class="main"><header class="top"><div><div class="eyebrow">Centro de controle / <span id="crumb">Planejamento de rotas de entrega</span></div><h1 id="pageTitle">Planejamento de rotas</h1></div><div style="display:flex;align-items:center;gap:10px"><button class="theme-btn" id="themeBtn" title="Alternar tema">☾</button><div class="status"><i></i>API oficial Google</div></div></header>
 <section id="planPage"><section class="hero"><div><div class="eyebrow" style="color:#71d8bc">✦ Uso da API oficial do Google Maps</div><h2>Previsibilidade de rotas em poucos cliques<br><em>Monitore o trajeto dos condutores</em></h3><p>Você pode salvar as rotas diariamente, ganhando assim uma importante ferramenta de rastreabilidade histórica. </p></div><div class="hero-art"><div class="orbit o1"></div><div class="orbit o2"></div><div class="route-line"></div><div class="node n1">⌖</div><div class="node n2">⌖</div><div class="node n3">⌖</div></div></section>
 <section class="summary"><div class="card"><div class="ico">▣</div><div><span>Unidades no planejamento</span><b id="sumStops">5<small> / 8</small></b></div></div><div class="card"><div class="ico">◷</div><div><span>Tempo de trânsito estimado</span><b id="sumTravel">—</b></div><span class="trend" id="sumTravelSub">aguardando rota</span></div><div class="card"><div class="ico">◔</div><div><span>Urgências críticas</span><b id="sumCritical">4</b></div><span class="trend" id="sumCriticalSub">2 super · 2 alta</span></div><div class="card"><div class="ico">♙</div><div><span>Condutor responsável</span><b style="font-size:14px" id="sumDriver">Reginaldo Braga</b></div><span class="trend">dia 28</span></div></section>
-<div class="grid"><section><div class="section"><div><div class="over">01 · Configuração</div><h3>Monte a rota</h3></div><button class="link" id="clearBtn">Limpar seleção ×</button></div><div class="card form"><label>Condutor<select id="driver"><option>Reginaldo Braga</option><option>Marcelo Medeiros</option></option></select><input id="driverName" type="text" value="Reginaldo Braga" placeholder="Nome utilizado nos documentos" style="margin-top:7px"></label><div class="two"><label>Data da operação<input id="date" type="date" value="2026-09-28"></label><label>Saída prevista<input id="departure" type="time" value="07:30"></label></div><label>Base de partida<select id="baseSelect"></select></label><div class="base"><div class="base-icon">⌖</div><div><b id="baseName"></b><small id="baseAddr"></small></div><span class="ok">✓</span></div><div class="divider"></div><div class="labelrow"><label>Paradas da rota <span id="selectedLabel">5 selecionadas</span></label><button id="addPoint">＋ Adicionar ponto</button></div><div class="selected" id="selectedList"></div><div class="options"><label class="switchline"><input id="returnBase" type="checkbox" checked><span class="switch"></span>Retornar à base ao final</label><label>Trânsito<select id="traffic"><option value="estimated">Estimado por faixa horária</option><option value="off">Sem ajuste de trânsito</option></select></label></div><button class="primary" id="calcBtn">⌁ Calcular melhor rota <span>↑</span></button><div class="foot">✓ O cálculo considera distância, janela de saída, tempo de atendimento e urgência.</div></div></section>
+<div class="grid"><section><div class="section"><div><div class="over">01 · Configuração</div><h3>Monte a rota</h3></div><button class="link" id="clearBtn">Limpar seleção ×</button></div><div class="card form"><label>Condutor<select id="driver"><option>Reginaldo Braga</option><option>Marcelo Medeiros</option></option></select><input id="driverName" type="text" value="Reginaldo Braga" placeholder="Nome utilizado nos documentos" style="margin-top:7px"></label><div class="two"><label>Data da operação<input id="date" type="date" value="2026-09-28"></label><label>Saída prevista<input id="departure" type="time" value="07:30"></label></div><label>Base de partida<select id="baseSelect"></select></label><div class="base"><div class="base-icon">⌖</div><div><b id="baseName"></b><small id="baseAddr"></small></div><span class="ok">✓</span></div><div class="divider"></div><div class="labelrow"><label>Paradas da rota <span id="selectedLabel">5 selecionadas</span></label><button id="addPoint">＋ Adicionar ponto</button></div><div class="selected" id="selectedList"></div><div class="options"><label class="switchline"><input id="returnBase" type="checkbox" checked><span class="switch"></span>Retornar à base ao final</label><label>Trânsito<select id="traffic"><option value="estimated">Estimado por faixa horária</option><option value="off">Sem ajuste de trânsito</option></select></label></div><button class="primary" id="calcBtn" title="Calcular a melhor rota com a seleção atual">⌁ Calcular melhor rota <span id="calcBtnIcon">↑</span></button><div class="recalc-notice" id="recalcNotice">⚠ A seleção ou configuração mudou. Recalcule a rota antes de salvá-la ou exportá-la.</div><div class="foot">✓ O cálculo considera distância, janela de saída, tempo de atendimento e urgência.</div></div></section>
 <section><div class="section"><div><div class="over">02 · Visualização</div><h3 id="mapTitle">Mapa operacional</h3></div><div class="map-actions"><button class="outline" id="driverRoutesBtn" title="Ver todas as rotas deste condutor no formato do roteiro PDF">▤ Rotas do condutor</button><button class="outline" id="gmapsOpenBtn" title="Abrir a rota selecionada e otimizada no Google Maps, em uma nova aba">🗺 Google Maps</button><button class="outline" id="saveRouteBtn">▣ Salvar Rota</button><button class="outline" id="recalcBtn">↻ Recalcular</button></div></div><div class="card map"><div class="mapcanvas" id="mapCanvas"><div id="fallbackMap" class="fallback-map"><div class="road r1"></div><div class="road r2"></div><div class="road r3"></div><span class="maplabel l1">ZONA NORTE</span><span class="maplabel l2">CENTRO EXPANDIDO</span><span class="maplabel l3">ZONA SUL</span><svg class="route" id="routeSvg" viewBox="0 0 100 100" preserveAspectRatio="none"></svg></div><div id="gmap" class="gmap-container" style="display:none"></div><div class="zoom-controls" id="mapZoomCtrls" aria-label="Controles de zoom do mapa do painel" data-target="panel"><button class="zoom-btn" data-zoom="in" title="Aumentar zoom">＋</button><button class="zoom-btn" data-zoom="out" title="Diminuir zoom">－</button><button class="zoom-btn" data-zoom="reset" title="Ajustar à área">⌖</button></div><div class="float"><i id="gmapsDot" class="gdot off"></i><span id="gmapsLabel">Google Maps não configurado</span><br><small id="mapSub">pré-visualização da seleção</small></div></div><div class="legend"><span><i class="dot db"></i>Base</span><span><i class="dot dg"></i>Rota planejada</span><span><i class="dot do"></i>Urgência</span><small>⌁ Rota real via Google Maps (ou estimativa local por distância e horário, sem chave)</small></div></div><div class="card result" id="result"><div class="empty"><div class="circle">⌁</div><h3>A rota aparecerá aqui</h3><p>Selecione as unidades, defina a urgência e clique em <b>Calcular melhor rota</b>.</p></div></div></section></div>
 <section class="units" id="unitsSection"><div class="section"><div><div class="over">03 · Unidades disponíveis</div><h3>Escolha os pontos de ligação</h3></div><div class="filters" id="smartSearch"><input id="search" placeholder="🔎  Busca inteligente · unidade, cliente, endereço ou código"><button class="link units-toggle" id="unitsToggleBtn" type="button" aria-expanded="false" aria-controls="unitsBody" title="Expandir a lista completa de unidades"><span class="ut-ico" aria-hidden="true">▾</span><span class="ut-txt">Mostrar unidades</span></button></div></div><div class="geo-filter" id="geoFilter"><div class="gf-title"><span class="gf-ico" aria-hidden="true">⌖</span><div><b>Marcar por localidade</b><small>Filtre por estado e cidade e marque de uma vez todas as unidades exibidas.</small></div></div><label>Estado<select id="filterUF"><option value="">Todos os estados</option></select></label><label>Cidade<select id="filterCity"><option value="">Todas as cidades</option></select></label><div class="gf-actions"><button class="outline" id="markFiltered" type="button">✓ Marcar filtradas</button><button class="outline" id="unmarkFiltered" type="button">✕ Desmarcar</button><button class="link" id="clearGeoFilter" type="button">Limpar filtro</button></div><div class="gf-info" id="geoInfo"></div></div><div class="card table units-body" id="unitsBody"><div class="thead"><span id="tableCount">5 de 8</span><span>Unidade de saúde</span><span>Município</span><span>Urgência</span><span>Atendimento</span><span>Ação</span></div><div id="unitRows"></div></div></section><div class="footer"><span>✓ Dados processados localmente neste navegador</span><span>Última atualização: agora · <button data-tab="import">Trocar planilha</button></span></div></section>
 <section id="importPage" class="import-page" style="display:none"><div class="importhero"><div><div class="eyebrow" style="color:#71d8bc">⇧ Entrada de dados</div><h2>Traga sua planilha.<br><em>O restante fica organizado.</em></h2><p>Selecione o arquivo Excel ou CSV com a aba de tarefas. São lidas as colunas Base, Endereço (padronizado), Cidade, UF, Latitude e Longitude. A leitura acontece no navegador.</p></div><div style="font-size:58px;color:#9af0d5">▧</div></div><div class="importgrid"><div class="card upload"><div class="drop" id="dropZone"><div class="uploadicon">⇧</div><h3>Arraste sua planilha aqui</h3><p>ou clique para procurar no computador</p><small>Formatos aceitos: .xlsx, .xls e .csv · até 20 MB</small><button class="primary" style="width:auto;margin-top:17px" id="fileBtn">⇧ Selecionar arquivo</button></div><input id="fileInput" type="file" accept=".xlsx,.xls,.csv" hidden><div class="file-status"><div style="font-size:20px;color:#0d8c78">▧</div><div><b id="fileName">Planilha de rede · aguardando importação</b><small id="fileInfo">Nenhum arquivo carregado ainda</small></div></div></div><div class="card mapping"><div class="over">Leitura da planilha</div><h3>Aba e colunas utilizadas</h3><p>A aba com a coluna <b>Endereço (padronizado)</b> é detectada automaticamente e abas “-Ant” são ignoradas. Se necessário, escolha outra aba.</p><div class="maprow"><span><b>Aba de dados</b><small>unidades e bases</small></span><select id="sheetStop"><option>Tarefas</option></select></div><div class="colmap" id="colMap"><div class="colrow"><span><b>Cliente</b><small>nome da unidade</small></span><em>aguardando</em></div><div class="colrow"><span><b>Base</b><small>pontos de saída</small></span><em>aguardando</em></div><div class="colrow"><span><b>Endereço (padronizado)</b><small>enviado ao Google Maps</small></span><em>aguardando</em></div><div class="colrow"><span><b>Cidade</b><small>filtro por cidade</small></span><em>aguardando</em></div><div class="colrow"><span><b>UF (estado)</b><small>filtro por estado</small></span><em>aguardando</em></div><div class="colrow"><span><b>Latitude</b><small>só se o Google falhar</small></span><em>aguardando</em></div><div class="colrow"><span><b>Longitude</b><small>só se o Google falhar</small></span><em>aguardando</em></div></div><button class="outline" style="width:100%;justify-content:center;margin-top:15px" id="changeFile">↻ Trocar arquivo</button></div><div class="card guide"><b>Como preparar a planilha?</b><p>Use a primeira linha como cabeçalho e inclua <strong>Cliente, Base, Endereço (padronizado), Cidade, UF, Latitude e Longitude</strong>. Os endereços são localizados pelo Google Maps; <strong>Latitude e Longitude só são usadas se essa pesquisa falhar</strong>. A urgência pode ser ajustada depois no planejamento.</p></div></div></section>
@@ -3436,7 +3461,28 @@ const geoFilter = { uf: '', city: '', cityUF: '' };
 let filteredUnits = [];
 let geoFilterSig = '';
 let selected = new Set(),
+    route = null,
+    routeNeedsRecalc = false;
+
+function setRouteNeedsRecalc(value) {
+    routeNeedsRecalc = !!value;
+    const button = $('calcBtn');
+    const notice = $('recalcNotice');
+    if (!button) return;
+    button.classList.toggle('needs-recalc', routeNeedsRecalc);
+    button.title = routeNeedsRecalc ? 'A seleção/configuração mudou. Recalcule a rota antes de salvar ou exportar.' : 'Calcular a melhor rota com a seleção atual';
+    const label = routeNeedsRecalc ? '⚠ Recalcular rota' : '⌁ Calcular melhor rota';
+    const icon = $('calcBtnIcon');
+    if (icon) icon.textContent = routeNeedsRecalc ? '!' : '↑';
+    if (icon) icon.parentElement.childNodes[0].nodeValue = label + ' ';
+    if (notice) notice.classList.toggle('is-visible', routeNeedsRecalc);
+}
+
+function invalidateRoute() {
     route = null;
+    setRouteNeedsRecalc(true);
+    renderResult();
+}
 /* Mudança de versão invalida rotas persistidas que ainda possam conter
    coordenadas determinísticas criadas pelo importador. */
 const ROUTE_ENGINE_VERSION = 'road-routing-v9-dwell-45min';
@@ -3586,6 +3632,7 @@ function restoreState() {
         const savedRoute = loadJSON('planiroute-route', null);
         if (savedRoute && savedRoute.engineVersion === ROUTE_ENGINE_VERSION && Array.isArray(savedRoute.ordered) && savedRoute.ordered.length && savedRoute.ordered.every(hasCompleteFiscalData)) {
             route = savedRoute;
+            routeNeedsRecalc = false;
         } else if (savedRoute) {
             /* Não reutiliza pernas calculadas antes da geocodificação real.
                Elas podem conter coordenadas determinísticas do importador e
@@ -4667,6 +4714,7 @@ async function calc() {
             service: ordered.reduce((a) => a + FIXED_DELIVERY_MINUTES, 0),
             end: t
         };
+        setRouteNeedsRecalc(false);
         function applyRealLegs(newLegs) {
             newLegs.forEach(function(leg, i) {
                 if (route.legs[i]) {
@@ -4736,6 +4784,7 @@ async function calc() {
     } catch (error) {
         console.error('GRUPO LABMEDIC - Planejamento de Rotas: falha ao calcular a rota:', error);
         route = null;
+        setRouteNeedsRecalc(true);
         renderResult();
         render();
         alert(error && error.userFacing ? error.message : 'Não foi possível calcular a rota. Verifique a chave/permissões do Google Maps e os endereços da planilha. Detalhe: ' + (error && error.message ? error.message : error));
@@ -5278,6 +5327,25 @@ function exportExcel(item) {
     XLSX.writeFile(wb, 'GRUPO LABMEDIC - Rota diária de entrega' + String((item ? item.meta.date : $('date').value)).replaceAll('/', '-') + '.xlsx');
 }
 
+function routeContentSignature(item) {
+    if (!item) return '';
+    const ordered = Array.isArray(item.ordered) ? item.ordered : [];
+    return JSON.stringify({
+        base: String(item.meta && item.meta.base || ''),
+        returnBase: ordered.length ? String(item.legs && item.legs.length > ordered.length) : '',
+        ordered: ordered.map(function(stop) {
+            return String(stop.id || stop.code || stop.name || '').trim();
+        })
+    });
+}
+
+function hasDuplicateRoute(item) {
+    const signature = routeContentSignature(item);
+    return !!signature && getHistory().some(function(saved) {
+        return routeContentSignature(saved) === signature;
+    });
+}
+
 function saveHistory() {
     if (!route || !Array.isArray(route.ordered) || !route.ordered.length) return false;
     try {
@@ -5520,8 +5588,7 @@ function requestFiscalData(stop, onComplete) {
 }
 
 function commitSelection() {
-    route = null;
-    renderResult();
+    invalidateRoute();
     render();
     persistDataset();
     persistSelected();
@@ -5564,8 +5631,7 @@ document.addEventListener('change', e => {
         const s = stops.find(x => x.id === e.target.dataset.u);
         if (s) {
             s.urgency = e.target.value;
-            route = null;
-            renderResult();
+            invalidateRoute();
             render();
             persistDataset();
             persistRoute();
@@ -5573,7 +5639,12 @@ document.addEventListener('change', e => {
     }
 });
 $('saveRouteBtn').onclick = function() {
-    if (!route) return alert('Calcule uma rota antes de salvar.');
+    if (!route || routeNeedsRecalc) return alert('A seleção ou configuração mudou. Clique em “Recalcular rota” antes de salvar.');
+    const candidate = currentRouteItem();
+    if (hasDuplicateRoute(candidate)) {
+        const duplicateDecision = confirm('Já existe no Histórico uma rota com a mesma composição de unidades e base. Deseja salvar uma rota duplicada mesmo assim?');
+        if (!duplicateDecision) return;
+    }
     const saved = saveHistory();
     if (!saved) return alert('Não foi possível salvar a rota no Histórico. Verifique os dados fiscais e o espaço disponível no navegador.');
     renderHistory();
@@ -5587,7 +5658,7 @@ $('calcBtn').onclick = calc;
 $('recalcBtn').onclick = calc;
 $('clearBtn').onclick = () => {
     selected.clear();
-    route = null;
+    invalidateRoute();
     render();
     persistSelected();
     persistRoute();
@@ -5599,6 +5670,7 @@ $('driver').onchange = function() {
     persistForm();
 };
 $('baseSelect').onchange = () => {
+    invalidateRoute();
     render();
     persistForm();
 };
@@ -5608,7 +5680,10 @@ $('addPoint').onclick = () => document.querySelector('.units').scrollIntoView({
 ['date', 'departure', 'traffic', 'returnBase'].forEach(function(id) {
     const el = $(id);
     if (!el) return;
-    el.addEventListener('change', persistForm);
+    el.addEventListener('change', function() {
+        persistForm();
+        if (id !== 'returnBase' || route) invalidateRoute();
+    });
     el.addEventListener('input', persistForm);
 });
 $('gmapsOpenBtn').onclick = openGoogleMapsRoute;
@@ -6284,6 +6359,7 @@ function resetActiveData() {
     bases = [DEFAULT_BASE];
     selected = new Set();
     route = null;
+    routeNeedsRecalc = false;
     panelMapBounds = null;
     applyFallbackZoom(1);
     $('baseSelect').innerHTML = bases.map(function(b) {
@@ -6354,7 +6430,9 @@ if ($('sideToggle')) {
 }
 
 restoreState();
+if (!route && selected.size) routeNeedsRecalc = true;
 render();
+setRouteNeedsRecalc(routeNeedsRecalc);
 if (route) renderResult();
 initGoogleMapsIfConfigured();
 </script>
