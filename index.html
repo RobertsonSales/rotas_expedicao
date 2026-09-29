@@ -588,7 +588,56 @@ button {
     gap: 8px;
     padding: 8px;
     border: 1px solid #e6eeeb;
-    border-radius: 9px
+    border-radius: 9px;
+    flex-wrap: wrap
+}
+
+.fiscal-form {
+    width: 100%;
+    margin: 2px 0 0 29px;
+    padding: 7px 8px 1px;
+    border-top: 1px dashed #dce8e3;
+    display: grid;
+    grid-template-columns: 1.1fr .9fr 1fr;
+    gap: 7px
+}
+
+.fiscal-form label {
+    margin: 0;
+    color: #7b8b8d;
+    font-size: 8px;
+    font-weight: 800
+}
+
+.fiscal-form input {
+    width: 100%;
+    margin-top: 3px;
+    padding: 5px 6px;
+    border: 1px solid #dce5e1;
+    background: #fbfcfc;
+    color: var(--ink);
+    border-radius: 6px;
+    font-size: 9px;
+    outline: 0
+}
+
+.fiscal-form input:focus {
+    border-color: var(--green);
+    box-shadow: 0 0 0 2px #0d8c7818
+}
+
+.fiscal-form .amount-input {
+    text-align: right
+}
+
+@media (max-width: 620px) {
+    .fiscal-form {
+        grid-template-columns: 1fr 1fr;
+        margin-left: 0
+    }
+    .fiscal-form label:first-child {
+        grid-column: 1 / -1
+    }
 }
 
 .num {
@@ -3319,6 +3368,24 @@ function loadJSON(storageKey, fallback) {
     }
 }
 
+function systemDate() {
+    const now = new Date();
+    return now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0');
+}
+
+function ensureFiscalData(stop) {
+    if (!stop.fiscal || typeof stop.fiscal !== 'object') stop.fiscal = {};
+    if (stop.fiscal.issueDate === undefined || stop.fiscal.issueDate === null || stop.fiscal.issueDate === '') stop.fiscal.issueDate = systemDate();
+    if (stop.fiscal.number === undefined || stop.fiscal.number === null) stop.fiscal.number = '';
+    if (stop.fiscal.amount === undefined || stop.fiscal.amount === null) stop.fiscal.amount = '';
+    return stop.fiscal;
+}
+
+function formatMoney(value) {
+    const number = Number(value);
+    return Number.isFinite(number) && value !== '' && value !== null ? number.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : '—';
+}
+
 function persistDataset() {
     saveJSON('planiroute-dataset', {
         stops,
@@ -3361,10 +3428,12 @@ function restoreState() {
         const dataset = loadJSON('planiroute-dataset', null);
         if (dataset && Array.isArray(dataset.stops) && dataset.stops.length) {
             stops = dataset.stops.map(function(stop) {
-                return Object.assign({}, stop, {
+                const restored = Object.assign({}, stop, {
                     service: normalizeServiceMinutes(stop.service),
                     state: stop.state || inferUF(stop.address)
                 });
+                ensureFiscalData(restored);
+                return restored;
             });
             bases = withDefaultBase(Array.isArray(dataset.bases) ? dataset.bases : []);
             $('baseSelect').innerHTML = bases.map(function(b) {
@@ -4269,7 +4338,10 @@ function render() {
 
 function renderSelected() {
     const arr = stops.filter(s => selected.has(s.id));
-    $('selectedList').innerHTML = arr.length ? arr.map((s, i) => `<div class="stop"><div class="num">${i+1}</div><div class="stop-main"><b>${s.name}</b><small>${s.city} · ${s.address}</small></div><select data-u="${s.id}" class="urg"><option ${s.urgency==='Super'?'selected':''}>Super</option><option ${s.urgency==='Alta'?'selected':''}>Alta</option><option ${s.urgency==='Média'?'selected':''}>Média</option><option ${s.urgency==='Baixa'?'selected':''}>Baixa</option></select><button class="trash" data-remove="${s.id}">×</button></div>`).join('') : `<div style="padding:20px;text-align:center;color:#9da9aa;border:1px dashed #dce6e3;border-radius:9px">Adicione unidades abaixo para montar esta rota.</div>`
+    $('selectedList').innerHTML = arr.length ? arr.map((s, i) => {
+        const fiscal = ensureFiscalData(s);
+        return `<div class="stop"><div class="num">${i+1}</div><div class="stop-main"><b>${escHtml(s.name)}</b><small>${escHtml(s.city)} · ${escHtml(s.address)}</small></div><select data-u="${s.id}" class="urg"><option ${s.urgency==='Super'?'selected':''}>Super</option><option ${s.urgency==='Alta'?'selected':''}>Alta</option><option ${s.urgency==='Média'?'selected':''}>Média</option><option ${s.urgency==='Baixa'?'selected':''}>Baixa</option></select><button class="trash" data-remove="${s.id}" title="Remover da rota">×</button><div class="fiscal-form" data-fiscal-form="${s.id}"><label>Nº do documento fiscal<input type="text" maxlength="40" placeholder="Ex.: NF 12345" data-fiscal="number" data-stop="${s.id}" value="${escHtml(fiscal.number)}"></label><label>Data de emissão<input type="date" data-fiscal="issueDate" data-stop="${s.id}" value="${escHtml(fiscal.issueDate)}"></label><label>Valor do documento (R$)<input class="amount-input" type="number" min="0" step="0.01" inputmode="decimal" placeholder="0,00" data-fiscal="amount" data-stop="${s.id}" value="${escHtml(fiscal.amount)}"></label></div></div>`;
+    }).join('') : `<div style="padding:20px;text-align:center;color:#9da9aa;border:1px dashed #dce6e3;border-radius:9px">Adicione unidades abaixo para montar esta rota.</div>`;
 }
 
 function renderUnits() {
@@ -4928,16 +5000,17 @@ function buildRouteSheets(data, wb, suffix) {
             ['Retorno à base', meta.end]
         ],
         agenda = [
-            ['AGENDA OTIMIZADA DE VISITAS', '', '', '', '', '', '', '', '', '', ''],
-            ['Ordem', 'Unidade', 'Endereço utilizado', 'Município', 'Urgência', 'Chegada prevista', 'Atendimento padrão', 'Trecho (km)', 'Deslocamento', 'Trânsito', 'Cliente']
+            ['AGENDA OTIMIZADA DE VISITAS', '', '', '', '', '', '', '', '', '', '', '', '', ''],
+            ['Ordem', 'Unidade', 'Endereço utilizado', 'Município', 'Urgência', 'Chegada prevista', 'Atendimento padrão', 'Trecho (km)', 'Deslocamento', 'Trânsito', 'Cliente', 'Nº documento fiscal', 'Data de emissão', 'Valor do documento']
         ];
     ordered.forEach(function(s, i) {
         const leg = legs[i] || {};
-        agenda.push([i + 1, s.name, s.address, s.city, s.urgency, clock(leg.arrival), fmt(FIXED_DELIVERY_MINUTES), +Number(leg.km || 0).toFixed(1), fmt(leg.m || 0), leg.l || '', s.client]);
+        const fiscal = ensureFiscalData(s);
+        agenda.push([i + 1, s.name, s.address, s.city, s.urgency, clock(leg.arrival), fmt(FIXED_DELIVERY_MINUTES), +Number(leg.km || 0).toFixed(1), fmt(leg.m || 0), leg.l || '', s.client, fiscal.number || '', fiscal.issueDate || '', fiscal.amount === '' ? '' : Number(fiscal.amount)]);
     });
     const returnLeg = legs[ordered.length];
     if (returnLeg) {
-        agenda.push(['↩', 'Retorno à base', meta.base, '', '', clock(returnLeg.arrival), '—', +Number(returnLeg.km || 0).toFixed(1), fmt(returnLeg.m || 0), returnLeg.l || '', '']);
+        agenda.push(['↩', 'Retorno à base', meta.base, '', '', clock(returnLeg.arrival), '—', +Number(returnLeg.km || 0).toFixed(1), fmt(returnLeg.m || 0), returnLeg.l || '', '', '', '', '']);
     }
     const sumWs = XLSX.utils.aoa_to_sheet(summary),
         ws = XLSX.utils.aoa_to_sheet(agenda),
@@ -4971,6 +5044,12 @@ function buildRouteSheets(data, wb, suffix) {
         wch: 20
     }, {
         wch: 32
+    }, {
+        wch: 22
+    }, {
+        wch: 16
+    }, {
+        wch: 18
     }];
     sumWs['!merges'] = [{
         s: {
@@ -4989,7 +5068,7 @@ function buildRouteSheets(data, wb, suffix) {
         },
         e: {
             r: 0,
-            c: 10
+            c: 13
         }
     }];
     sumWs['A1'].s = {
@@ -5036,7 +5115,7 @@ function buildRouteSheets(data, wb, suffix) {
             }
         }
     };
-    for (let c = 0; c < 11; c++) ws[XLSX.utils.encode_cell({
+    for (let c = 0; c < 14; c++) ws[XLSX.utils.encode_cell({
         r: 1,
         c: c
     })].s = {
@@ -5059,7 +5138,7 @@ function buildRouteSheets(data, wb, suffix) {
         ref: 'A2:B11'
     };
     ws['!autofilter'] = {
-        ref: 'A2:K' + agenda.length
+        ref: 'A2:N' + agenda.length
     };
     sumWs['!freeze'] = {
         xSplit: 0,
@@ -5079,7 +5158,7 @@ function exportExcel(item) {
     if (!window.XLSX) return alert('A biblioteca de Excel não carregou.');
     const wb = XLSX.utils.book_new();
     buildRouteSheets(data, wb, '');
-    XLSX.writeFile(wb, 'PlaniRoute_Rota_' + String((item ? item.meta.date : $('date').value)).replaceAll('/', '-') + '.xlsx');
+    XLSX.writeFile(wb, 'GRUPO LABMEDIC - Rota diária de entrega' + String((item ? item.meta.date : $('date').value)).replaceAll('/', '-') + '.xlsx');
 }
 
 function saveHistory() {
@@ -5098,9 +5177,9 @@ function saveHistory() {
             end: $('returnBase').checked ? clock(route.end) : '—'
         },
         ordered: route.ordered.map(function(s) {
-            return {
-                ...s
-            };
+            const copy = { ...s };
+            copy.fiscal = { ...ensureFiscalData(s) };
+            return copy;
         }),
         legs: route.legs.map(function(l) {
             return {
@@ -5143,11 +5222,12 @@ function renderHistory() {
 function printHistory(item) {
     const rows = item.ordered.map(function(s, i) {
         const leg = item.legs[i] || {};
-        return `<tr><td>${i+1}</td><td><strong>${s.name}</strong><br><small>${s.address}</small></td><td>${s.urgency}</td><td>${clock(leg.arrival)}</td><td>${Number(leg.km || 0).toFixed(1)} km</td><td>${fmt(leg.m || 0)}</td><td>${fmt(FIXED_DELIVERY_MINUTES)}<br><small>tempo padrão por entrega</small></td></tr>`
+        const fiscal = ensureFiscalData(s);
+        return `<tr><td>${i+1}</td><td><strong>${escHtml(s.name)}</strong><br><small>${escHtml(s.address)}</small></td><td>${s.urgency}</td><td>${clock(leg.arrival)}</td><td>${Number(leg.km || 0).toFixed(1)} km</td><td>${fmt(leg.m || 0)}</td><td>${fmt(FIXED_DELIVERY_MINUTES)}<br><small>tempo padrão por entrega</small></td><td>${escHtml(fiscal.number || '—')}</td><td>${escHtml(fiscal.issueDate || '—')}</td><td>${escHtml(formatMoney(fiscal.amount))}</td></tr>`
     }).join('') + (item.legs[item.ordered.length] ? `<tr style="font-weight:700;background:#eff8f4"><td>↩</td><td><strong>Retorno à base</strong><br><small>${item.meta.base}</small></td><td>—</td><td>${clock(item.legs[item.ordered.length].arrival)}</td><td>${Number(item.legs[item.ordered.length].km || 0).toFixed(1)} km</td><td>${fmt(item.legs[item.ordered.length].m || 0)}</td><td>Chegada à base: ${clock(item.end)}</td></tr>` : '');
     const w = window.open('', '_blank');
     if (!w) return alert('Permita pop-ups para gerar o PDF.');
-    w.document.write(`<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>GRUPO LABMEDIC - Roteiro</title><style>@page{size:A4 landscape;margin:10mm}body{font-family:Arial;color:#183345;padding:18px}.toolbar{display:flex;gap:8px;margin-bottom:16px}.toolbar button{border:0;border-radius:6px;padding:9px 13px;background:#0d806d;color:#fff;cursor:pointer}.toolbar button.alt{background:#193345}h1{margin:0;color:#0d806d}h2{font-size:15px;margin-top:28px;border-bottom:2px solid #0d806d;padding-bottom:8px}.sub{color:#6d7e80;font-size:12px;margin:6px 0 22px}.meta{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.box{background:#eff8f4;padding:12px;border-radius:7px}.box small{display:block;color:#718184;font-size:10px}.box b{display:block;margin-top:4px;font-size:13px}table{width:100%;border-collapse:collapse;margin-top:12px;font-size:11px}th{text-align:left;background:#193345;color:white;padding:9px}td{padding:9px;border-bottom:1px solid #dce8e3}small{color:#758789}@media print{button{display:none}}.unit-photo{width:100%;height:150px;object-fit:cover;border-radius:10px;background:var(--mint);display:block;margin-bottom:12px}.map-details{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin:12px 0}.map-detail{padding:9px;border:1px solid var(--line);border-radius:8px;background:var(--card)}.map-detail small{display:block;color:var(--soft);font-size:9px}.map-detail b{display:block;color:var(--ink);margin-top:3px}.maps-frame{width:100%;height:220px;border:1px solid var(--line);border-radius:10px;margin-top:12px;background:var(--mint)}.progress-backdrop{position:fixed;inset:0;background:rgba(8,27,38,.58);backdrop-filter:blur(5px);z-index:100;display:grid;place-items:center}.progress-card{width:min(390px,calc(100vw - 36px));background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:18px;padding:25px;box-shadow:0 22px 60px rgba(0,0,0,.25);text-align:center}.progress-ring{width:62px;height:62px;border:5px solid var(--line);border-top-color:var(--teal);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 15px}@keyframes spin{to{transform:rotate(360deg)}}.progress-bar{height:7px;background:var(--line);border-radius:99px;overflow:hidden;margin-top:16px}.progress-bar i{display:block;height:100%;width:18%;background:linear-gradient(90deg,var(--teal),#70dfbf);border-radius:inherit;transition:width .3s ease}@page{size:A4 landscape;margin:10mm}</style></head><body><div class="toolbar"><button onclick="window.print()">▤ Imprimir / Salvar como PDF</button><button class="alt" onclick="downloadReport()">⇩ Baixar relatório</button></div><h1>GRUPO LABMEDIC - Planejamento de Rotas</h1><div class="sub">Roteiro profissional de visitação · ${item.meta.date}</div><div class="meta"><div class="box"><small>Condutor</small><b>${item.meta.driver}</b></div><div class="box"><small>Base de partida</small><b>${item.meta.base}</b></div><div class="box"><small>Resumo</small><b>${item.meta.stops} paradas · ${Number(item.meta.km).toFixed(1)} km</b></div></div><h2>Agenda otimizada</h2><table><thead><tr><th>#</th><th>Unidade</th><th>Urgência</th><th>Chegada</th><th>Km do trecho</th><th>Deslocamento</th><th>Atendimento padrão</th></tr></thead><tbody>${rows}</tbody></table><p style="margin-top:24px;color:#718184;font-size:10px">A coluna “Km do trecho” indica a quilometragem entre a origem e o destino de cada linha. Cada parada considera exatamente ${FIXED_DELIVERY_MINUTES} minutos de atendimento padrão, independentemente de colunas de duração na planilha. A última linha mostra o retorno à base · Documento gerado localmente pelo GRUPO LABMEDIC - Planejamento de Rotas.</p><script>function downloadReport(){const blob=new Blob([document.documentElement.outerHTML],{type:"text/html;charset=utf-8"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="GRUPO LABMEDIC - Planejamento de Rotas.html";a.click();setTimeout(function(){URL.revokeObjectURL(a.href)},500)}window.onload=function(){setTimeout(function(){window.print()},350)}</body></html>`);
+    w.document.write(`<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>GRUPO LABMEDIC - Roteiro</title><style>@page{size:A4 landscape;margin:10mm}body{font-family:Arial;color:#183345;padding:18px}.toolbar{display:flex;gap:8px;margin-bottom:16px}.toolbar button{border:0;border-radius:6px;padding:9px 13px;background:#0d806d;color:#fff;cursor:pointer}.toolbar button.alt{background:#193345}h1{margin:0;color:#0d806d}h2{font-size:15px;margin-top:28px;border-bottom:2px solid #0d806d;padding-bottom:8px}.sub{color:#6d7e80;font-size:12px;margin:6px 0 22px}.meta{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.box{background:#eff8f4;padding:12px;border-radius:7px}.box small{display:block;color:#718184;font-size:10px}.box b{display:block;margin-top:4px;font-size:13px}table{width:100%;border-collapse:collapse;margin-top:12px;font-size:11px}th{text-align:left;background:#193345;color:white;padding:9px}td{padding:9px;border-bottom:1px solid #dce8e3}small{color:#758789}@media print{button{display:none}}.unit-photo{width:100%;height:150px;object-fit:cover;border-radius:10px;background:var(--mint);display:block;margin-bottom:12px}.map-details{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin:12px 0}.map-detail{padding:9px;border:1px solid var(--line);border-radius:8px;background:var(--card)}.map-detail small{display:block;color:var(--soft);font-size:9px}.map-detail b{display:block;color:var(--ink);margin-top:3px}.maps-frame{width:100%;height:220px;border:1px solid var(--line);border-radius:10px;margin-top:12px;background:var(--mint)}.progress-backdrop{position:fixed;inset:0;background:rgba(8,27,38,.58);backdrop-filter:blur(5px);z-index:100;display:grid;place-items:center}.progress-card{width:min(390px,calc(100vw - 36px));background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:18px;padding:25px;box-shadow:0 22px 60px rgba(0,0,0,.25);text-align:center}.progress-ring{width:62px;height:62px;border:5px solid var(--line);border-top-color:var(--teal);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 15px}@keyframes spin{to{transform:rotate(360deg)}}.progress-bar{height:7px;background:var(--line);border-radius:99px;overflow:hidden;margin-top:16px}.progress-bar i{display:block;height:100%;width:18%;background:linear-gradient(90deg,var(--teal),#70dfbf);border-radius:inherit;transition:width .3s ease}@page{size:A4 landscape;margin:10mm}</style></head><body><div class="toolbar"><button onclick="window.print()">▤ Imprimir / Salvar como PDF</button><button class="alt" onclick="downloadReport()">⇩ Baixar relatório</button></div><h1>GRUPO LABMEDIC - Planejamento de Rotas</h1><div class="sub">Roteiro profissional de visitação · ${item.meta.date}</div><div class="meta"><div class="box"><small>Condutor</small><b>${item.meta.driver}</b></div><div class="box"><small>Base de partida</small><b>${item.meta.base}</b></div><div class="box"><small>Resumo</small><b>${item.meta.stops} paradas · ${Number(item.meta.km).toFixed(1)} km</b></div></div><h2>Agenda otimizada</h2><table><thead><tr><th>#</th><th>Unidade</th><th>Urgência</th><th>Chegada</th><th>Km do trecho</th><th>Deslocamento</th><th>Atendimento padrão</th><th>Documento fiscal</th><th>Emissão</th><th>Valor</th></tr></thead><tbody>${rows}</tbody></table><p style="margin-top:24px;color:#718184;font-size:10px">A coluna “Km do trecho” indica a quilometragem entre a origem e o destino de cada linha. Cada parada considera exatamente ${FIXED_DELIVERY_MINUTES} minutos de atendimento padrão, independentemente de colunas de duração na planilha. A última linha mostra o retorno à base · Documento gerado localmente pelo GRUPO LABMEDIC - Planejamento de Rotas.</p><script>function downloadReport(){const blob=new Blob([document.documentElement.outerHTML],{type:"text/html;charset=utf-8"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="GRUPO LABMEDIC - Planejamento de Rotas.html";a.click();setTimeout(function(){URL.revokeObjectURL(a.href)},500)}window.onload=function(){setTimeout(function(){window.print()},350)}</body></html>`);
     w.document.close();
 }
 
@@ -5285,10 +5365,17 @@ function openHelp() {
 }
 
 function toggle(id) {
-    selected.has(id) ? selected.delete(id) : selected.add(id);
+    if (selected.has(id)) {
+        selected.delete(id);
+    } else {
+        const stop = stops.find(function(s) { return s.id === id; });
+        if (stop) ensureFiscalData(stop);
+        selected.add(id);
+    }
     route = null;
     renderResult();
     render();
+    persistDataset();
     persistSelected();
     persistRoute();
 }
@@ -5296,6 +5383,25 @@ $('unitRows').onclick = e => {
     const b = e.target.closest('[data-toggle]');
     if (b) toggle(b.dataset.toggle)
 };
+$('selectedList').addEventListener('input', function(e) {
+    const input = e.target.closest('[data-fiscal]');
+    if (!input) return;
+    const stop = stops.find(function(s) { return s.id === input.dataset.stop; });
+    if (!stop) return;
+    const fiscal = ensureFiscalData(stop);
+    fiscal[input.dataset.fiscal] = input.value;
+    persistDataset();
+    persistSelected();
+});
+$('selectedList').addEventListener('change', function(e) {
+    const input = e.target.closest('[data-fiscal]');
+    if (!input) return;
+    const stop = stops.find(function(s) { return s.id === input.dataset.stop; });
+    if (!stop) return;
+    ensureFiscalData(stop)[input.dataset.fiscal] = input.value;
+    persistDataset();
+    persistSelected();
+});
 $('selectedList').onclick = e => {
     const b = e.target.closest('[data-remove]');
     if (b) toggle(b.dataset.remove)
@@ -5431,6 +5537,7 @@ function applySelectionChange() {
     route = null;
     renderResult();
     render();
+    persistDataset();
     persistSelected();
     persistRoute();
 }
