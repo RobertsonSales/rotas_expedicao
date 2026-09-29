@@ -3198,8 +3198,8 @@ body.landing-lock {
             </div>
         </div>
         <div class="landing-footer">
-            <span>GRUPO LABMEDIC · PlaniRoute Saúde</span>
-            <span>Rotas assistenciais com previsibilidade de chegada</span>
+            <span>GRUPO LABMEDIC · Planejamento de Rotas</span>
+            <span>Rotas de entrega com previsibilidade de chegada</span>
         </div>
     </div>
 </div>
@@ -3305,7 +3305,7 @@ function saveJSON(storageKey, value) {
         localStorage.setItem(storageKey, JSON.stringify(value));
         return true;
     } catch (e) {
-        console.warn('PlaniRoute: não foi possível salvar "' + storageKey + '".', e);
+        console.warn('GRUPO LABMEDIC - Planejamento de Rotas: não foi possível salvar "' + storageKey + '".', e);
         return false;
     }
 }
@@ -3415,7 +3415,7 @@ function restoreState() {
             } catch (e) {}
         }
     } catch (e) {
-        console.warn('PlaniRoute: não foi possível restaurar o estado salvo.', e);
+        console.warn('GRUPO LABMEDIC - Planejamento de Rotas: não foi possível restaurar o estado salvo.', e);
     }
 }
 
@@ -4545,7 +4545,7 @@ async function calc() {
         persistRoute();
         await wait(350);
     } catch (error) {
-        console.error('PlaniRoute: falha ao calcular a rota:', error);
+        console.error('GRUPO LABMEDIC - Planejamento de Rotas: falha ao calcular a rota:', error);
         route = null;
         renderResult();
         render();
@@ -4914,7 +4914,7 @@ function buildRouteSheets(data, wb, suffix) {
             end: $('returnBase').checked ? clock(data.end) : '—'
         };
     const summary = [
-            ['PLANIROUTE SAÚDE · RESUMO EXECUTIVO', ''],
+            ['GRUPO LABMEDIC - Planejamento de Rotas · RESUMO EXECUTIVO', ''],
             ['Indicador', 'Valor'],
             ['Condutor', meta.driver],
             ['Data', meta.date],
@@ -5147,7 +5147,7 @@ function printHistory(item) {
     }).join('') + (item.legs[item.ordered.length] ? `<tr style="font-weight:700;background:#eff8f4"><td>↩</td><td><strong>Retorno à base</strong><br><small>${item.meta.base}</small></td><td>—</td><td>${clock(item.legs[item.ordered.length].arrival)}</td><td>${Number(item.legs[item.ordered.length].km || 0).toFixed(1)} km</td><td>${fmt(item.legs[item.ordered.length].m || 0)}</td><td>Chegada à base: ${clock(item.end)}</td></tr>` : '');
     const w = window.open('', '_blank');
     if (!w) return alert('Permita pop-ups para gerar o PDF.');
-    w.document.write(`<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>PlaniRoute · Roteiro</title><style>@page{size:A4 landscape;margin:10mm}body{font-family:Arial;color:#183345;padding:18px}.toolbar{display:flex;gap:8px;margin-bottom:16px}.toolbar button{border:0;border-radius:6px;padding:9px 13px;background:#0d806d;color:#fff;cursor:pointer}.toolbar button.alt{background:#193345}h1{margin:0;color:#0d806d}h2{font-size:15px;margin-top:28px;border-bottom:2px solid #0d806d;padding-bottom:8px}.sub{color:#6d7e80;font-size:12px;margin:6px 0 22px}.meta{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.box{background:#eff8f4;padding:12px;border-radius:7px}.box small{display:block;color:#718184;font-size:10px}.box b{display:block;margin-top:4px;font-size:13px}table{width:100%;border-collapse:collapse;margin-top:12px;font-size:11px}th{text-align:left;background:#193345;color:white;padding:9px}td{padding:9px;border-bottom:1px solid #dce8e3}small{color:#758789}@media print{button{display:none}}.unit-photo{width:100%;height:150px;object-fit:cover;border-radius:10px;background:var(--mint);display:block;margin-bottom:12px}.map-details{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin:12px 0}.map-detail{padding:9px;border:1px solid var(--line);border-radius:8px;background:var(--card)}.map-detail small{display:block;color:var(--soft);font-size:9px}.map-detail b{display:block;color:var(--ink);margin-top:3px}.maps-frame{width:100%;height:220px;border:1px solid var(--line);border-radius:10px;margin-top:12px;background:var(--mint)}.progress-backdrop{position:fixed;inset:0;background:rgba(8,27,38,.58);backdrop-filter:blur(5px);z-index:100;display:grid;place-items:center}.progress-card{width:min(390px,calc(100vw - 36px));background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:18px;padding:25px;box-shadow:0 22px 60px rgba(0,0,0,.25);text-align:center}.progress-ring{width:62px;height:62px;border:5px solid var(--line);border-top-color:var(--teal);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 15px}@keyframes spin{to{transform:rotate(360deg)}}.progress-bar{height:7px;background:var(--line);border-radius:99px;overflow:hidden;margin-top:16px}.progress-bar i{display:block;height:100%;width:18%;background:linear-gradient(90deg,var(--teal),#70dfbf);border-radius:inherit;transition:width .3s ease}@page{size:A4 landscape;margin:10mm}</style></head><body><div class="toolbar"><button onclick="window.print()">▤ Imprimir / Salvar como PDF</button><button class="alt" onclick="downloadReport()">⇩ Baixar relatório</button></div><h1>PlaniRoute Saúde</h1><div class="sub">Roteiro profissional de visitação · ${item.meta.date}</div><div class="meta"><div class="box"><small>Condutor</small><b>${item.meta.driver}</b></div><div class="box"><small>Base de partida</small><b>${item.meta.base}</b></div><div class="box"><small>Resumo</small><b>${item.meta.stops} paradas · ${Number(item.meta.km).toFixed(1)} km</b></div></div><h2>Agenda otimizada</h2><table><thead><tr><th>#</th><th>Unidade</th><th>Urgência</th><th>Chegada</th><th>Km do trecho</th><th>Deslocamento</th><th>Atendimento padrão</th></tr></thead><tbody>${rows}</tbody></table><p style="margin-top:24px;color:#718184;font-size:10px">A coluna “Km do trecho” indica a quilometragem entre a origem e o destino de cada linha. Cada parada considera exatamente ${FIXED_DELIVERY_MINUTES} minutos de atendimento padrão, independentemente de colunas de duração na planilha. A última linha mostra o retorno à base · Documento gerado localmente pelo PlaniRoute.</p><script>function downloadReport(){const blob=new Blob([document.documentElement.outerHTML],{type:"text/html;charset=utf-8"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="PlaniRoute_Roteiro.html";a.click();setTimeout(function(){URL.revokeObjectURL(a.href)},500)}window.onload=function(){setTimeout(function(){window.print()},350)}</body></html>`);
+    w.document.write(`<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>GRUPO LABMEDIC - Roteiro</title><style>@page{size:A4 landscape;margin:10mm}body{font-family:Arial;color:#183345;padding:18px}.toolbar{display:flex;gap:8px;margin-bottom:16px}.toolbar button{border:0;border-radius:6px;padding:9px 13px;background:#0d806d;color:#fff;cursor:pointer}.toolbar button.alt{background:#193345}h1{margin:0;color:#0d806d}h2{font-size:15px;margin-top:28px;border-bottom:2px solid #0d806d;padding-bottom:8px}.sub{color:#6d7e80;font-size:12px;margin:6px 0 22px}.meta{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.box{background:#eff8f4;padding:12px;border-radius:7px}.box small{display:block;color:#718184;font-size:10px}.box b{display:block;margin-top:4px;font-size:13px}table{width:100%;border-collapse:collapse;margin-top:12px;font-size:11px}th{text-align:left;background:#193345;color:white;padding:9px}td{padding:9px;border-bottom:1px solid #dce8e3}small{color:#758789}@media print{button{display:none}}.unit-photo{width:100%;height:150px;object-fit:cover;border-radius:10px;background:var(--mint);display:block;margin-bottom:12px}.map-details{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin:12px 0}.map-detail{padding:9px;border:1px solid var(--line);border-radius:8px;background:var(--card)}.map-detail small{display:block;color:var(--soft);font-size:9px}.map-detail b{display:block;color:var(--ink);margin-top:3px}.maps-frame{width:100%;height:220px;border:1px solid var(--line);border-radius:10px;margin-top:12px;background:var(--mint)}.progress-backdrop{position:fixed;inset:0;background:rgba(8,27,38,.58);backdrop-filter:blur(5px);z-index:100;display:grid;place-items:center}.progress-card{width:min(390px,calc(100vw - 36px));background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:18px;padding:25px;box-shadow:0 22px 60px rgba(0,0,0,.25);text-align:center}.progress-ring{width:62px;height:62px;border:5px solid var(--line);border-top-color:var(--teal);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 15px}@keyframes spin{to{transform:rotate(360deg)}}.progress-bar{height:7px;background:var(--line);border-radius:99px;overflow:hidden;margin-top:16px}.progress-bar i{display:block;height:100%;width:18%;background:linear-gradient(90deg,var(--teal),#70dfbf);border-radius:inherit;transition:width .3s ease}@page{size:A4 landscape;margin:10mm}</style></head><body><div class="toolbar"><button onclick="window.print()">▤ Imprimir / Salvar como PDF</button><button class="alt" onclick="downloadReport()">⇩ Baixar relatório</button></div><h1>GRUPO LABMEDIC - Planejamento de Rotas</h1><div class="sub">Roteiro profissional de visitação · ${item.meta.date}</div><div class="meta"><div class="box"><small>Condutor</small><b>${item.meta.driver}</b></div><div class="box"><small>Base de partida</small><b>${item.meta.base}</b></div><div class="box"><small>Resumo</small><b>${item.meta.stops} paradas · ${Number(item.meta.km).toFixed(1)} km</b></div></div><h2>Agenda otimizada</h2><table><thead><tr><th>#</th><th>Unidade</th><th>Urgência</th><th>Chegada</th><th>Km do trecho</th><th>Deslocamento</th><th>Atendimento padrão</th></tr></thead><tbody>${rows}</tbody></table><p style="margin-top:24px;color:#718184;font-size:10px">A coluna “Km do trecho” indica a quilometragem entre a origem e o destino de cada linha. Cada parada considera exatamente ${FIXED_DELIVERY_MINUTES} minutos de atendimento padrão, independentemente de colunas de duração na planilha. A última linha mostra o retorno à base · Documento gerado localmente pelo GRUPO LABMEDIC - Planejamento de Rotas.</p><script>function downloadReport(){const blob=new Blob([document.documentElement.outerHTML],{type:"text/html;charset=utf-8"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="GRUPO LABMEDIC - Planejamento de Rotas.html";a.click();setTimeout(function(){URL.revokeObjectURL(a.href)},500)}window.onload=function(){setTimeout(function(){window.print()},350)}</body></html>`);
     w.document.close();
 }
 
@@ -5832,7 +5832,7 @@ $('exportHistoryBtn').onclick = function() {
     list.forEach(function(item, i) {
         buildRouteSheets(item, wb, String(i + 1));
     });
-    XLSX.writeFile(wb, 'PlaniRoute_Historico_' + (from || 'inicio') + '_' + (to || 'atual') + '.xlsx');
+    XLSX.writeFile(wb, 'GRUPO LABMEDIC - Planejamento de Rotas_' + (from || 'inicio') + '_' + (to || 'atual') + '.xlsx');
 };
 /* ================================================================
    GOOGLE MAPS · abre a rota selecionada/otimizada em nova aba
@@ -5912,7 +5912,7 @@ function driverRoutesSheet(item) {
         }).join(''),
         ret = legs[ordered.length],
         retRow = ret ? '<tr class="rs-return"><td>↩</td><td><strong>Retorno à base</strong><br><small>' + escHtml(item.meta.base) + '</small></td><td>—</td><td>' + clock(ret.arrival) + '</td><td>' + Number(ret.km || 0).toFixed(1) + ' km</td><td>' + fmt(ret.m || 0) + '</td><td>Chegada à base: ' + clock(item.end) + '</td></tr>' : '';
-    return '<div class="rs-sheet"><div class="rs-sheet-head"><div><h4>PlaniRoute Saúde · Roteiro de visitação</h4><small>' + escHtml(item.meta.date || '') + ' · saída ' + escHtml(item.meta.departure || '') + '</small></div><span class="rs-tag">' + escHtml(item.sourceTag || 'Roteiro') + '</span></div>' +
+    return '<div class="rs-sheet"><div class="rs-sheet-head"><div><h4>GRUPO LABMEDIC - Roteiro de Entregas</h4><small>' + escHtml(item.meta.date || '') + ' · saída ' + escHtml(item.meta.departure || '') + '</small></div><span class="rs-tag">' + escHtml(item.sourceTag || 'Roteiro') + '</span></div>' +
         '<div class="rs-meta"><div class="rs-box"><small>Condutor</small><b>' + escHtml(item.meta.driver) + '</b></div><div class="rs-box"><small>Base de partida</small><b>' + escHtml(item.meta.base) + '</b></div><div class="rs-box"><small>Resumo</small><b>' + item.meta.stops + ' paradas · ' + Number(item.meta.km).toFixed(1) + ' km</b></div></div>' +
         '<div class="rs-tablewrap"><table><thead><tr><th>#</th><th>Unidade</th><th>Urgência</th><th>Chegada</th><th>Km do trecho</th><th>Deslocamento</th><th>Atendimento padrão</th></tr></thead><tbody>' + rows + retRow + '</tbody></table></div></div>';
 }
