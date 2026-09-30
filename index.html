@@ -5477,6 +5477,12 @@ function reopenHistory(item) {
         service: item.service,
         end: item.end
     };
+    /* A base de partida/retorno deve ser a da rota salva, e não a que
+       estiver selecionada por acaso no painel Planejamento. */
+    const savedBase = bases.find(function(b) {
+        return key(b.name) === key(item.meta.base || '');
+    });
+    if (savedBase) $('baseSelect').value = savedBase.id;
     $('driver').value = item.meta.driver;
     $('driverName').value = item.meta.driver;
     $('date').value = item.meta.date;
@@ -6318,11 +6324,21 @@ $('exportHistoryBtn').onclick = function() {
    GOOGLE MAPS · abre a rota selecionada/otimizada em nova aba
    ================================================================ */
 /* GM-ROUTE-LINKS:START */
+/* Coordenada "verificada" = obtida pelo Google/OpenStreetMap, informada
+   manualmente ou vinda da Latitude/Longitude da planilha (geoSource definido).
+   Coordenadas sem origem — como o placeholder da base padrão ou as geradas
+   pelo importador — NUNCA vão no link: o Google as converteria no endereço
+   mais próximo (ex.: outra rua) em vez do endereço real do ponto. */
+function hasVerifiedCoordinates(p) {
+    return !!p && !!p.geoSource && hasValidCoordinates(p);
+}
+
 function routePointParam(p) {
     if (!p) return '';
-    if (p.lat != null && p.lng != null && isFinite(Number(p.lat)) && isFinite(Number(p.lng))) {
+    if (hasVerifiedCoordinates(p)) {
         return Number(p.lat).toFixed(6) + ',' + Number(p.lng).toFixed(6);
     }
+    if (p.googleFormattedAddress) return p.googleFormattedAddress;
     if (p.searchText) return p.searchText;
     return [p.name, p.address, p.city, 'Brasil'].filter(Boolean).join(', ');
 }
@@ -6390,7 +6406,7 @@ async function openGoogleMapsRoute() {
        ser bloqueada pelo navegador durante a espera. */
     let win = null;
     const pending = points.filter(function(p, i) {
-        return !hasValidCoordinates(p) && points.indexOf(p) === i;
+        return !hasVerifiedCoordinates(p) && points.indexOf(p) === i;
     });
     if (pending.length) {
         win = window.open('', '_blank');
@@ -6398,7 +6414,8 @@ async function openGoogleMapsRoute() {
             if (win) win.document.title = 'Abrindo Google Maps…';
             showProgress('Localizando endereços para abrir no Google Maps…', 30);
             await geocodeAllWithProgress(pending, gmapsReady && geocoderG ? function(p) {
-                return geocodePointGoogle(p);
+                /* force: ignora coordenada provisória/antiga e consulta o endereço. */
+                return geocodePointGoogle(p, { force: !hasVerifiedCoordinates(p) });
             } : geocodePointPublic, gmapsReady && geocoderG ? 'Google' : 'OpenStreetMap', 30000);
         } catch (e) {
             console.warn('Google Maps: não foi possível localizar todos os pontos.', e);
