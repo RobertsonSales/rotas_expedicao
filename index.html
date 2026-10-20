@@ -3361,6 +3361,37 @@ body.landing-lock {
 @media(max-width:760px){.top::before{left:-15px;right:-15px}}
 @media(max-width:520px){.top::before{left:-14px;right:-14px}}
 @media print{.top{position:static}}
+
+/* ================================================================
+   GOOGLE SHEETS · status, formulário de bases, histórico sincronizado
+   ================================================================ */
+.status.sheets-pill { cursor: default; white-space: nowrap }
+.status.off { border-color: #f1d6c4; background: #fff6ef; color: #a5521c }
+.status.off i { background: #d06b1e }
+.status.pending i { background: #d0a21e; animation: gdotpulse 1s ease-in-out infinite }
+.dark .status.off { background: #3a2a20; border-color: #6b4630; color: #f0b48a }
+.base-tools { display: flex; gap: 14px; justify-content: flex-end; margin: -8px 0 8px }
+.tag.tag-local { color: #7a5b00; background: #fff4cf }
+.tag.tag-warn { color: #a5521c; background: #fdebdc }
+.unit-flag { display: inline-block; margin-left: 6px; padding: 1px 5px; border-radius: 5px; background: #fff4cf; color: #7a5b00; font-size: 8px; font-weight: 800; font-style: normal; vertical-align: middle }
+.dark .unit-flag, .dark .tag.tag-local { background: #4a3d12; color: #f3d77a }
+.dark .tag.tag-warn { background: #4a2a16; color: #f0b48a }
+.base-form { display: grid; grid-template-columns: 1fr 1fr; gap: 0 12px }
+.base-form label { display: block; margin: 0 0 11px; color: var(--soft); font-size: 10px; font-weight: 800 }
+.base-form input:not([type=checkbox]), .base-form select { display: block; width: 100%; margin-top: 5px; padding: 9px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--card); color: var(--ink) }
+.base-form .bf-wide { grid-column: 1 / -1 }
+.base-form .bf-check { margin: 2px 0 12px; align-self: center }
+.bf-locate { display: flex; align-items: center; gap: 10px; margin: -2px 0 12px; flex-wrap: wrap }
+.bf-locate small { color: var(--soft); font-size: 10px; flex: 1; min-width: 180px }
+.pref-bases { display: grid; gap: 7px; margin: 0 0 10px }
+.pref-base { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 9px 11px; border: 1px solid var(--line); border-radius: 9px }
+.pref-base small { display: block; color: var(--soft); font-size: 10px; margin-top: 2px }
+.pref-base .tag { display: inline-block; padding: 2px 6px; margin-left: 4px }
+.pref-sheets-manual { margin: 0 0 8px; font-size: 11px }
+.pref-sheets-manual summary { cursor: pointer; font-weight: 700; margin-bottom: 8px }
+.modal-body label > input[type="text"], .modal-body label > input[type="password"] { display: block; width: 100%; padding: 9px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--card); color: var(--ink); font-size: 12px }
+.hist-tools { display: flex; align-items: end; gap: 7px; flex-wrap: wrap }
+@media (max-width: 620px) { .base-form { grid-template-columns: 1fr } .status.sheets-pill { display: none } }
 </style>
 </head>
 <body>
@@ -3417,17 +3448,17 @@ body.landing-lock {
     </div>
 </div>
 <div class="app">
-<aside class="side" id="sideNav"><button class="side-toggle" id="sideToggle" type="button" aria-controls="sideNav" aria-expanded="true" title="Recolher menu lateral (Ctrl + B)"><span aria-hidden="true">«</span></button><div class="brand"><div class="brand-mark">⌁</div><div class="brand-txt"><strong>GRUPO LABMEDIC</strong><span>Planejamento de Entregas</span></div></div><div class="workspace"><div class="eyebrow">Workspace ativo</div><div class="workspace-row"><i></i>Logística assistencial<b>⌄</b></div></div><div class="nav"><div class="nav-label">Operação</div><button class="active" data-tab="plan" title="Planejamento"><i class="nav-ico">➤</i><em class="nav-txt">Planejamento</em> <span id="navCount">5</span></button><button data-tab="import" title="Importar dados"><i class="nav-ico">▧</i><em class="nav-txt">Importar dados</em></button><button data-tab="history" title="Histórico"><i class="nav-ico">▦</i><em class="nav-txt">Histórico</em></button><button data-tab="metrics" title="Análise de Métricas"><i class="nav-ico">◈</i><em class="nav-txt">Análise de Métricas</em><span id="metricsCount">0</span></button><div class="nav-label second">Configuração</div><button id="preferencesBtn" title="Preferências"><i class="nav-ico">☷</i><em class="nav-txt">Preferências</em></button><button id="helpBtn" title="Central de Ajuda · abre o manual de uso em uma nova aba"><i class="nav-ico">?</i><em class="nav-txt">Central de Ajuda</em><small class="nav-ext" aria-hidden="true">↗</small></button></div><div class="operator"><div class="avatar">MC</div><div class="operator-txt"><b>Marina Costa</b><small>Operadora · Rede SP</small></div></div></aside>
-<main class="main"><header class="top"><div><div class="eyebrow">Centro de controle / <span id="crumb">Planejamento de rotas de entrega</span></div><h1 id="pageTitle">Planejamento de rotas</h1></div><div style="display:flex;align-items:center;gap:10px"><button class="theme-btn" id="themeBtn" title="Alternar tema">☾</button><div class="status"><i></i>API oficial Google</div></div></header>
+<aside class="side" id="sideNav"><button class="side-toggle" id="sideToggle" type="button" aria-controls="sideNav" aria-expanded="true" title="Recolher menu lateral (Ctrl + B)"><span aria-hidden="true">«</span></button><div class="brand"><div class="brand-mark">⌁</div><div class="brand-txt"><strong>GRUPO LABMEDIC</strong><span>Planejamento de Entregas</span></div></div><div class="workspace"><div class="eyebrow">Workspace ativo</div><div class="workspace-row"><i></i>Logística assistencial<b>⌄</b></div></div><div class="nav"><div class="nav-label">Operação</div><button class="active" data-tab="plan" title="Planejamento"><i class="nav-ico">➤</i><em class="nav-txt">Planejamento</em> <span id="navCount">5</span></button><button data-tab="import" title="Importação manual de planilha (contingência)"><i class="nav-ico">▧</i><em class="nav-txt">Importação manual</em></button><button data-tab="history" title="Histórico"><i class="nav-ico">▦</i><em class="nav-txt">Histórico</em></button><button data-tab="metrics" title="Análise de Métricas"><i class="nav-ico">◈</i><em class="nav-txt">Análise de Métricas</em><span id="metricsCount">0</span></button><div class="nav-label second">Configuração</div><button id="preferencesBtn" title="Preferências"><i class="nav-ico">☷</i><em class="nav-txt">Preferências</em></button><button id="helpBtn" title="Central de Ajuda · abre o manual de uso em uma nova aba"><i class="nav-ico">?</i><em class="nav-txt">Central de Ajuda</em><small class="nav-ext" aria-hidden="true">↗</small></button></div><div class="operator"><div class="avatar">MC</div><div class="operator-txt"><b>Marina Costa</b><small>Operadora · Rede SP</small></div></div></aside>
+<main class="main"><header class="top"><div><div class="eyebrow">Centro de controle / <span id="crumb">Planejamento de rotas de entrega</span></div><h1 id="pageTitle">Planejamento de rotas</h1></div><div style="display:flex;align-items:center;gap:10px"><button class="theme-btn" id="themeBtn" title="Alternar tema">☾</button><div class="status sheets-pill pending" id="sheetsPill" title="Conectando ao Google Sheets…"><i></i><span id="sheetsPillTxt">Google Sheets · conectando…</span></div><div class="status"><i></i>API oficial Google</div></div></header>
 <section id="planPage"><section class="hero"><div><div class="eyebrow" style="color:#71d8bc">✦ Uso da API oficial do Google Maps</div><h2>Previsibilidade de rotas em poucos cliques<br><em>Monitore o trajeto dos condutores</em></h3><p>Você pode salvar as rotas diariamente, ganhando assim uma importante ferramenta de rastreabilidade histórica. </p></div><div class="hero-art"><div class="orbit o1"></div><div class="orbit o2"></div><div class="route-line"></div><div class="node n1">⌖</div><div class="node n2">⌖</div><div class="node n3">⌖</div></div></section>
 <section class="summary"><div class="card"><div class="ico">▣</div><div><span>Unidades no planejamento</span><b id="sumStops">5<small> / 8</small></b></div></div><div class="card"><div class="ico">◷</div><div><span>Tempo de trânsito estimado</span><b id="sumTravel">—</b></div><span class="trend" id="sumTravelSub">aguardando rota</span></div><div class="card"><div class="ico">◔</div><div><span>Urgências críticas</span><b id="sumCritical">4</b></div><span class="trend" id="sumCriticalSub">2 super · 2 alta</span></div><div class="card"><div class="ico">♙</div><div><span>Condutor responsável</span><b style="font-size:14px" id="sumDriver">Reginaldo Braga</b></div><span class="trend">dia 28</span></div></section>
-<div class="grid"><section><div class="section"><div><div class="over">01 · Configuração</div><h3>Monte a rota</h3></div><button class="link" id="clearBtn">Limpar seleção ×</button></div><div class="card form"><label>Condutor<select id="driver"><option>Reginaldo Braga</option><option>Marcelo Medeiros</option><option>Vendedor</option><option>Técnico</option><option>Coletor da cliente</option><option>Transportadora</option></select><input id="driverName" type="text" value="Reginaldo Braga" placeholder="Nome utilizado nos documentos" style="margin-top:7px"></label><div class="two"><label>Data da operação<input id="date" type="date" value=""></label><label>Saída prevista<input id="departure" type="time" value="08:00"></label></div><label>Base de partida<select id="baseSelect"></select></label><div class="base"><div class="base-icon">⌖</div><div><b id="baseName"></b><small id="baseAddr"></small></div><span class="ok">✓</span></div><div class="divider"></div><div class="labelrow"><label>Paradas da rota <span id="selectedLabel">5 selecionadas</span></label><button id="addPoint">＋ Adicionar ponto</button></div><div class="selected" id="selectedList"></div><div class="options"><label class="switchline"><input id="returnBase" type="checkbox" checked><span class="switch"></span>Retornar à base ao final</label><label>Trânsito<select id="traffic"><option value="estimated">Estimado por faixa horária</option><option value="off">Sem ajuste de trânsito</option></select></label></div><button class="primary" id="calcBtn" title="Calcular a melhor rota com a seleção atual">⌁ Calcular melhor rota <span id="calcBtnIcon">↑</span></button><div class="recalc-notice" id="recalcNotice">⚠ A seleção ou configuração mudou. Recalcule a rota antes de salvá-la ou exportá-la.</div><div class="foot">✓ O cálculo considera distância, janela de saída, tempo de atendimento e urgência.</div></div></section>
+<div class="grid"><section><div class="section"><div><div class="over">01 · Configuração</div><h3>Monte a rota</h3></div><button class="link" id="clearBtn">Limpar seleção ×</button></div><div class="card form"><label>Condutor<select id="driver"><option>Reginaldo Braga</option><option>Marcelo Medeiros</option><option>Vendedor</option><option>Técnico</option><option>Coletor da cliente</option><option>Transportadora</option></select><input id="driverName" type="text" value="Reginaldo Braga" placeholder="Nome utilizado nos documentos" style="margin-top:7px"></label><div class="two"><label>Data da operação<input id="date" type="date" value=""></label><label>Saída prevista<input id="departure" type="time" value="08:00"></label></div><label>Base de partida<select id="baseSelect"></select></label><div class="base-tools"><button type="button" class="link" id="baseNewBtn" title="Cadastrar uma nova base de partida no Google Sheets">＋ Nova base</button><button type="button" class="link" id="baseEditBtn" title="Editar a base selecionada no Google Sheets">✎ Editar base</button></div><div class="base"><div class="base-icon">⌖</div><div><b id="baseName"></b><small id="baseAddr"></small></div><span class="ok">✓</span></div><div class="divider"></div><div class="labelrow"><label>Paradas da rota <span id="selectedLabel">5 selecionadas</span></label><button id="addPoint">＋ Adicionar ponto</button></div><div class="selected" id="selectedList"></div><div class="options"><label class="switchline"><input id="returnBase" type="checkbox" checked><span class="switch"></span>Retornar à base ao final</label><label>Trânsito<select id="traffic"><option value="estimated">Estimado por faixa horária</option><option value="off">Sem ajuste de trânsito</option></select></label></div><button class="primary" id="calcBtn" title="Calcular a melhor rota com a seleção atual">⌁ Calcular melhor rota <span id="calcBtnIcon">↑</span></button><div class="recalc-notice" id="recalcNotice">⚠ A seleção ou configuração mudou. Recalcule a rota antes de salvá-la ou exportá-la.</div><div class="foot">✓ O cálculo considera distância, janela de saída, tempo de atendimento e urgência.</div></div></section>
 <section><div class="section"><div><div class="over">02 · Visualização</div><h3 id="mapTitle">Mapa operacional</h3></div><div class="map-actions"><button class="outline" id="driverRoutesBtn" title="Ver todas as rotas deste condutor no formato do roteiro PDF">▤ Rotas do condutor</button><button class="outline" id="gmapsOpenBtn" title="Abrir a rota selecionada e otimizada no Google Maps, em uma nova aba">🗺 Google Maps</button><button class="outline" id="saveRouteBtn">▣ Salvar Rota</button><button class="outline" id="recalcBtn">↻ Recalcular</button></div></div><div class="card map"><div class="mapcanvas" id="mapCanvas"><div id="fallbackMap" class="fallback-map"><div class="road r1"></div><div class="road r2"></div><div class="road r3"></div><span class="maplabel l1">ZONA NORTE</span><span class="maplabel l2">CENTRO EXPANDIDO</span><span class="maplabel l3">ZONA SUL</span><svg class="route" id="routeSvg" viewBox="0 0 100 100" preserveAspectRatio="none"></svg></div><div id="gmap" class="gmap-container" style="display:none"></div><div class="zoom-controls" id="mapZoomCtrls" aria-label="Controles de zoom do mapa do painel" data-target="panel"><button class="zoom-btn" data-zoom="in" title="Aumentar zoom">＋</button><button class="zoom-btn" data-zoom="out" title="Diminuir zoom">－</button><button class="zoom-btn" data-zoom="reset" title="Ajustar à área">⌖</button></div><div class="float"><i id="gmapsDot" class="gdot off"></i><span id="gmapsLabel">Google Maps não configurado</span><br><small id="mapSub">pré-visualização da seleção</small></div></div><div class="legend"><span><i class="dot db"></i>Base</span><span><i class="dot dg"></i>Rota planejada</span><span><i class="dot do"></i>Urgência</span><small>⌁ Rota real via Google Maps (ou estimativa local por distância e horário, sem chave)</small></div></div><div class="card result" id="result"><div class="empty"><div class="circle">⌁</div><h3>A rota aparecerá aqui</h3><p>Selecione as unidades, defina a urgência e clique em <b>Calcular melhor rota</b>.</p></div></div></section></div>
-<section class="units" id="unitsSection"><div class="section"><div><div class="over">03 · Unidades disponíveis</div><h3>Escolha os pontos de ligação</h3></div><div class="filters" id="smartSearch"><input id="search" placeholder="🔎  Busca inteligente · unidade, cliente, endereço ou código"><button class="link units-toggle" id="unitsToggleBtn" type="button" aria-expanded="false" aria-controls="unitsBody" title="Expandir a lista completa de unidades"><span class="ut-ico" aria-hidden="true">▾</span><span class="ut-txt">Mostrar unidades</span></button></div></div><div class="geo-filter" id="geoFilter"><div class="gf-title"><span class="gf-ico" aria-hidden="true">⌖</span><div><b>Marcar por localidade</b><small>Filtre por estado e cidade e marque de uma vez todas as unidades exibidas.</small></div></div><label>Estado<select id="filterUF"><option value="">Todos os estados</option></select></label><label>Cidade<select id="filterCity"><option value="">Todas as cidades</option></select></label><div class="gf-actions"><button class="outline" id="markFiltered" type="button">✓ Marcar filtradas</button><button class="outline" id="unmarkFiltered" type="button">✕ Desmarcar</button><button class="link" id="clearGeoFilter" type="button">Limpar filtro</button></div><div class="gf-info" id="geoInfo"></div></div><div class="card table units-body" id="unitsBody"><div class="thead"><span id="tableCount">5 de 8</span><span>Unidade de saúde</span><span>Município</span><span>Urgência</span><span>Atendimento</span><span>Ação</span></div><div id="unitRows"></div></div></section><div class="footer"><span>✓ Dados processados localmente neste navegador</span><span>Última atualização: agora · <button data-tab="import">Trocar planilha</button></span></div></section>
-<section id="importPage" class="import-page" style="display:none"><div class="importhero"><div><div class="eyebrow" style="color:#71d8bc">⇧ Entrada de dados</div><h2>Traga sua planilha.<br><em>O restante fica organizado.</em></h2><p>Selecione o arquivo Excel ou CSV com a aba de tarefas. São lidas as colunas Base, Endereço (padronizado), Cidade, UF, Latitude e Longitude. A leitura acontece no navegador.</p></div><div style="font-size:58px;color:#9af0d5">▧</div></div><div class="importgrid"><div class="card upload"><div class="drop" id="dropZone"><div class="uploadicon">⇧</div><h3>Arraste sua planilha aqui</h3><p>ou clique para procurar no computador</p><small>Formatos aceitos: .xlsx, .xls e .csv · até 20 MB</small><button class="primary" style="width:auto;margin-top:17px" id="fileBtn">⇧ Selecionar arquivo</button></div><input id="fileInput" type="file" accept=".xlsx,.xls,.csv" hidden><div class="file-status"><div style="font-size:20px;color:#0d8c78">▧</div><div><b id="fileName">Planilha de rede · aguardando importação</b><small id="fileInfo">Nenhum arquivo carregado ainda</small></div></div></div><div class="card mapping"><div class="over">Leitura da planilha</div><h3>Aba e colunas utilizadas</h3><p>A aba com a coluna <b>Endereço (padronizado)</b> é detectada automaticamente e abas “-Ant” são ignoradas. Se necessário, escolha outra aba.</p><div class="maprow"><span><b>Aba de dados</b><small>unidades e bases</small></span><select id="sheetStop"><option>Tarefas</option></select></div><div class="colmap" id="colMap"><div class="colrow"><span><b>Cliente</b><small>nome da unidade</small></span><em>aguardando</em></div><div class="colrow"><span><b>Base</b><small>pontos de saída</small></span><em>aguardando</em></div><div class="colrow"><span><b>Endereço (padronizado)</b><small>enviado ao Google Maps</small></span><em>aguardando</em></div><div class="colrow"><span><b>Cidade</b><small>filtro por cidade</small></span><em>aguardando</em></div><div class="colrow"><span><b>UF (estado)</b><small>filtro por estado</small></span><em>aguardando</em></div><div class="colrow"><span><b>Latitude</b><small>só se o Google falhar</small></span><em>aguardando</em></div><div class="colrow"><span><b>Longitude</b><small>só se o Google falhar</small></span><em>aguardando</em></div></div><button class="outline" style="width:100%;justify-content:center;margin-top:15px" id="changeFile">↻ Trocar arquivo</button></div><div class="card guide"><b>Como preparar a planilha?</b><p>Use a primeira linha como cabeçalho e inclua <strong>Cliente, Base, Endereço (padronizado), Cidade, UF, Latitude e Longitude</strong>. Os endereços são localizados pelo Google Maps; <strong>Latitude e Longitude só são usadas se essa pesquisa falhar</strong>. A urgência pode ser ajustada depois no planejamento.</p></div></div></section>
-<section id="historyPage" class="history-page" style="display:none"><div class="historyhead"><div><div class="over">Registro de operações</div><h2>Histórico de planejamentos</h2><p>Revisite, reabra e exporte os cenários calculados nesta sessão.</p></div><div style="display:flex;align-items:end;gap:7px;flex-wrap:wrap"><label class="muted">De<input id="historyFrom" type="date" aria-label="Filtrar histórico a partir de" style="display:block;margin-top:4px;padding:7px;border:1px solid var(--line);border-radius:7px;background:var(--card);color:var(--ink)"></label><label class="muted">Até<input id="historyTo" type="date" aria-label="Filtrar histórico até" style="display:block;margin-top:4px;padding:7px;border:1px solid var(--line);border-radius:7px;background:var(--card);color:var(--ink)"></label><button class="outline" id="exportHistoryBtn">⇩ Exportar histórico</button></div></div><div class="card" id="historyList"><div class="history-empty">Nenhuma rota calculada ainda. Calcule uma rota para que ela apareça aqui.</div></div><div class="notice">△ As rotas ficam salvas neste navegador. Use PDF ou Excel para arquivamento operacional externo.</div></section>
+<section class="units" id="unitsSection"><div class="section"><div><div class="over">03 · Unidades disponíveis</div><h3>Escolha os pontos de ligação</h3></div><div class="filters" id="smartSearch"><input id="search" placeholder="🔎  Busca inteligente · unidade, cliente, endereço ou código"><button class="link units-toggle" id="unitsToggleBtn" type="button" aria-expanded="false" aria-controls="unitsBody" title="Expandir a lista completa de unidades"><span class="ut-ico" aria-hidden="true">▾</span><span class="ut-txt">Mostrar unidades</span></button></div></div><div class="geo-filter" id="geoFilter"><div class="gf-title"><span class="gf-ico" aria-hidden="true">⌖</span><div><b>Marcar por localidade</b><small>Filtre por estado e cidade e marque de uma vez todas as unidades exibidas.</small></div></div><label>Estado<select id="filterUF"><option value="">Todos os estados</option></select></label><label>Cidade<select id="filterCity"><option value="">Todas as cidades</option></select></label><div class="gf-actions"><button class="outline" id="markFiltered" type="button">✓ Marcar filtradas</button><button class="outline" id="unmarkFiltered" type="button">✕ Desmarcar</button><button class="link" id="clearGeoFilter" type="button">Limpar filtro</button></div><div class="gf-info" id="geoInfo"></div></div><div class="card table units-body" id="unitsBody"><div class="thead"><span id="tableCount">5 de 8</span><span>Unidade de saúde</span><span>Município</span><span>Urgência</span><span>Atendimento</span><span>Ação</span></div><div id="unitRows"></div></div></section><div class="footer"><span id="dataSourceFoot">… conectando ao Google Sheets</span><span>Última atualização: agora · <button data-tab="import">Importação manual</button></span></div></section>
+<section id="importPage" class="import-page" style="display:none"><div class="importhero"><div><div class="eyebrow" style="color:#71d8bc">⇧ Entrada de dados</div><h2>Traga sua planilha.<br><em>O restante fica organizado.</em></h2><p>O cadastro de unidades, bases e condutores vem automaticamente do <b>Google Sheets</b>. Use esta tela só como contingência (planilha sem conexão ou teste): o arquivo importado vale até a aplicação ser reaberta com o Google Sheets disponível. São lidas as colunas Cliente, Base, Endereço (padronizado), Cidade, UF, Latitude e Longitude.</p></div><div style="font-size:58px;color:#9af0d5">▧</div></div><div class="importgrid"><div class="card upload"><div class="drop" id="dropZone"><div class="uploadicon">⇧</div><h3>Arraste sua planilha aqui</h3><p>ou clique para procurar no computador</p><small>Formatos aceitos: .xlsx, .xls e .csv · até 20 MB</small><button class="primary" style="width:auto;margin-top:17px" id="fileBtn">⇧ Selecionar arquivo</button></div><input id="fileInput" type="file" accept=".xlsx,.xls,.csv" hidden><div class="file-status"><div style="font-size:20px;color:#0d8c78">▧</div><div><b id="fileName">Planilha de rede · aguardando importação</b><small id="fileInfo">Nenhum arquivo carregado ainda</small></div></div></div><div class="card mapping"><div class="over">Leitura da planilha</div><h3>Aba e colunas utilizadas</h3><p>A aba com a coluna <b>Endereço (padronizado)</b> é detectada automaticamente e abas “-Ant” são ignoradas. Se necessário, escolha outra aba.</p><div class="maprow"><span><b>Aba de dados</b><small>unidades e bases</small></span><select id="sheetStop"><option>Tarefas</option></select></div><div class="colmap" id="colMap"><div class="colrow"><span><b>Cliente</b><small>nome da unidade</small></span><em>aguardando</em></div><div class="colrow"><span><b>Base</b><small>pontos de saída</small></span><em>aguardando</em></div><div class="colrow"><span><b>Endereço (padronizado)</b><small>enviado ao Google Maps</small></span><em>aguardando</em></div><div class="colrow"><span><b>Cidade</b><small>filtro por cidade</small></span><em>aguardando</em></div><div class="colrow"><span><b>UF (estado)</b><small>filtro por estado</small></span><em>aguardando</em></div><div class="colrow"><span><b>Latitude</b><small>só se o Google falhar</small></span><em>aguardando</em></div><div class="colrow"><span><b>Longitude</b><small>só se o Google falhar</small></span><em>aguardando</em></div></div><button class="outline" style="width:100%;justify-content:center;margin-top:15px" id="changeFile">↻ Trocar arquivo</button></div><div class="card guide"><b>Como preparar a planilha?</b><p>Use a primeira linha como cabeçalho e inclua <strong>Cliente, Base, Endereço (padronizado), Cidade, UF, Latitude e Longitude</strong>. Os endereços são localizados pelo Google Maps; <strong>Latitude e Longitude só são usadas se essa pesquisa falhar</strong>. A urgência pode ser ajustada depois no planejamento.</p></div></div></section>
+<section id="historyPage" class="history-page" style="display:none"><div class="historyhead"><div><div class="over">Registro de operações</div><h2>Histórico de planejamentos</h2><p>Rotas salvas no Google Sheets, compartilhadas entre todos os usuários. Reabra, exporte ou exclua.</p></div><div style="display:flex;align-items:end;gap:7px;flex-wrap:wrap"><label class="muted">De<input id="historyFrom" type="date" aria-label="Filtrar histórico a partir de" style="display:block;margin-top:4px;padding:7px;border:1px solid var(--line);border-radius:7px;background:var(--card);color:var(--ink)"></label><label class="muted">Até<input id="historyTo" type="date" aria-label="Filtrar histórico até" style="display:block;margin-top:4px;padding:7px;border:1px solid var(--line);border-radius:7px;background:var(--card);color:var(--ink)"></label><button class="outline" id="refreshHistoryBtn" title="Recarregar as rotas do Google Sheets">↻ Atualizar</button><button class="outline" id="syncPendingBtn" style="display:none">⇪ Enviar ao Google Sheets</button><button class="outline" id="exportHistoryBtn">⇩ Exportar histórico</button></div></div><div class="card" id="historyList"><div class="history-empty">Nenhuma rota calculada ainda. Calcule uma rota para que ela apareça aqui.</div></div><div class="notice" id="historyNotice">△ Conectando ao Google Sheets…</div></section>
 <section id="metricsPage" class="metrics-page" style="display:none">
-  <div class="metrics-head"><div><div class="over">Inteligência operacional</div><h2>Análise de Métricas</h2><p>Indicadores consolidados a partir das diligências salvas no histórico.</p></div><div class="metrics-actions"><button class="outline" id="metricsRefresh">↻ Atualizar</button><button class="primary" id="metricsPdf" style="width:auto;margin-top:0">▤ Visualizar PDF A4</button></div></div>
+  <div class="metrics-head"><div><div class="over">Inteligência operacional</div><h2>Análise de Métricas</h2><p>Indicadores consolidados a partir das rotas salvas no Google Sheets.</p></div><div class="metrics-actions"><button class="outline" id="metricsRefresh">↻ Atualizar</button><button class="primary" id="metricsPdf" style="width:auto;margin-top:0">▤ Visualizar PDF A4</button></div></div>
   <div class="card metrics-filters"><label>Condutor<select id="metricsDriver"><option value="">Todos os condutores</option></select></label><label>De<input id="metricsFrom" type="date"></label><label>Até<input id="metricsTo" type="date"></label><label>Base<select id="metricsBase"><option value="">Todas as bases</option></select></label><label>Unidade visitada<input id="metricsUnit" type="text" list="metricsUnitList" placeholder="Todas as unidades" autocomplete="off"><datalist id="metricsUnitList"></datalist></label><label>Documento fiscal<input id="metricsDoc" type="text" list="metricsDocList" placeholder="Todos os documentos" autocomplete="off"><datalist id="metricsDocList"></datalist></label><div class="metrics-filter-actions"><button class="link" id="metricsClear">Limpar filtros</button></div></div>
   <div id="metricsContent"><div class="metrics-empty">Nenhum planejamento salvo no histórico. Salve uma rota para começar a acompanhar as métricas.</div></div>
 </section>
@@ -3514,6 +3545,646 @@ function invalidateRoute() {
     setRouteNeedsRecalc(true);
     renderResult();
 }
+/* ================================================================
+   GOOGLE SHEETS · fonte de dados da aplicação
+   - Cadastro (Unidades, Bases, Condutores) lido da planilha
+     "GRUPO_LABMEDIC_Rotas_de_Entrega_Base" pelo Apps Script.
+   - Rotas salvas gravadas nas abas Rotas/Paradas (histórico compartilhado).
+   - Caminho: /api/rotas (função da Vercel, guarda o token) ou, para uso
+     local, a URL /exec do Apps Script informada em Preferências.
+   - Sem conexão, a aplicação segue com o último cadastro guardado neste
+     navegador e mantém as rotas salvas como pendentes até o reenvio.
+   ================================================================ */
+const SHEETS_PROXY_URL = '/api/rotas';
+const SHEETS_DIRECT_KEY = 'planiroute-sheets-url';
+const SHEETS_TOKEN_KEY = 'planiroute-sheets-token';
+const LOCAL_HISTORY_KEY = 'planiroute-history';
+let sheetsState = { online: false, pending: false, mode: '', planilha: '', lidoEm: '', erro: '' };
+let remoteHistory = [];
+let remoteHistoryLoaded = false;
+let sheetBasesAll = [];        /* todas as bases da planilha (inclusive inativas) — usadas no formulário */
+let cachedCondutores = null;
+let datasetSource = '';        /* 'sheets' | 'arquivo' */
+
+function sheetsDirectUrl() { try { return localStorage.getItem(SHEETS_DIRECT_KEY) || ''; } catch (e) { return ''; } }
+function sheetsDirectToken() { try { return localStorage.getItem(SHEETS_TOKEN_KEY) || ''; } catch (e) { return ''; } }
+
+async function sheetsFetchJSON(url, init, ms) {
+    const res = await withTimeout(fetch(url, init).catch(function(e) { return { networkError: e }; }), ms, null);
+    if (!res) throw new Error('tempo esgotado ao contatar o Google Sheets');
+    if (res.networkError) throw new Error('sem conexão de rede');
+    const text = await res.text();
+    try {
+        return { status: res.status, data: JSON.parse(text) };
+    } catch (e) {
+        const err = new Error('Resposta inesperada do servidor (HTTP ' + res.status + ').');
+        err.notJson = true;
+        throw err;
+    }
+}
+
+async function sheetsCall(action, params, opts) {
+    opts = opts || {};
+    const payload = Object.assign({ action: action }, params || {});
+    const ms = opts.timeout || 30000;
+    let proxyError = '';
+    if (location.protocol !== 'file:' && sheetsState.mode !== 'direct') {
+        try {
+            const r = await sheetsFetchJSON(SHEETS_PROXY_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload),
+                cache: 'no-store'
+            }, ms);
+            if (r.data && r.data.ok) {
+                sheetsState.mode = 'proxy';
+                return r.data.data;
+            }
+            const err = new Error((r.data && r.data.error) || 'Falha no Google Sheets.');
+            err.fromServer = true;
+            throw err;
+        } catch (e) {
+            if (e.fromServer) throw e;
+            proxyError = e.message;
+        }
+    }
+    const direct = sheetsDirectUrl();
+    if (direct) {
+        const r = await sheetsFetchJSON(direct, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify(Object.assign({ token: sheetsDirectToken() }, payload)),
+            redirect: 'follow'
+        }, ms);
+        if (r.data && r.data.ok) {
+            sheetsState.mode = 'direct';
+            return r.data.data;
+        }
+        const err = new Error((r.data && r.data.error) || 'Falha no Apps Script.');
+        err.fromServer = true;
+        throw err;
+    }
+    throw new Error(proxyError ? 'Função /api/rotas indisponível (' + proxyError + ')' : 'Google Sheets não configurado neste ambiente — informe a URL do Apps Script em Preferências.');
+}
+
+/* ---------------- status visual ---------------- */
+function setSheetsStatus(state, msg) {
+    sheetsState.online = state === true;
+    sheetsState.pending = state === null;
+    if (msg !== undefined) sheetsState.erro = state === false ? msg : '';
+    const pill = $('sheetsPill'), txt = $('sheetsPillTxt');
+    if (pill) {
+        pill.classList.toggle('off', state === false);
+        pill.classList.toggle('pending', state === null);
+        pill.title = state === true ? 'Cadastro e rotas sincronizados com a planilha "' + sheetsState.planilha + '"' : (sheetsState.erro || 'Conectando ao Google Sheets…');
+    }
+    if (txt) txt.textContent = state === true ? 'Google Sheets · ' + stops.filter(function(s) { return s.source === 'sheets'; }).length + ' unidades' : state === false ? 'Google Sheets offline' : 'Google Sheets · conectando…';
+    const foot = $('dataSourceFoot');
+    if (foot) foot.textContent = state === true ? '✓ Cadastro e rotas: Google Sheets (' + sheetsState.planilha + ')' : state === false ? '△ Google Sheets indisponível · usando os dados guardados neste navegador' : '… conectando ao Google Sheets';
+    const pref = $('prefSheetsStatus');
+    if (pref) pref.innerHTML = sheetsStatusHtml();
+    updateHistoryNotice();
+}
+
+function sheetsStatusHtml() {
+    if (sheetsState.online) return '✓ Conectado à planilha <b>' + escHtml(sheetsState.planilha) + '</b> ' + (sheetsState.mode === 'proxy' ? 'pela função <code>/api/rotas</code> da Vercel' : 'pela URL direta do Apps Script') + ' · cadastro lido às ' + escHtml(sheetsState.lidoEm) + '.';
+    if (sheetsState.pending) return '… Conectando ao Google Sheets…';
+    return '○ Sem conexão com o Google Sheets' + (sheetsState.erro ? ': ' + escHtml(sheetsState.erro) : '') + '. A aplicação usa o último cadastro guardado neste navegador.';
+}
+
+/* ---------------- cadastro ---------------- */
+function sheetCoordTrusted(fonte) {
+    const k = key(fonte);
+    return k === 'google' || k === 'manual';
+}
+
+function applyTrustedCoord(point, lat, lng, fonte) {
+    point.lat = lat;
+    point.lng = lng;
+    point.geoReady = true;
+    point.geoSource = key(fonte) === 'manual' ? 'manual' : 'google';
+    point.geoProvider = 'google';
+    point.geoFallback = false;
+    point.geoQuery = 'Coordenada da planilha (' + norm(fonte) + ')';
+    point.coordSaved = true;
+}
+
+function unitFromSheet(u, previous) {
+    const lat = parseCoord(u.lat), lng = parseCoord(u.lng);
+    const okCoord = validBrazilCoord(lat, lng);
+    const name = norm(u.cliente);
+    const urg = norm(u.urgencia);
+    const stop = {
+        id: norm(u.id),
+        code: norm(u.id),
+        name: name,
+        photoSearchName: name,
+        client: name,
+        address: norm(u.endereco) || 'Endereço não informado',
+        city: norm(u.cidade) || 'Sem cidade',
+        state: normalizeUF(u.uf) || inferUF(u.endereco),
+        baseName: norm(u.base),
+        baseId: norm(u.baseId),
+        lat: null,
+        lng: null,
+        sheetLat: okCoord ? lat : null,
+        sheetLng: okCoord ? lng : null,
+        urgency: urgency[urg] ? urg : 'Média',
+        service: FIXED_DELIVERY_MINUTES,
+        tasks: 1,
+        cnpj: '',
+        situacao: norm(u.situacao),
+        source: 'sheets',
+        coordSaved: false
+    };
+    if (okCoord && sheetCoordTrusted(u.fonteCoord)) applyTrustedCoord(stop, lat, lng, u.fonteCoord);
+    stop.searchText = addressQuery(stop);
+    if (previous) {
+        /* preserva o que o operador fez neste navegador (documento fiscal, urgência alterada) */
+        if (previous.fiscal) stop.fiscal = previous.fiscal;
+        if (previous.urgencyEdited && urgency[previous.urgency]) {
+            stop.urgency = previous.urgency;
+            stop.urgencyEdited = true;
+        }
+        if (!stop.coordSaved && previous.geoProvider === 'google' && hasValidCoordinates(previous) && key(previous.address) === key(stop.address)) {
+            ['lat', 'lng', 'geoReady', 'geoSource', 'geoProvider', 'geoFallback', 'geoQuery', 'googleFormattedAddress', 'googlePlaceId'].forEach(function(k) { stop[k] = previous[k]; });
+        }
+    }
+    ensureFiscalData(stop);
+    return stop;
+}
+
+function baseFromSheet(b) {
+    const lat = parseCoord(b.lat), lng = parseCoord(b.lng);
+    const okCoord = validBrazilCoord(lat, lng);
+    const base = {
+        id: norm(b.id),
+        name: norm(b.nome),
+        address: norm(b.endereco),
+        searchText: norm(b.endereco),
+        city: norm(b.cidade),
+        state: normalizeUF(b.uf),
+        lat: null,
+        lng: null,
+        sheetLat: okCoord ? lat : null,
+        sheetLng: okCoord ? lng : null,
+        isDefault: key(b.padrao) === 'sim',
+        active: key(b.ativa) !== 'nao',
+        papel: norm(b.papel),
+        observacoes: norm(b.observacoes),
+        fonteCoord: norm(b.fonteCoord),
+        source: 'sheets',
+        coordSaved: false
+    };
+    if (okCoord && sheetCoordTrusted(b.fonteCoord)) applyTrustedCoord(base, lat, lng, b.fonteCoord);
+    return base;
+}
+
+function fillBaseSelect(preferredId) {
+    const sel = $('baseSelect');
+    if (!sel) return;
+    sel.innerHTML = bases.map(function(b) {
+        return '<option value="' + escHtml(b.id) + '">' + escHtml(b.name) + '</option>';
+    }).join('');
+    const def = bases.find(function(b) { return b.isDefault; }) || bases[0];
+    sel.value = preferredId && bases.some(function(b) { return b.id === preferredId; }) ? preferredId : (def ? def.id : '');
+}
+
+function fillDrivers(list, preferred) {
+    const sel = $('driver');
+    if (!sel || !Array.isArray(list)) return;
+    const names = list.filter(function(c) { return key(c.ativo) !== 'nao' && norm(c.nome); }).map(function(c) { return norm(c.nome); });
+    if (!names.length) return;
+    const current = preferred || sel.value;
+    sel.innerHTML = names.map(function(n) { return '<option>' + escHtml(n) + '</option>'; }).join('');
+    if (names.includes(current)) sel.value = current;
+}
+
+function applyCadastro(data) {
+    const prevById = new Map(stops.map(function(s) { return [String(s.id), s]; }));
+    const units = (data.unidades || []).filter(function(u) { return key(u.ativo) !== 'nao' && norm(u.id) && norm(u.cliente); });
+    stops = units.map(function(u) { return unitFromSheet(u, prevById.get(norm(u.id))); });
+    sheetBasesAll = (data.bases || []).map(baseFromSheet).filter(function(b) { return b.id && b.name; });
+    const prevBaseObjs = new Map(bases.map(function(b) { return [b.id, b]; }));
+    const active = sheetBasesAll.filter(function(b) { return b.active; }).map(function(b) {
+        /* mantém coordenadas já localizadas nesta sessão */
+        const prev = prevBaseObjs.get(b.id);
+        if (prev && !b.coordSaved && prev.geoProvider === 'google' && hasValidCoordinates(prev) && key(prev.address) === key(b.address)) {
+            ['lat', 'lng', 'geoReady', 'geoSource', 'geoProvider', 'geoFallback', 'geoQuery', 'googleFormattedAddress', 'googlePlaceId'].forEach(function(k) { b[k] = prev[k]; });
+        }
+        return b;
+    });
+    const prevBase = $('baseSelect') ? $('baseSelect').value : '';
+    if (active.length) {
+        bases = active.sort(function(a, b) { return (b.isDefault ? 1 : 0) - (a.isDefault ? 1 : 0); });
+    } else if (!bases.length) {
+        bases = [DEFAULT_BASE];
+    }
+    fillBaseSelect(prevBase);
+    cachedCondutores = data.condutores || null;
+    fillDrivers(cachedCondutores);
+    selected = new Set(Array.from(selected).filter(function(id) {
+        const s = stops.find(function(x) { return x.id === id; });
+        return s && hasCompleteFiscalData(s);
+    }));
+    datasetSource = 'sheets';
+    sheetsState.planilha = (data.info && data.info.planilha) || 'Rotas de Entrega';
+    sheetsState.lidoEm = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+    if ($('fileName')) $('fileName').textContent = 'Google Sheets · ' + sheetsState.planilha;
+    if ($('fileInfo')) $('fileInfo').textContent = stops.length + ' unidades ativas · ' + bases.length + ' base(s) · ' + (cachedCondutores ? cachedCondutores.length : 0) + ' condutor(es) · lido às ' + sheetsState.lidoEm;
+    geoFilterSig = '';
+    rebuildGeoFilters(true);
+    persistDataset();
+    persistSelected();
+    persistForm();
+    render();
+}
+
+async function loadCadastro() {
+    const data = await sheetsCall('cadastro', {}, { timeout: 30000 });
+    applyCadastro(data);
+    return data;
+}
+
+async function initSheets() {
+    setSheetsStatus(null);
+    try {
+        await loadCadastro();
+        setSheetsStatus(true);
+    } catch (e) {
+        console.warn('Google Sheets: cadastro indisponível.', e);
+        setSheetsStatus(false, e.message);
+        return;
+    }
+    try {
+        await loadRemoteHistory();
+        await syncPendingRoutes({ onlyNew: true, silent: true });
+    } catch (e) {
+        console.warn('Google Sheets: histórico indisponível.', e);
+    }
+}
+
+/* ---------------- rotas: planilha ⇄ aplicação ---------------- */
+function hhmmToMin(t) {
+    const m = String(t || '').match(/^(\d{1,2}):(\d{2})/);
+    return m ? Number(m[1]) * 60 + Number(m[2]) : NaN;
+}
+function round1(v) {
+    const n = Number(v);
+    return Number.isFinite(n) ? Math.round(n * 10) / 10 : '';
+}
+
+function itemFromSheet(r) {
+    const paradas = (r.paradas || []).slice().sort(function(a, b) { return Number(a.ordem) - Number(b.ordem); });
+    const ordered = paradas.map(function(p) {
+        const lat = parseCoord(p.lat), lng = parseCoord(p.lng), ok = validBrazilCoord(lat, lng);
+        const urg = norm(p.urgencia);
+        const s = {
+            id: norm(p.unidadeId) || 'parada-' + norm(p.id),
+            code: norm(p.unidadeId),
+            name: norm(p.unidade),
+            photoSearchName: norm(p.unidade),
+            client: norm(p.cliente) || norm(p.unidade),
+            address: norm(p.endereco),
+            city: norm(p.municipio) || 'Sem cidade',
+            state: normalizeUF(p.uf),
+            urgency: urgency[urg] ? urg : 'Média',
+            service: FIXED_DELIVERY_MINUTES,
+            fiscal: {
+                number: String(p.docNumero == null ? '' : p.docNumero),
+                issueDate: norm(p.docEmissao),
+                amount: p.docValor === '' || p.docValor == null ? '' : Number(p.docValor)
+            },
+            lat: ok ? lat : null,
+            lng: ok ? lng : null
+        };
+        if (ok) {
+            s.geoReady = true;
+            s.geoSource = 'google';
+            s.geoProvider = 'google';
+        }
+        s.searchText = addressQuery(s);
+        return s;
+    });
+    const legs = paradas.map(function(p) {
+        return { from: '', to: norm(p.unidade), km: Number(p.trechoKm) || 0, m: Number(p.deslocMin) || 0, l: norm(p.fonteTrecho), arrival: hhmmToMin(p.chegada) };
+    });
+    const hasReturn = key(r.retorno) === 'sim';
+    const end = hhmmToMin(r.termino);
+    if (hasReturn) legs.push({ from: '', to: norm(r.base), km: Number(r.kmRetorno) || 0, m: Number(r.retornoMin) || 0, l: norm(r.fonte), arrival: end });
+    const km = Number(r.km) || 0,
+        travel = Number(r.deslocMin) || 0,
+        service = Number(r.atendMin) || ordered.length * FIXED_DELIVERY_MINUTES;
+    return {
+        id: norm(r.id),
+        sheetId: norm(r.id),
+        sync: 'ok',
+        engineVersion: norm(r.versaoMotor) || ROUTE_ENGINE_VERSION,
+        meta: {
+            driver: norm(r.condutor),
+            date: norm(r.data),
+            base: norm(r.base),
+            baseId: norm(r.baseId),
+            departure: norm(r.saida),
+            stops: ordered.length,
+            km: km,
+            travel: travel,
+            service: service,
+            end: hasReturn ? (norm(r.termino) || '—') : '—',
+            trafficLabel: norm(r.transito)
+        },
+        ordered: ordered,
+        legs: legs,
+        geometry: null,
+        km: km,
+        travel: travel,
+        service: service,
+        end: end,
+        savedAt: norm(r.salvoEm),
+        origin: norm(r.origem)
+    };
+}
+
+function unitIdFor(s) {
+    if (/^UN-\d+/.test(String(s.id))) return String(s.id);
+    const m = stops.find(function(x) { return x.source === 'sheets' && key(x.name) === key(s.name); });
+    return m ? m.id : '';
+}
+
+function routeToSheetPayload(item) {
+    const ordered = item.ordered || [], legs = item.legs || [], meta = item.meta || {};
+    const ret = legs.length > ordered.length ? legs[ordered.length] : null;
+    const baseObj = bases.find(function(b) { return b.id === meta.baseId; }) || bases.find(function(b) { return key(b.name) === key(meta.base); });
+    const pick = function(a, b) { return a !== undefined && a !== null && a !== '' ? a : b; };
+    const end = Number(item.end);
+    return {
+        rota: {
+            idLocal: String(item.id),
+            data: meta.date,
+            condutor: meta.driver,
+            baseId: meta.baseId || (baseObj && baseObj.source === 'sheets' ? baseObj.id : ''),
+            base: meta.base,
+            saida: meta.departure,
+            km: round1(pick(item.km, meta.km)),
+            deslocMin: Math.round(Number(pick(item.travel, meta.travel)) || 0),
+            atendMin: Math.round(Number(pick(item.service, meta.service)) || 0),
+            tempoUnidade: FIXED_DELIVERY_MINUTES,
+            retorno: ret ? 'Sim' : 'Não',
+            kmRetorno: ret ? round1(ret.km) : '',
+            retornoMin: ret ? Math.round(Number(ret.m) || 0) : '',
+            termino: Number.isFinite(end) ? clock(end) : (meta.end && meta.end !== '—' ? meta.end : ''),
+            transito: meta.trafficLabel || '',
+            fonte: (legs[0] && legs[0].l) || '',
+            versaoMotor: item.engineVersion || ROUTE_ENGINE_VERSION,
+            origem: item.sync === 'pendente' ? 'Aplicação web' : 'Migrada do histórico local do navegador'
+        },
+        paradas: ordered.map(function(s, i) {
+            const leg = legs[i] || {};
+            const f = s.fiscal || {};
+            const coords = hasValidCoordinates(s) && s.geoSource;
+            return {
+                ordem: i + 1,
+                unidadeId: unitIdFor(s),
+                unidade: s.name,
+                cliente: s.client || s.name,
+                endereco: s.address,
+                municipio: s.city === 'Sem cidade' ? '' : s.city,
+                uf: s.state || '',
+                urgencia: s.urgency,
+                chegada: Number.isFinite(Number(leg.arrival)) ? clock(Number(leg.arrival)) : '',
+                atendMin: FIXED_DELIVERY_MINUTES,
+                trechoKm: round1(leg.km),
+                deslocMin: Math.round(Number(leg.m) || 0),
+                fonteTrecho: leg.l || '',
+                docNumero: f.number || '',
+                docEmissao: f.issueDate || '',
+                docValor: f.amount === '' || f.amount == null ? '' : Number(f.amount),
+                lat: coords ? Number(Number(s.lat).toFixed(6)) : '',
+                lng: coords ? Number(Number(s.lng).toFixed(6)) : ''
+            };
+        })
+    };
+}
+
+function getLocalHistory() {
+    try {
+        return JSON.parse(localStorage.getItem(LOCAL_HISTORY_KEY) || '[]');
+    } catch (e) {
+        return [];
+    }
+}
+
+function setLocalHistory(list) {
+    return saveJSON(LOCAL_HISTORY_KEY, list);
+}
+
+function updateLocalItem(id, patch) {
+    const list = getLocalHistory();
+    const it = list.find(function(x) { return String(x.id) === String(id); });
+    if (it) Object.assign(it, patch);
+    setLocalHistory(list);
+}
+
+async function loadRemoteHistory() {
+    const data = await sheetsCall('listarRotas', {}, { timeout: 45000 });
+    remoteHistory = (data.rotas || []).map(itemFromSheet);
+    remoteHistoryLoaded = true;
+    getHistory().forEach(function(x) { ensureHistoryFilterShows(String(x.meta && x.meta.date || '')); });
+    refreshHistoryViews();
+}
+
+function refreshHistoryViews() {
+    renderHistory();
+    if ($('metricsCount')) $('metricsCount').textContent = getHistory().length;
+    if ($('metricsPage') && $('metricsPage').style.display !== 'none') renderMetrics();
+}
+
+function routeTwinKey(item) {
+    const m = item.meta || {};
+    return key(m.date) + '|' + key(m.driver) + '|' + (item.ordered || []).map(function(s) { return key(s.name); }).join('>');
+}
+
+async function pushRouteToSheets(item) {
+    try {
+        /* rota antiga do navegador que já está na planilha (ex.: migrada): só vincula */
+        if (remoteHistoryLoaded && item.sync !== 'pendente') {
+            const twin = remoteHistory.find(function(r) { return routeTwinKey(r) === routeTwinKey(item); });
+            if (twin) {
+                updateLocalItem(item.id, { sheetId: twin.sheetId, sync: 'ok', syncError: '' });
+                return { ok: true, id: twin.sheetId, linked: true };
+            }
+        }
+        const res = await sheetsCall('salvarRota', routeToSheetPayload(item), { timeout: 45000 });
+        updateLocalItem(item.id, { sheetId: res.id, sync: 'ok', syncError: '' });
+        if (remoteHistoryLoaded) {
+            remoteHistory = remoteHistory.filter(function(x) { return x.sheetId !== res.id; });
+            remoteHistory.unshift(Object.assign({}, item, { id: res.id, sheetId: res.id, sync: 'ok' }));
+        }
+        return { ok: true, id: res.id };
+    } catch (e) {
+        updateLocalItem(item.id, { syncError: e.message });
+        return { ok: false, error: e.message };
+    }
+}
+
+/* Envia as rotas que só existem neste navegador. onlyNew = apenas as salvas por esta versão (falha de rede). */
+async function syncPendingRoutes(opts) {
+    opts = opts || {};
+    const pending = getLocalHistory().filter(function(x) { return !x.sheetId && (!opts.onlyNew || x.sync === 'pendente'); });
+    if (!pending.length) return { sent: 0, failed: 0 };
+    let sent = 0, failed = 0, lastError = '';
+    for (const item of pending.slice().reverse()) {
+        const r = await pushRouteToSheets(item);
+        if (r.ok) sent++;
+        else { failed++; lastError = r.error; }
+    }
+    refreshHistoryViews();
+    if (!opts.silent) alert(sent + ' rota(s) enviada(s) ao Google Sheets' + (failed ? ' · ' + failed + ' não enviada(s): ' + lastError : '') + '.');
+    return { sent: sent, failed: failed };
+}
+
+/* Coordenadas localizadas pelo Google voltam para a planilha (evita localizar de novo). */
+function saveGeocodesToSheets(points) {
+    if (!sheetsState.online) return;
+    const unidades = [], basesOut = [], touched = [];
+    (points || []).forEach(function(p) {
+        if (!p || p.source !== 'sheets' || p.coordSaved || p.geoSource !== 'google' || !hasValidCoordinates(p)) return;
+        const row = { id: p.id, lat: Number(Number(p.lat).toFixed(6)), lng: Number(Number(p.lng).toFixed(6)), fonte: 'Google' };
+        if (/^UN-/.test(String(p.id))) unidades.push(row);
+        else basesOut.push(row);
+        touched.push(p);
+    });
+    if (!touched.length) return;
+    sheetsCall('salvarCoordenadas', { unidades: unidades, bases: basesOut }).then(function() {
+        touched.forEach(function(p) { p.coordSaved = true; });
+        persistDataset();
+    }).catch(function(e) {
+        console.warn('Google Sheets: coordenadas não gravadas.', e);
+    });
+}
+
+/* ---------------- histórico: avisos ---------------- */
+function updateHistoryNotice() {
+    const box = $('historyNotice');
+    const local = getLocalHistory().filter(function(x) { return !x.sheetId; });
+    const btn = $('syncPendingBtn');
+    if (btn) {
+        btn.style.display = local.length && sheetsState.online ? '' : 'none';
+        btn.textContent = '⇪ Enviar ao Google Sheets (' + local.length + ')';
+    }
+    if (!box) return;
+    if (sheetsState.online) {
+        box.textContent = '△ As rotas salvas ficam no Google Sheets (abas Rotas e Paradas) e aparecem para todos os usuários. Excluir aqui marca a rota como "Excluída" na planilha, sem apagar as linhas.' + (local.length ? ' Há ' + local.length + ' rota(s) guardada(s) só neste navegador.' : '');
+    } else {
+        box.textContent = '△ Google Sheets indisponível: a lista mostra apenas as rotas guardadas neste navegador. Rotas salvas agora serão enviadas automaticamente quando a conexão voltar.';
+    }
+}
+
+/* ---------------- formulário de bases ---------------- */
+function openBaseForm(existing) {
+    if (!sheetsState.online) {
+        alert('O cadastro de bases fica no Google Sheets, que está indisponível agora. Verifique a conexão (Preferências → Google Sheets) e tente novamente.');
+        return;
+    }
+    const b = existing && existing.source === 'sheets' ? existing : null;
+    const lat = b ? (b.coordSaved ? b.lat : b.sheetLat) : null;
+    const lng = b ? (b.coordSaved ? b.lng : b.sheetLng) : null;
+    const ufOptions = UF_LIST.map(function(uf) {
+        return '<option' + ((b ? b.state : 'RJ') === uf ? ' selected' : '') + '>' + uf + '</option>';
+    }).join('');
+    const body = '<form class="base-form" id="baseForm" autocomplete="off">' +
+        '<p class="fiscal-modal-intro bf-wide">' + (b ? 'Alterações gravadas na aba <b>Bases</b> da planilha (' + escHtml(b.id) + ').' : 'A nova base é gravada na aba <b>Bases</b> da planilha e fica disponível para todos os usuários.') + '</p>' +
+        '<label class="bf-wide">Nome da base *<input id="bfNome" required maxlength="60" value="' + escHtml(b ? b.name : '') + '" placeholder="Ex.: Niterói"></label>' +
+        '<label class="bf-wide">Endereço completo *<input id="bfEndereco" required maxlength="200" value="' + escHtml(b ? b.address : '') + '" placeholder="Logradouro, número, bairro, cidade - UF, CEP"></label>' +
+        '<label>Cidade *<input id="bfCidade" required maxlength="60" value="' + escHtml(b ? b.city : '') + '"></label>' +
+        '<label>UF *<select id="bfUF" required>' + ufOptions + '</select></label>' +
+        '<label>Latitude<input id="bfLat" type="number" step="any" min="-34" max="6" value="' + (Number.isFinite(lat) ? Number(lat).toFixed(6) : '') + '" placeholder="-22.900000"></label>' +
+        '<label>Longitude<input id="bfLng" type="number" step="any" min="-74" max="-32" value="' + (Number.isFinite(lng) ? Number(lng).toFixed(6) : '') + '" placeholder="-43.300000"></label>' +
+        '<div class="bf-wide bf-locate"><button type="button" class="outline" id="bfLocate">⌖ Localizar pelo endereço</button><small id="bfLocateInfo">' + (b && b.fonteCoord ? 'Coordenada atual: ' + escHtml(b.fonteCoord) : 'Sem coordenada: a aplicação localiza pelo endereço na primeira rota.') + '</small></div>' +
+        '<label class="bf-wide">Papel / região atendida<input id="bfPapel" maxlength="80" value="' + escHtml(b ? b.papel : '') + '" placeholder="Ex.: Base regional (Região Serrana)"></label>' +
+        '<label class="bf-wide">Observações<input id="bfObs" maxlength="200" value="' + escHtml(b ? b.observacoes : '') + '"></label>' +
+        '<label class="switchline bf-check"><input id="bfPadrao" type="checkbox"' + (b && b.isDefault ? ' checked' : '') + '><span class="switch"></span>Base padrão (pré-selecionada)</label>' +
+        '<label class="switchline bf-check"><input id="bfAtiva" type="checkbox"' + (!b || b.active ? ' checked' : '') + '><span class="switch"></span>Ativa (aparece em “Base de partida”)</label>' +
+        '<div class="fiscal-modal-actions bf-wide"><button type="button" class="outline" id="bfCancel">Cancelar</button><button type="submit" class="primary" id="bfSave" style="width:auto;margin-top:0">' + (b ? 'Salvar alterações' : 'Cadastrar base') + '</button></div>' +
+        '</form>';
+    openModal(b ? 'Editar base · ' + escHtml(b.name) : 'Nova base de partida', body, '');
+    let fonte = b ? b.fonteCoord : '';
+    $('bfCancel').onclick = closeModal;
+    ['bfLat', 'bfLng'].forEach(function(id) {
+        $(id).addEventListener('input', function() {
+            fonte = 'Manual';
+            $('bfLocateInfo').textContent = 'Coordenada digitada: será gravada como Manual (a aplicação não a substitui).';
+        });
+    });
+    $('bfLocate').onclick = async function() {
+        const query = [$('bfEndereco').value, $('bfCidade').value, $('bfUF').value, 'Brasil'].map(norm).filter(Boolean).join(', ');
+        if (!norm($('bfEndereco').value)) return alert('Informe o endereço antes de localizar.');
+        const info = $('bfLocateInfo');
+        info.textContent = 'Localizando…';
+        const probe = { name: $('bfNome').value, address: query, searchText: query, city: $('bfCidade').value, state: $('bfUF').value };
+        try {
+            if (gmapsReady && geocoderG) await geocodePointGoogle(probe, { force: true });
+            else await geocodePointPublic(probe);
+        } catch (e) {}
+        if (hasValidCoordinates(probe) && probe.geoSource) {
+            $('bfLat').value = Number(probe.lat).toFixed(6);
+            $('bfLng').value = Number(probe.lng).toFixed(6);
+            fonte = probe.geoSource === 'google' ? 'Google' : 'OpenStreetMap';
+            info.textContent = '✓ Localizado (' + fonte + ')' + (probe.googleFormattedAddress ? ': ' + probe.googleFormattedAddress : '') + '.';
+        } else {
+            info.textContent = 'Endereço não localizado. Confira o texto ou digite latitude/longitude.';
+        }
+    };
+    $('baseForm').onsubmit = async function(e) {
+        e.preventDefault();
+        if (!this.reportValidity()) return;
+        const latV = $('bfLat').value.trim(), lngV = $('bfLng').value.trim();
+        if ((latV === '') !== (lngV === '')) return alert('Informe latitude e longitude juntas, ou deixe as duas em branco.');
+        if (latV !== '' && !validBrazilCoord(Number(latV), Number(lngV))) return alert('As coordenadas informadas ficam fora do Brasil. Confira latitude e longitude.');
+        const payload = {
+            id: b ? b.id : '',
+            nome: norm($('bfNome').value),
+            endereco: norm($('bfEndereco').value),
+            cidade: norm($('bfCidade').value),
+            uf: $('bfUF').value,
+            lat: latV === '' ? '' : Number(latV),
+            lng: lngV === '' ? '' : Number(lngV),
+            fonteCoord: latV === '' ? '' : (fonte || 'Manual'),
+            padrao: $('bfPadrao').checked ? 'Sim' : 'Não',
+            ativa: $('bfAtiva').checked ? 'Sim' : 'Não',
+            papel: norm($('bfPapel').value),
+            observacoes: norm($('bfObs').value)
+        };
+        const btn = $('bfSave');
+        btn.disabled = true;
+        btn.textContent = 'Salvando…';
+        try {
+            const res = await sheetsCall('salvarBase', { base: payload });
+            await loadCadastro();
+            setSheetsStatus(true);
+            if (bases.some(function(x) { return x.id === res.id; })) {
+                $('baseSelect').value = res.id;
+                invalidateRoute();
+                render();
+                persistForm();
+            }
+            closeModal();
+            alert(res.criada ? 'Base "' + payload.nome + '" cadastrada (' + res.id + ').' : 'Base "' + payload.nome + '" atualizada.');
+        } catch (err) {
+            btn.disabled = false;
+            btn.textContent = b ? 'Salvar alterações' : 'Cadastrar base';
+            alert('Não foi possível salvar a base: ' + err.message);
+        }
+    };
+}
+
+function basesListHtml() {
+    if (!sheetBasesAll.length) return '<p style="margin:0 0 10px;font-size:11px">Nenhuma base carregada da planilha.</p>';
+    return '<div class="pref-bases">' + sheetBasesAll.map(function(b) {
+        return '<div class="pref-base"><div><b>' + escHtml(b.name) + '</b>' + (b.isDefault ? ' <span class="tag">padrão</span>' : '') + (b.active ? '' : ' <span class="tag tag-local">inativa</span>') + '<small>' + escHtml(b.address) + '</small></div><button class="outline" data-base-edit="' + escHtml(b.id) + '">✎ Editar</button></div>';
+    }).join('') + '</div>';
+}
+
 /* Mudança de versão invalida rotas persistidas que ainda possam conter
    coordenadas determinísticas criadas pelo importador. */
 const ROUTE_ENGINE_VERSION = 'road-routing-v9-dwell-45min';
@@ -3580,6 +4251,9 @@ function persistDataset() {
     saveJSON('planiroute-dataset', {
         stops,
         bases,
+        source: datasetSource,
+        condutores: cachedCondutores,
+        basesAll: sheetBasesAll,
         fileName: $('fileName') ? $('fileName').textContent : '',
         fileInfo: $('fileInfo') ? $('fileInfo').textContent : ''
     });
@@ -3625,7 +4299,13 @@ function restoreState() {
                 ensureFiscalData(restored);
                 return restored;
             });
-            bases = withDefaultBase(Array.isArray(dataset.bases) ? dataset.bases : []);
+            datasetSource = dataset.source || 'arquivo';
+            bases = datasetSource === 'sheets' && Array.isArray(dataset.bases) && dataset.bases.length ? dataset.bases : withDefaultBase(Array.isArray(dataset.bases) ? dataset.bases : []);
+            if (Array.isArray(dataset.basesAll)) sheetBasesAll = dataset.basesAll;
+            if (Array.isArray(dataset.condutores)) {
+                cachedCondutores = dataset.condutores;
+                fillDrivers(dataset.condutores);
+            }
             $('baseSelect').innerHTML = bases.map(function(b) {
                 return '<option value="' + b.id + '">' + escHtml(b.name) + '</option>';
             }).join('');
@@ -4557,7 +5237,7 @@ function renderUnits() {
     $('tableCount').textContent = list.length + ' de ' + stops.length;
     updateGeoInfo();
     $('unitRows').innerHTML = list.map(function(s) {
-        return `<div class="unit ${selected.has(s.id)?'chosen':''}"><button class="check ${selected.has(s.id)?'on':''}" data-toggle="${s.id}">${selected.has(s.id)?'✓':''}</button><div class="unitname"><b>${s.name}${s.geoFallback?'<em class="geo-fb" title="Endereço não localizado no Google Maps: usando a Latitude/Longitude da planilha">📍</em>':''}</b><small>${s.client} · ${s.address}</small></div><span class="muted">${s.city}${s.state?' · '+s.state:''}</span><select class="urg" data-u="${s.id}" style="color:${urgency[s.urgency].c};background:${urgency[s.urgency].bg}"><option ${s.urgency==='Super'?'selected':''}>Super</option><option ${s.urgency==='Alta'?'selected':''}>Alta</option><option ${s.urgency==='Média'?'selected':''}>Média</option><option ${s.urgency==='Baixa'?'selected':''}>Baixa</option></select><span class="muted">${FIXED_DELIVERY_MINUTES} min</span><button class="${selected.has(s.id)?'included':'add'}" data-toggle="${s.id}">${selected.has(s.id)?'✓ Incluída':'＋ Adicionar'}</button></div>`
+        return `<div class="unit ${selected.has(s.id)?'chosen':''}"><button class="check ${selected.has(s.id)?'on':''}" data-toggle="${s.id}">${selected.has(s.id)?'✓':''}</button><div class="unitname"><b>${s.name}${s.geoFallback?'<em class="geo-fb" title="Endereço não localizado no Google Maps: usando a Latitude/Longitude da planilha">📍</em>':''}${s.situacao==='Revisar'?'<em class="unit-flag" title="Endereço incompleto no cadastro (Situação = Revisar). Confira a posição no mapa antes de sair.">revisar endereço</em>':''}</b><small>${s.client} · ${s.address}</small></div><span class="muted">${s.city}${s.state?' · '+s.state:''}</span><select class="urg" data-u="${s.id}" style="color:${urgency[s.urgency].c};background:${urgency[s.urgency].bg}"><option ${s.urgency==='Super'?'selected':''}>Super</option><option ${s.urgency==='Alta'?'selected':''}>Alta</option><option ${s.urgency==='Média'?'selected':''}>Média</option><option ${s.urgency==='Baixa'?'selected':''}>Baixa</option></select><span class="muted">${FIXED_DELIVERY_MINUTES} min</span><button class="${selected.has(s.id)?'included':'add'}" data-toggle="${s.id}">${selected.has(s.id)?'✓ Incluída':'＋ Adicionar'}</button></div>`
     }).join('') || '<div style="padding:25px;text-align:center;color:#9aa7a7">Nenhuma unidade encontrada para a busca atual.</div>';
 }
 
@@ -4819,6 +5499,7 @@ async function calc() {
         persistForm();
         persistSelected();
         persistRoute();
+        saveGeocodesToSheets([base].concat(ordered)); /* Google → planilha (não bloqueia) */
         await wait(350);
     } catch (error) {
         console.error('GRUPO LABMEDIC - Planejamento de Rotas: falha ao calcular a rota:', error);
@@ -5385,35 +6066,41 @@ function hasDuplicateRoute(item) {
     });
 }
 
-function saveHistory() {
-    if (!route || !Array.isArray(route.ordered) || !route.ordered.length) return false;
+async function saveHistory() {
+    if (!route || !Array.isArray(route.ordered) || !route.ordered.length) return { ok: false };
+    let item;
     try {
         /* A seleção pode ter recebido dados fiscais depois do último cálculo.
            Reassocia cada parada calculada ao cadastro atual antes de gravar. */
-        const ordered = route.ordered.map(function(item) {
-            const current = stops.find(function(stop) { return String(stop.id) === String(item.id); }) || item;
-            const copy = { ...item, ...current };
+        const ordered = route.ordered.map(function(it) {
+            const current = stops.find(function(stop) { return String(stop.id) === String(it.id); }) || it;
+            const copy = { ...it, ...current };
             copy.fiscal = { ...ensureFiscalData(current) };
             return copy;
         });
         const incomplete = ordered.filter(function(stop) { return !hasCompleteFiscalData(stop); });
         if (incomplete.length) {
             alert('Não foi possível salvar: há unidade(s) sem documento fiscal completo na rota.');
-            return false;
+            return { ok: false, handled: true };
         }
-        const item = {
+        const base = bases.find(function(b) { return b.id === $('baseSelect').value; });
+        const trafficSel = $('traffic');
+        item = {
             id: Date.now(),
+            sync: 'pendente',
             engineVersion: ROUTE_ENGINE_VERSION,
             meta: {
                 driver: driverValue(),
                 date: $('date').value,
                 base: $('baseName').textContent,
+                baseId: base && base.source === 'sheets' ? base.id : '',
                 departure: $('departure').value,
                 stops: ordered.length,
                 km: route.km,
                 travel: route.travel,
                 service: route.service,
-                end: $('returnBase').checked ? clock(route.end) : '—'
+                end: $('returnBase').checked ? clock(route.end) : '—',
+                trafficLabel: trafficSel && trafficSel.selectedOptions[0] ? trafficSel.selectedOptions[0].textContent : ''
             },
             ordered,
             legs: (route.legs || []).map(function(l) { return { ...l }; }),
@@ -5423,23 +6110,35 @@ function saveHistory() {
             service: route.service,
             end: route.end
         };
-        const list = getHistory().filter(function(x) {
-            return Date.now() - Number(x.id || 0) < 7776000000;
-        });
-        list.unshift(item);
-        return saveJSON('planiroute-history', list.slice(0, 25));
+        /* Cópia local: rotas ainda não enviadas nunca são descartadas; das já
+           enviadas ficam só as mais recentes (uso offline). */
+        const list = getLocalHistory();
+        const pend = list.filter(function(x) { return !x.sheetId; });
+        const synced = list.filter(function(x) { return x.sheetId && Date.now() - Number(x.id || 0) < 7776000000; }).slice(0, 40);
+        if (!setLocalHistory([item].concat(pend, synced))) return { ok: false };
     } catch (e) {
         console.error('GRUPO LABMEDIC - não foi possível salvar a rota no histórico.', e);
-        return false;
+        return { ok: false };
     }
+    const r = await pushRouteToSheets(item);
+    refreshHistoryViews();
+    return { ok: true, synced: r.ok, id: r.id, error: r.error };
 }
 
 function getHistory() {
-    try {
-        return JSON.parse(localStorage.getItem('planiroute-history') || '[]')
-    } catch (e) {
-        return []
-    }
+    /* Rotas da planilha + rotas que só existem neste navegador (pendentes).
+       Sem conexão com o Google Sheets, usa a cópia local completa. */
+    const local = getLocalHistory();
+    const list = remoteHistoryLoaded ? local.filter(function(x) { return !x.sheetId; }).concat(remoteHistory) : local;
+    return list.slice().sort(function(a, b) {
+        return String(b.meta && b.meta.date || '').localeCompare(String(a.meta && a.meta.date || '')) || String(b.id).localeCompare(String(a.id));
+    });
+}
+
+function historySyncTag(item) {
+    if (item.sheetId) return '<span class="tag" title="Gravada na planilha · ' + escHtml(item.sheetId) + '">Google Sheets</span>';
+    if (item.sync === 'pendente') return '<span class="tag tag-warn" title="' + escHtml(item.syncError || 'Aguardando conexão com o Google Sheets') + '">Envio pendente</span>';
+    return '<span class="tag tag-local" title="Rota salva antes da integração com o Google Sheets">Só neste navegador</span>';
 }
 
 function renderHistory() {
@@ -5451,8 +6150,10 @@ function renderHistory() {
         return (!from || date >= from) && (!to || date <= to);
     });
     $('historyList').innerHTML = list.length ? list.map(function(item) {
-        return `<div class="historyrow"><div class="avatar" style="width:25px;height:25px">✓</div><div><b>${item.meta.driver}</b><span>${item.meta.date} · ${item.meta.base}</span></div><span class="tag">Concluído</span><span class="muted history-stops">${item.meta.stops} paradas · ${Number(item.meta.km).toFixed(1)} km</span><div class="history-actions"><button data-history="reopen" data-id="${item.id}">Abrir</button><button data-history="pdf" data-id="${item.id}">PDF</button><button data-history="xlsx" data-id="${item.id}">Excel</button><button data-history="delete" data-id="${item.id}" class="danger">Excluir</button></div></div>`
+        const sendBtn = !item.sheetId && sheetsState.online ? `<button data-history="sync" data-id="${escHtml(item.id)}" title="Gravar esta rota no Google Sheets">Enviar</button>` : '';
+        return `<div class="historyrow"><div class="avatar" style="width:25px;height:25px">${item.sheetId ? '✓' : '!'}</div><div><b>${escHtml(item.meta.driver)}</b><span>${escHtml(item.meta.date)} · ${escHtml(item.meta.base)}${item.sheetId ? ' · ' + escHtml(item.sheetId) : ''}</span></div>${historySyncTag(item)}<span class="muted history-stops">${item.meta.stops} paradas · ${Number(item.meta.km).toFixed(1)} km</span><div class="history-actions">${sendBtn}<button data-history="reopen" data-id="${escHtml(item.id)}">Abrir</button><button data-history="pdf" data-id="${escHtml(item.id)}">PDF</button><button data-history="xlsx" data-id="${escHtml(item.id)}">Excel</button><button data-history="delete" data-id="${escHtml(item.id)}" class="danger">Excluir</button></div></div>`
     }).join('') : (all.length ? '<div class="history-empty">Nenhuma rota salva no período selecionado. Ajuste as datas “De” e “Até” para ampliar a busca.</div>' : '<div class="history-empty">Nenhuma rota calculada ainda. Calcule uma rota para que ela apareça aqui.</div>');
+    updateHistoryNotice();
 }
 
 function printHistory(item) {
@@ -5468,17 +6169,26 @@ function printHistory(item) {
 }
 
 function reopenHistory(item) {
-    stops = item.ordered.map(function(s) {
-        return {
-            ...s
-        };
+    const routeStops = (item.ordered || []).map(function(s) {
+        const current = stops.find(function(x) { return String(x.id) === String(s.id); }) || (s.code ? stops.find(function(x) { return String(x.id) === String(s.code); }) : null);
+        if (current) {
+            current.fiscal = { ...(s.fiscal || {}) };
+            if (urgency[s.urgency]) current.urgency = s.urgency;
+            if (!hasValidCoordinates(current) && hasValidCoordinates(s) && s.geoSource) {
+                ['lat', 'lng', 'geoReady', 'geoSource', 'geoProvider', 'geoFallback', 'geoQuery'].forEach(function(k) { current[k] = s[k]; });
+            }
+            return current;
+        }
+        const copy = { ...s };
+        stops.push(copy);
+        return copy;
     });
-    selected = new Set(stops.map(function(s) {
+    selected = new Set(routeStops.map(function(s) {
         return s.id;
     }));
     route = {
         engineVersion: item.engineVersion || ROUTE_ENGINE_VERSION,
-        ordered: stops,
+        ordered: routeStops,
         legs: item.legs,
         geometry: item.geometry || null,
         km: item.km,
@@ -5489,10 +6199,12 @@ function reopenHistory(item) {
     /* A base de partida/retorno deve ser a da rota salva, e não a que
        estiver selecionada por acaso no painel Planejamento. */
     const savedBase = bases.find(function(b) {
+        return item.meta.baseId && b.id === item.meta.baseId;
+    }) || bases.find(function(b) {
         return key(b.name) === key(item.meta.base || '');
     });
     if (savedBase) $('baseSelect').value = savedBase.id;
-    $('driver').value = item.meta.driver;
+    if (Array.from($('driver').options).some(function(o) { return o.value === item.meta.driver; })) $('driver').value = item.meta.driver;
     $('driverName').value = item.meta.driver;
     $('date').value = item.meta.date;
     $('departure').value = item.meta.departure;
@@ -5505,7 +6217,7 @@ function reopenHistory(item) {
     persistForm();
 }
 
-function handleHistory(e) {
+async function handleHistory(e) {
     const b = e.target.closest('[data-history]');
     if (!b) return;
     const item = getHistory().find(function(x) {
@@ -5515,11 +6227,29 @@ function handleHistory(e) {
     if (b.dataset.history === 'reopen') reopenHistory(item);
     if (b.dataset.history === 'pdf') printHistory(item);
     if (b.dataset.history === 'xlsx') exportExcel(item);
-    if (b.dataset.history === 'delete' && confirm('Excluir este planejamento do histórico? Esta ação não pode ser desfeita.')) {
-        localStorage.setItem('planiroute-history', JSON.stringify(getHistory().filter(function(x) {
-            return String(x.id) !== String(item.id);
-        })));
-        renderHistory();
+    if (b.dataset.history === 'sync') {
+        b.disabled = true;
+        b.textContent = 'Enviando…';
+        const r = await pushRouteToSheets(item);
+        refreshHistoryViews();
+        alert(r.ok ? (r.linked ? 'Esta rota já estava na planilha (' + r.id + '); o registro foi vinculado.' : 'Rota enviada ao Google Sheets (' + r.id + ').') : 'Não foi possível enviar: ' + r.error);
+    }
+    if (b.dataset.history === 'delete') {
+        const msg = item.sheetId ? 'Excluir a rota ' + item.sheetId + '? Ela deixa de aparecer para todos os usuários (na planilha fica registrada como "Excluída").' : 'Excluir esta rota guardada neste navegador? Esta ação não pode ser desfeita.';
+        if (!confirm(msg)) return;
+        if (item.sheetId) {
+            try {
+                await sheetsCall('excluirRota', { id: item.sheetId });
+            } catch (err) {
+                alert('Não foi possível excluir no Google Sheets: ' + err.message);
+                return;
+            }
+            remoteHistory = remoteHistory.filter(function(x) { return x.sheetId !== item.sheetId; });
+        }
+        setLocalHistory(getLocalHistory().filter(function(x) {
+            return String(x.id) !== String(item.id) && !(item.sheetId && x.sheetId === item.sheetId);
+        }));
+        refreshHistoryViews();
     }
 }
 
@@ -5537,7 +6267,7 @@ function closeModal() {
 
 function openPreferences() {
     const currentKey = getGoogleKey();
-    openModal('Preferências operacionais', `<div class="pref-row"><span>Tema da aplicação</span><select id="prefTheme"><option value="light">Claro</option><option value="dark">Escuro</option></select></div><div class="pref-row"><span>Trânsito padrão</span><select id="prefTraffic"><option value="estimated">Estimado por faixa horária</option><option value="off">Sem ajuste de trânsito</option></select></div><div class="pref-row"><span>Retornar à base ao final</span><input id="prefReturn" type="checkbox" checked></div><div class="divider" style="margin:18px 0"></div><div class="over" style="margin-bottom:6px">Google Maps</div><p style="margin:0 0 10px">Rotas em tempo real e fotos das unidades exigem uma chave de API do Google Maps com <b>Maps JavaScript API</b>, <b>Directions API</b>, <b>Geocoding API</b> e <b>Places API</b> habilitadas (e faturamento ativo no projeto). Sem chave, a aplicação usa apenas uma estimativa local por distância e faixa horária (sem geocodificação real de endereços).</p><p id="prefGmapsServerNote" style="display:none;margin:0 0 10px;padding:9px 11px;border:1px solid var(--line);border-radius:8px;background:var(--mint);font-size:11px">🔒 Esta chave está sendo carregada automaticamente e com segurança a partir da variável de ambiente configurada na Vercel — não fica salva neste navegador.</p><div id="prefGmapsManualBox"><label style="display:block;margin-bottom:10px">Chave de API (uso manual/local)<input id="prefGmapsKey" type="text" placeholder="AIza…" value="${escHtml(currentKey)}" style="margin-top:6px"></label><div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px"><button class="primary" style="width:auto" id="prefGmapsSave">Salvar e conectar</button><button class="outline" id="prefGmapsClear">Remover chave</button><a class="outline" href="https://console.cloud.google.com/google/maps-apis/credentials" target="_blank" rel="noopener">↗ Obter chave</a></div></div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px"><button class="outline" id="prefGmapsRetry">↻ Testar conexão novamente</button></div><p id="prefGmapsStatus" style="font-size:10px;margin:6px 0 0"></p><div class="divider" style="margin:18px 0"></div><div class="over" style="margin-bottom:6px">Dados salvos neste navegador</div><p style="margin:0 0 10px">Planilha importada, seleção, formulário e última rota calculada ficam salvos para uso após fechar ou reiniciar a aplicação.</p><button class="outline" id="prefClearData">🗑 Limpar dados ativos e reiniciar</button><p style="margin-top:17px">As preferências são aplicadas imediatamente e ficam salvas neste navegador.</p>`);
+    openModal('Preferências operacionais', `<div class="pref-row"><span>Tema da aplicação</span><select id="prefTheme"><option value="light">Claro</option><option value="dark">Escuro</option></select></div><div class="pref-row"><span>Trânsito padrão</span><select id="prefTraffic"><option value="estimated">Estimado por faixa horária</option><option value="off">Sem ajuste de trânsito</option></select></div><div class="pref-row"><span>Retornar à base ao final</span><input id="prefReturn" type="checkbox" checked></div><div class="divider" style="margin:18px 0"></div><div class="over" style="margin-bottom:6px">Google Maps</div><p style="margin:0 0 10px">Rotas em tempo real e fotos das unidades exigem uma chave de API do Google Maps com <b>Maps JavaScript API</b>, <b>Directions API</b>, <b>Geocoding API</b> e <b>Places API</b> habilitadas (e faturamento ativo no projeto). Sem chave, a aplicação usa apenas uma estimativa local por distância e faixa horária (sem geocodificação real de endereços).</p><p id="prefGmapsServerNote" style="display:none;margin:0 0 10px;padding:9px 11px;border:1px solid var(--line);border-radius:8px;background:var(--mint);font-size:11px">🔒 Esta chave está sendo carregada automaticamente e com segurança a partir da variável de ambiente configurada na Vercel — não fica salva neste navegador.</p><div id="prefGmapsManualBox"><label style="display:block;margin-bottom:10px">Chave de API (uso manual/local)<input id="prefGmapsKey" type="text" placeholder="AIza…" value="${escHtml(currentKey)}" style="margin-top:6px"></label><div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px"><button class="primary" style="width:auto" id="prefGmapsSave">Salvar e conectar</button><button class="outline" id="prefGmapsClear">Remover chave</button><a class="outline" href="https://console.cloud.google.com/google/maps-apis/credentials" target="_blank" rel="noopener">↗ Obter chave</a></div></div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px"><button class="outline" id="prefGmapsRetry">↻ Testar conexão novamente</button></div><p id="prefGmapsStatus" style="font-size:10px;margin:6px 0 0"></p><div class="divider" style="margin:18px 0"></div><div class="over" style="margin-bottom:6px">Google Sheets</div><p id="prefSheetsStatus" style="margin:0 0 10px;font-size:11px">${sheetsStatusHtml()}</p><div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px"><button class="outline" id="prefSheetsReload">↻ Recarregar cadastro e histórico</button></div><details class="pref-sheets-manual"${sheetsState.mode === 'proxy' ? '' : ' open'}><summary>Conexão direta com o Apps Script (uso local, sem a Vercel)</summary><p style="margin:0 0 8px;font-size:10px">Na Vercel a conexão é feita pela função <code>/api/rotas</code>, com o token guardado nas variáveis de ambiente — não é preciso preencher nada aqui. Use estes campos só para abrir o arquivo localmente.</p><label style="display:block;margin-bottom:8px">URL do Aplicativo da Web (termina em /exec)<input id="prefSheetsUrl" type="text" placeholder="https://script.google.com/macros/s/…/exec" value="${escHtml(sheetsDirectUrl())}" style="margin-top:6px"></label><label style="display:block;margin-bottom:8px">Token (propriedade API_TOKEN do Apps Script)<input id="prefSheetsToken" type="password" value="${escHtml(sheetsDirectToken())}" style="margin-top:6px"></label><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="primary" style="width:auto;margin-top:0" id="prefSheetsSave">Salvar e conectar</button><button class="outline" id="prefSheetsClear">Remover</button></div></details><div class="divider" style="margin:18px 0"></div><div class="over" style="margin-bottom:6px">Bases de partida</div><div id="prefBasesList">${basesListHtml()}</div><button class="outline" id="prefBaseNew">＋ Nova base</button><div class="divider" style="margin:18px 0"></div><div class="over" style="margin-bottom:6px">Dados salvos neste navegador</div><p style="margin:0 0 10px">Planilha importada, seleção, formulário e última rota calculada ficam salvos para uso após fechar ou reiniciar a aplicação.</p><button class="outline" id="prefClearData">🗑 Limpar dados ativos e reiniciar</button><p style="margin-top:17px">As preferências são aplicadas imediatamente e ficam salvas neste navegador.</p>`);
     $('prefTheme').value = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
     $('prefTraffic').value = $('traffic').value;
     $('prefReturn').checked = $('returnBase').checked;
@@ -5590,6 +6320,41 @@ function openPreferences() {
         if (confirm('Isto apaga a planilha importada, seleção e rota salvas neste navegador (o histórico de planejamentos é mantido). Deseja continuar?')) {
             resetActiveData();
         }
+    };
+    $('prefSheetsReload').onclick = async function() {
+        this.disabled = true;
+        await initSheets();
+        this.disabled = false;
+        if ($('prefBasesList')) $('prefBasesList').innerHTML = basesListHtml();
+    };
+    $('prefSheetsSave').onclick = async function() {
+        const url = $('prefSheetsUrl').value.trim();
+        if (!/^https:\/\/script\.google\.com\/.+\/exec$/.test(url)) {
+            alert('Informe a URL do Aplicativo da Web do Apps Script (https://script.google.com/macros/s/…/exec).');
+            return;
+        }
+        try {
+            localStorage.setItem(SHEETS_DIRECT_KEY, url);
+            localStorage.setItem(SHEETS_TOKEN_KEY, $('prefSheetsToken').value.trim());
+        } catch (e) {}
+        sheetsState.mode = '';
+        await initSheets();
+        if ($('prefBasesList')) $('prefBasesList').innerHTML = basesListHtml();
+    };
+    $('prefSheetsClear').onclick = async function() {
+        try {
+            localStorage.removeItem(SHEETS_DIRECT_KEY);
+            localStorage.removeItem(SHEETS_TOKEN_KEY);
+        } catch (e) {}
+        $('prefSheetsUrl').value = '';
+        $('prefSheetsToken').value = '';
+        sheetsState.mode = '';
+        await initSheets();
+    };
+    $('prefBaseNew').onclick = function() { openBaseForm(null); };
+    $('prefBasesList').onclick = function(e) {
+        const b = e.target.closest('[data-base-edit]');
+        if (b) openBaseForm(sheetBasesAll.find(function(x) { return x.id === b.dataset.baseEdit; }));
     };
 }
 
@@ -5677,6 +6442,7 @@ document.addEventListener('change', e => {
         const s = stops.find(x => x.id === e.target.dataset.u);
         if (s) {
             s.urgency = e.target.value;
+            s.urgencyEdited = true;
             invalidateRoute();
             render();
             persistDataset();
@@ -5684,20 +6450,42 @@ document.addEventListener('change', e => {
         }
     }
 });
-$('saveRouteBtn').onclick = function() {
+$('saveRouteBtn').onclick = async function() {
     if (!route || routeNeedsRecalc) return alert('A seleção ou configuração mudou. Clique em “Recalcular rota” antes de salvar.');
     const candidate = currentRouteItem();
     if (hasDuplicateRoute(candidate)) {
         const duplicateDecision = confirm('Já existe no Histórico uma rota com a mesma composição de unidades e base. Deseja salvar uma rota duplicada mesmo assim?');
         if (!duplicateDecision) return;
     }
-    const saved = saveHistory();
-    if (!saved) return alert('Não foi possível salvar a rota no Histórico. Verifique os dados fiscais e o espaço disponível no navegador.');
-    /* Amplia o filtro de período, se necessário, para que a rota recém-salva
-       (cuja data de operação pode ser anterior a "hoje") apareça na lista. */
-    ensureHistoryFilterShows($('date').value);
-    renderHistory();
-    alert('Rota salva no Histórico.');
+    const btn = this, label = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = '… Salvando';
+    try {
+        const saved = await saveHistory();
+        if (!saved.ok) {
+            if (!saved.handled) alert('Não foi possível salvar a rota no Histórico. Verifique os dados fiscais e o espaço disponível no navegador.');
+            return;
+        }
+        /* Amplia o filtro de período, se necessário, para que a rota recém-salva
+           (cuja data de operação pode ser anterior a "hoje") apareça na lista. */
+        ensureHistoryFilterShows($('date').value);
+        renderHistory();
+        alert(saved.synced ? 'Rota salva no Google Sheets (' + saved.id + ').' : 'A rota ficou guardada neste navegador, mas ainda não foi enviada ao Google Sheets (' + (saved.error || 'sem conexão') + '). Ela será reenviada automaticamente quando a aplicação for reaberta com conexão, ou pelo botão “Enviar ao Google Sheets” no Histórico.');
+    } finally {
+        btn.disabled = false;
+        btn.textContent = label;
+    }
+};
+$('baseNewBtn').onclick = function() { openBaseForm(null); };
+$('baseEditBtn').onclick = function() {
+    const b = bases.find(function(x) { return x.id === $('baseSelect').value; });
+    if (b && b.source !== 'sheets') {
+        if (!confirm('Esta base não veio do Google Sheets. Deseja cadastrá-la na planilha?')) return;
+        openBaseForm(null);
+        if ($('bfNome')) { $('bfNome').value = b.name || ''; $('bfEndereco').value = String(b.address || '').replace(/\s*·\s*Brasil$/, ''); }
+        return;
+    }
+    openBaseForm(b);
 };
 $('driverName').oninput = () => {
     render();
@@ -5792,7 +6580,7 @@ function updateGeoInfo() {
         return selected.has(s.id);
     }).length;
     if (!stops.length) {
-        info.innerHTML = 'Importe a planilha para habilitar o filtro por estado e cidade.';
+        info.innerHTML = 'Aguardando o cadastro de unidades (Google Sheets) para habilitar o filtro por estado e cidade.';
     } else {
         info.innerHTML = '<b>' + total + '</b> unidade' + (total === 1 ? '' : 's') + ' no filtro · <b>' + marked + '</b> já marcada' + (marked === 1 ? '' : 's') + ' · <b>' + selected.size + '</b> na rota';
     }
@@ -6091,6 +6879,7 @@ function processSheet(sheetName) {
         }
     });
     stops = Array.from(grouped.values());
+    datasetSource = 'arquivo';
     bases = withDefaultBase(Array.from(baseMap.values()));
     showProgress('Atualizando unidades disponíveis e filtros…', 84);
     $('baseSelect').innerHTML = bases.map(function(base) {
@@ -6245,7 +7034,7 @@ function renderMetrics() {
     '<div class="metrics-grid"><section class="card metrics-panel"><h3>Evolução da distância</h3><p class="panel-sub">Quilômetros planejados por data, até as 12 datas mais recentes.</p><div class="metrics-chart">'+(dates.length?dates.map(x=>'<div class="metric-bar-col"><span class="metric-bar-value">'+x[1].km.toFixed(0)+' km</span><i class="metric-bar" style="height:'+Math.max(3,x[1].km/maxKm*135)+'px"></i><span class="metric-bar-label">'+metricEsc(x[0].slice(5))+'</span></div>').join(''):'<span class="metrics-empty">Sem série temporal</span>')+'</div></section>'+
     '<section class="card metrics-panel"><h3>Distribuição de urgências</h3><p class="panel-sub">Prioridade registrada nas unidades das rotas filtradas.</p><div class="urgency-list">'+Object.entries(d.urg).map(x=>'<div class="urgency-row"><span>'+x[0]+'</span><div class="u-track"><i style="width:'+(x[1]/maxUrg*100)+'%;background:'+(urgency[x[0]]?.c||'#0d8c78')+'"></i></div><b>'+x[1]+'</b></div>').join('')+'</div></section>'+
     '<section class="card metrics-panel"><h3>Desempenho por condutor</h3><p class="panel-sub">Volume de paradas, rotas e distância acumulada.</p><table class="metric-table"><thead><tr><th>Condutor</th><th>Rotas</th><th>Paradas</th><th>Km</th><th>Média/rota</th></tr></thead><tbody>'+top.map((x,i)=>'<tr><td><span class="rank">'+(i+1)+'</span>'+metricEsc(x[0])+'</td><td>'+x[1].routes+'</td><td><span class="mini-bar-wrap"><i style="width:'+Math.min(100,x[1].stops/Math.max(1,top[0][1].stops)*100)+'%"></i></span>'+x[1].stops+'</td><td>'+x[1].km.toFixed(1)+'</td><td>'+(x[1].routes? (x[1].stops/x[1].routes).toFixed(1):'0')+'</td></tr>').join('')+'</tbody></table></section>'+
-    '<section class="card metrics-panel"><h3>Resumo executivo e insights</h3><p class="panel-sub">Leituras automáticas para apoiar a gestão da operação.</p><div class="insights"><div class="insight"><b>Condutor com maior volume</b>'+metricEsc(insight1)+'</div><div class="insight"><b>Prioridade operacional</b>'+metricEsc(insight2)+'</div><div class="insight"><b>Referência de produtividade</b>'+metricEsc(insight3)+'</div><div class="insight"><b>Rastreabilidade fiscal</b>'+metricEsc(insight4)+'</div></div></section></div><div class="metrics-foot">Fonte: histórico local de planejamentos salvos. Os valores refletem apenas o recorte atual de condutor, período, base, unidade e documento fiscal.'+(($('metricsUnit').value.trim()||$('metricsDoc').value.trim())?' Com filtro de unidade/documento, distância e deslocamento somam apenas os trechos que chegam às paradas filtradas.':'')+'</div>';
+    '<section class="card metrics-panel"><h3>Resumo executivo e insights</h3><p class="panel-sub">Leituras automáticas para apoiar a gestão da operação.</p><div class="insights"><div class="insight"><b>Condutor com maior volume</b>'+metricEsc(insight1)+'</div><div class="insight"><b>Prioridade operacional</b>'+metricEsc(insight2)+'</div><div class="insight"><b>Referência de produtividade</b>'+metricEsc(insight3)+'</div><div class="insight"><b>Rastreabilidade fiscal</b>'+metricEsc(insight4)+'</div></div></section></div><div class="metrics-foot">Fonte: rotas salvas no Google Sheets (e rotas ainda não enviadas deste navegador). Os valores refletem apenas o recorte atual de condutor, período, base, unidade e documento fiscal.'+(($('metricsUnit').value.trim()||$('metricsDoc').value.trim())?' Com filtro de unidade/documento, distância e deslocamento somam apenas os trechos que chegam às paradas filtradas.':'')+'</div>';
 }
 function metricsPdf() {
     const items=metricHistoryData();
@@ -6263,7 +7052,7 @@ function metricsPdf() {
     const insights=[top[0]?'O condutor com maior volume é '+top[0][0]+', com '+top[0][1].stops+' paradas.':'Não há líder de volume no recorte.',critical&&totalUrg?'Paradas Super/Alta correspondem a '+Math.round(critical/totalUrg*100)+'% do total.':'Não foi possível calcular concentração de urgências.',d.routes>1?'A média operacional é de '+d.avgStops.toFixed(1)+' paradas e '+d.avgKm.toFixed(1)+' km por rota.':'Uma única rota foi analisada; use-a como linha de base.',d.fiscal?'O valor fiscal acumulado informado é '+metricFmtMoney(d.fiscal)+'.':'Não há valores fiscais informados no período.'];
     const w=window.open('','_blank');
     if(!w)return alert('Permita pop-ups para gerar o relatório.');
-    const html='<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>Relatório de métricas · GRUPO LABMEDIC</title><style>@page{size:A4 landscape;margin:12mm}*{box-sizing:border-box}body{font-family:Arial,sans-serif;color:#183345;margin:0;font-size:10px}.toolbar{display:flex;justify-content:flex-end;gap:8px;margin-bottom:10px}.toolbar button{padding:8px 12px;background:#0d806d;color:#fff;border:0;border-radius:5px;cursor:pointer}.toolbar button.alt{background:#193345}h1{font-size:25px;color:#0d806d;margin:0 0 4px}h2{font-size:14px;color:#193345;border-bottom:2px solid #0d806d;padding-bottom:6px;margin:20px 0 10px}.sub{color:#718184;font-size:11px}.brand{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:1px solid #dce8e3;padding-bottom:12px}.filters{padding:8px 10px;background:#f6f9f8;border:1px solid #e0e9e5;color:#607175;font-size:9px;margin-top:12px}.meta{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:14px 0}.box{background:#eff8f4;border-radius:7px;padding:10px}.box small{display:block;color:#718184;font-size:9px}.box b{display:block;font-size:16px;margin-top:4px;color:#183345}.cols{display:grid;grid-template-columns:1.25fr .75fr;gap:16px}table{width:100%;border-collapse:collapse;table-layout:fixed}thead{display:table-header-group}th{background:#193345;color:#fff;text-align:left;padding:7px;font-size:8px}td{padding:7px;border-bottom:1px solid #e0e9e5;vertical-align:top;word-break:break-word}td:not(:first-child),th:not(:first-child){text-align:right}tr{break-inside:avoid;page-break-inside:avoid}td small{display:block;color:#718184;font-size:8px;margin-top:3px;text-align:left}.insight{padding:8px 10px;border-left:3px solid #0d8c78;background:#eff8f4;margin-bottom:7px;line-height:1.35}.details-page{break-before:page;page-break-before:always}.details-title{display:flex;justify-content:space-between;align-items:end}.details-title small{color:#718184;font-size:9px}.details-table{font-size:8px}.details-table th{font-size:7px;padding:6px}.details-table td{padding:5px}.details-table th:nth-child(1){width:7%}.details-table th:nth-child(2){width:9%}.details-table th:nth-child(3){width:10%}.details-table th:nth-child(4){width:4%}.details-table th:nth-child(5){width:23%}.details-table th:nth-child(6){width:7%}.details-table th:nth-child(7){width:7%}.details-table th:nth-child(8){width:7%}.details-table th:nth-child(9){width:10%}.details-table th:nth-child(10){width:8%}.details-table th:nth-child(11){width:8%}.foot{margin-top:18px;padding-top:8px;border-top:1px solid #dce8e3;color:#718184;font-size:8px}@media print{.toolbar{display:none}.summary-page{break-after:page;page-break-after:always}.details-page{break-before:auto;page-break-before:auto}}@media screen{body{max-width:1400px;margin:0 auto;padding:12px;background:#fff}.details-page{margin-top:20px;padding-top:8px;border-top:5px solid #eaf4f0}}</style></head><body><div class="toolbar"><button onclick="window.print()">▤ Imprimir / Salvar como PDF</button><button class="alt" onclick="downloadReport()">⇩ Baixar relatório</button></div><section class="summary-page"><div class="brand"><div><h1>GRUPO LABMEDIC</h1><div class="sub">Relatório executivo de análise de métricas operacionais</div></div><div class="sub">Gerado em '+new Date().toLocaleString('pt-BR')+'</div></div><div class="filters"><b>Filtros aplicados:</b> Condutor: '+metricEsc(driver)+' · Período: '+metricEsc(from)+' a '+metricEsc(to)+' · Base: '+metricEsc(base)+' · Unidade: '+metricEsc(unitF)+' · Documento fiscal: '+metricEsc(docF)+'</div><div class="meta">'+[['Diligências',d.routes],['Unidades visitadas',d.stops],['Distância total',d.km.toFixed(1)+' km'],['Tempo de deslocamento',metricFmtHours(d.travel)],['Condutores',Object.keys(d.drivers).length],['Média de paradas/rota',d.avgStops.toFixed(1)],['Valor fiscal',metricFmtMoney(d.fiscal)],['Paradas críticas',critical]].map(x=>'<div class="box"><small>'+x[0]+'</small><b>'+x[1]+'</b></div>').join('')+'</div><div class="cols"><div><h2>Desempenho por condutor</h2><table><thead><tr><th>#</th><th>Condutor</th><th>Rotas</th><th>Paradas</th><th>Distância</th><th>Média/rota</th></tr></thead><tbody>'+rows+'</tbody></table><h2>Insights executivos</h2>'+insights.map(x=>'<div class="insight">'+metricEsc(x)+'</div>').join('')+'</div><div><h2>Distribuição de urgências</h2><table><thead><tr><th>Nível</th><th>Paradas</th><th>Participação</th></tr></thead><tbody>'+urgRows+'</tbody></table><h2>Resumo da leitura</h2><div class="insight">O relatório considera '+d.routes+' planejamento(s) salvos, '+d.stops+' unidade(s) visitada(s) e '+d.km.toFixed(1)+' km de deslocamento acumulado.</div><div class="insight">A média de deslocamento por rota foi de '+metricFmtHours(d.avgTravel)+', com '+d.avgStops.toFixed(1)+' parada(s) por rota.</div></div></div><div class="foot">Página de resumo · Fonte: histórico local de planejamentos · Documento gerado pelo módulo Análise de Métricas.</div></section><section class="details-page"><div class="details-title"><div><h1 style="font-size:20px">Unidades visitadas</h1><div class="sub">Listagem detalhada das unidades incluídas nas diligências filtradas</div></div><small>'+details.length+' unidade(s) · quebra automática por página</small></div><table class="details-table"><thead><tr><th>Data</th><th>Condutor</th><th>Base</th><th>#</th><th>Unidade / endereço</th><th>Urgência</th><th>Chegada</th><th>Km trecho</th><th>Documento fiscal</th><th>Emissão</th><th>Valor</th></tr></thead><tbody>'+details.join('')+'</tbody></table><div class="foot">Página(s) de detalhamento · As linhas são mantidas inteiras e o cabeçalho é repetido automaticamente quando houver quebra de página.</div></section><script>function downloadReport(){const blob=new Blob([document.documentElement.outerHTML],{type:"text/html;charset=utf-8"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="GRUPO LABMEDIC - Relatorio de Metricas.html";a.click();setTimeout(function(){URL.revokeObjectURL(a.href)},500)}<\/script></body></html>';
+    const html='<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>Relatório de métricas · GRUPO LABMEDIC</title><style>@page{size:A4 landscape;margin:12mm}*{box-sizing:border-box}body{font-family:Arial,sans-serif;color:#183345;margin:0;font-size:10px}.toolbar{display:flex;justify-content:flex-end;gap:8px;margin-bottom:10px}.toolbar button{padding:8px 12px;background:#0d806d;color:#fff;border:0;border-radius:5px;cursor:pointer}.toolbar button.alt{background:#193345}h1{font-size:25px;color:#0d806d;margin:0 0 4px}h2{font-size:14px;color:#193345;border-bottom:2px solid #0d806d;padding-bottom:6px;margin:20px 0 10px}.sub{color:#718184;font-size:11px}.brand{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:1px solid #dce8e3;padding-bottom:12px}.filters{padding:8px 10px;background:#f6f9f8;border:1px solid #e0e9e5;color:#607175;font-size:9px;margin-top:12px}.meta{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:14px 0}.box{background:#eff8f4;border-radius:7px;padding:10px}.box small{display:block;color:#718184;font-size:9px}.box b{display:block;font-size:16px;margin-top:4px;color:#183345}.cols{display:grid;grid-template-columns:1.25fr .75fr;gap:16px}table{width:100%;border-collapse:collapse;table-layout:fixed}thead{display:table-header-group}th{background:#193345;color:#fff;text-align:left;padding:7px;font-size:8px}td{padding:7px;border-bottom:1px solid #e0e9e5;vertical-align:top;word-break:break-word}td:not(:first-child),th:not(:first-child){text-align:right}tr{break-inside:avoid;page-break-inside:avoid}td small{display:block;color:#718184;font-size:8px;margin-top:3px;text-align:left}.insight{padding:8px 10px;border-left:3px solid #0d8c78;background:#eff8f4;margin-bottom:7px;line-height:1.35}.details-page{break-before:page;page-break-before:always}.details-title{display:flex;justify-content:space-between;align-items:end}.details-title small{color:#718184;font-size:9px}.details-table{font-size:8px}.details-table th{font-size:7px;padding:6px}.details-table td{padding:5px}.details-table th:nth-child(1){width:7%}.details-table th:nth-child(2){width:9%}.details-table th:nth-child(3){width:10%}.details-table th:nth-child(4){width:4%}.details-table th:nth-child(5){width:23%}.details-table th:nth-child(6){width:7%}.details-table th:nth-child(7){width:7%}.details-table th:nth-child(8){width:7%}.details-table th:nth-child(9){width:10%}.details-table th:nth-child(10){width:8%}.details-table th:nth-child(11){width:8%}.foot{margin-top:18px;padding-top:8px;border-top:1px solid #dce8e3;color:#718184;font-size:8px}@media print{.toolbar{display:none}.summary-page{break-after:page;page-break-after:always}.details-page{break-before:auto;page-break-before:auto}}@media screen{body{max-width:1400px;margin:0 auto;padding:12px;background:#fff}.details-page{margin-top:20px;padding-top:8px;border-top:5px solid #eaf4f0}}</style></head><body><div class="toolbar"><button onclick="window.print()">▤ Imprimir / Salvar como PDF</button><button class="alt" onclick="downloadReport()">⇩ Baixar relatório</button></div><section class="summary-page"><div class="brand"><div><h1>GRUPO LABMEDIC</h1><div class="sub">Relatório executivo de análise de métricas operacionais</div></div><div class="sub">Gerado em '+new Date().toLocaleString('pt-BR')+'</div></div><div class="filters"><b>Filtros aplicados:</b> Condutor: '+metricEsc(driver)+' · Período: '+metricEsc(from)+' a '+metricEsc(to)+' · Base: '+metricEsc(base)+' · Unidade: '+metricEsc(unitF)+' · Documento fiscal: '+metricEsc(docF)+'</div><div class="meta">'+[['Diligências',d.routes],['Unidades visitadas',d.stops],['Distância total',d.km.toFixed(1)+' km'],['Tempo de deslocamento',metricFmtHours(d.travel)],['Condutores',Object.keys(d.drivers).length],['Média de paradas/rota',d.avgStops.toFixed(1)],['Valor fiscal',metricFmtMoney(d.fiscal)],['Paradas críticas',critical]].map(x=>'<div class="box"><small>'+x[0]+'</small><b>'+x[1]+'</b></div>').join('')+'</div><div class="cols"><div><h2>Desempenho por condutor</h2><table><thead><tr><th>#</th><th>Condutor</th><th>Rotas</th><th>Paradas</th><th>Distância</th><th>Média/rota</th></tr></thead><tbody>'+rows+'</tbody></table><h2>Insights executivos</h2>'+insights.map(x=>'<div class="insight">'+metricEsc(x)+'</div>').join('')+'</div><div><h2>Distribuição de urgências</h2><table><thead><tr><th>Nível</th><th>Paradas</th><th>Participação</th></tr></thead><tbody>'+urgRows+'</tbody></table><h2>Resumo da leitura</h2><div class="insight">O relatório considera '+d.routes+' planejamento(s) salvos, '+d.stops+' unidade(s) visitada(s) e '+d.km.toFixed(1)+' km de deslocamento acumulado.</div><div class="insight">A média de deslocamento por rota foi de '+metricFmtHours(d.avgTravel)+', com '+d.avgStops.toFixed(1)+' parada(s) por rota.</div></div></div><div class="foot">Página de resumo · Fonte: rotas salvas no Google Sheets · Documento gerado pelo módulo Análise de Métricas.</div></section><section class="details-page"><div class="details-title"><div><h1 style="font-size:20px">Unidades visitadas</h1><div class="sub">Listagem detalhada das unidades incluídas nas diligências filtradas</div></div><small>'+details.length+' unidade(s) · quebra automática por página</small></div><table class="details-table"><thead><tr><th>Data</th><th>Condutor</th><th>Base</th><th>#</th><th>Unidade / endereço</th><th>Urgência</th><th>Chegada</th><th>Km trecho</th><th>Documento fiscal</th><th>Emissão</th><th>Valor</th></tr></thead><tbody>'+details.join('')+'</tbody></table><div class="foot">Página(s) de detalhamento · As linhas são mantidas inteiras e o cabeçalho é repetido automaticamente quando houver quebra de página.</div></section><script>function downloadReport(){const blob=new Blob([document.documentElement.outerHTML],{type:"text/html;charset=utf-8"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="GRUPO LABMEDIC - Relatorio de Metricas.html";a.click();setTimeout(function(){URL.revokeObjectURL(a.href)},500)}<\/script></body></html>';
     w.document.write(html);
     w.document.close();
 }
@@ -6449,6 +7238,7 @@ async function openGoogleMapsRoute() {
         }
         hideProgress();
         persistDataset();
+        saveGeocodesToSheets(pending);
     }
     const links = buildGoogleMapsLinks(points);
     if (!links.length) {
@@ -6512,6 +7302,7 @@ function resetActiveData() {
     } catch (e) {}
     stops = [];
     bases = [DEFAULT_BASE];
+    datasetSource = '';
     selected = new Set();
     route = null;
     routeNeedsRecalc = false;
@@ -6549,6 +7340,7 @@ function resetActiveData() {
     closeModal();
     tabs('plan');
     window.scrollTo({ top: 0, behavior: 'smooth' });
+    initSheets();
 }
 
 /* MENU LATERAL RETRÁTIL · estado salvo neste navegador */
@@ -6590,6 +7382,23 @@ render();
 setRouteNeedsRecalc(routeNeedsRecalc);
 if (route) renderResult();
 initGoogleMapsIfConfigured();
+$('refreshHistoryBtn').onclick = async function() {
+    this.disabled = true;
+    try {
+        if (!sheetsState.online) await initSheets();
+        else await loadRemoteHistory();
+    } catch (e) {
+        alert('Não foi possível atualizar o histórico: ' + e.message);
+    }
+    this.disabled = false;
+};
+$('syncPendingBtn').onclick = async function() {
+    this.disabled = true;
+    await syncPendingRoutes({});
+    this.disabled = false;
+};
+updateHistoryNotice();
+initSheets();
 </script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v31edd6df95cf4e85bb4c19e7a9bdbcba1788362987495" integrity="sha512-iIg7k2xntmwu6/uSb5tpc/hySgZc4eoL31yB29W6tJFo2akwjPWcEqnCEdJvGexCL0KEQwVYv5BlowfhVz26hg==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v31edd6df95cf4e85bb4c19e7a9bdbcba1788362987495" integrity="sha512-iIg7k2xntmwu6/uSb5tpc/hySgZc4eoL31yB29W6tJFo2akwjPWcEqnCEdJvGexCL0KEQwVYv5BlowfhVz26hg==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
