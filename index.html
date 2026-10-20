@@ -3392,6 +3392,20 @@ body.landing-lock {
 .modal-body label > input[type="text"], .modal-body label > input[type="password"] { display: block; width: 100%; padding: 9px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--card); color: var(--ink); font-size: 12px }
 .hist-tools { display: flex; align-items: end; gap: 7px; flex-wrap: wrap }
 @media (max-width: 620px) { .base-form { grid-template-columns: 1fr } .status.sheets-pill { display: none } }
+
+/* v3 · correção de endereço e mapa */
+.unit.unit-review { cursor: pointer }
+.unit.unit-review:hover { background: #fffaf0 }
+.dark .unit.unit-review:hover { background: #3a3220 }
+.unit-fix { display: inline-block; margin-left: 7px; padding: 2px 7px; border: 1px solid #efd48c; border-radius: 6px; background: #fff7e0; color: #7a5b00; font-size: 8.5px; font-weight: 800; vertical-align: middle; cursor: pointer }
+.unit-fix:hover { background: #ffeeb8 }
+.dark .unit-fix { background: #4a3d12; border-color: #7a6420; color: #f3d77a }
+.addr-current, .addr-preview { margin: 0 0 12px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 9px; background: var(--paper) }
+.addr-current small, .addr-preview small { display: block; color: var(--soft); font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: .5px }
+.addr-current b, .addr-preview b { display: block; margin-top: 4px; font-size: 11.5px; color: var(--ink) }
+.addr-current em { display: block; margin-top: 5px; font-style: normal; font-size: 10px; color: #a5521c }
+.addr-preview { background: var(--mint); border-color: transparent }
+#mapLegendNote { max-width: 60%; text-align: right; line-height: 1.35 }
 </style>
 </head>
 <body>
@@ -3409,10 +3423,10 @@ body.landing-lock {
             <div class="landing-copy">
                 <div class="landing-badge">✦ Logística assistencial inteligente</div>
                 <h1 class="landing-title">Cada entrega no tempo certo.<br><em>Cada rota no melhor caminho.</em></h1>
-                <p class="landing-sub">Monte a rota do condutor em poucos cliques: importe a planilha, selecione as unidades, otimize a sequência de visitas e acompanhe tudo no Google Maps em tempo real — com histórico de operações e documentos prontos para a expedição.</p>
+                <p class="landing-sub">Monte a rota do condutor em poucos cliques: o cadastro vem do Google Sheets, você seleciona as unidades, otimize a sequência de visitas e acompanhe tudo no Google Maps em tempo real — com histórico de operações e documentos prontos para a expedição.</p>
                 <div class="landing-ctarow">
                     <button class="landing-cta" id="enterAppBtn">Acessar aplicação <span>➤</span></button>
-                    <span class="landing-note">✓ Dados processados localmente neste navegador</span>
+                    <span class="landing-note">✓ Cadastro e rotas salvos no Google Sheets</span>
                 </div>
                 <div class="landing-feats">
                     <div class="feat"><b>⌁</b>Rota otimizada</div>
@@ -3448,14 +3462,13 @@ body.landing-lock {
     </div>
 </div>
 <div class="app">
-<aside class="side" id="sideNav"><button class="side-toggle" id="sideToggle" type="button" aria-controls="sideNav" aria-expanded="true" title="Recolher menu lateral (Ctrl + B)"><span aria-hidden="true">«</span></button><div class="brand"><div class="brand-mark">⌁</div><div class="brand-txt"><strong>GRUPO LABMEDIC</strong><span>Planejamento de Entregas</span></div></div><div class="workspace"><div class="eyebrow">Workspace ativo</div><div class="workspace-row"><i></i>Logística assistencial<b>⌄</b></div></div><div class="nav"><div class="nav-label">Operação</div><button class="active" data-tab="plan" title="Planejamento"><i class="nav-ico">➤</i><em class="nav-txt">Planejamento</em> <span id="navCount">5</span></button><button data-tab="import" title="Importação manual de planilha (contingência)"><i class="nav-ico">▧</i><em class="nav-txt">Importação manual</em></button><button data-tab="history" title="Histórico"><i class="nav-ico">▦</i><em class="nav-txt">Histórico</em></button><button data-tab="metrics" title="Análise de Métricas"><i class="nav-ico">◈</i><em class="nav-txt">Análise de Métricas</em><span id="metricsCount">0</span></button><div class="nav-label second">Configuração</div><button id="preferencesBtn" title="Preferências"><i class="nav-ico">☷</i><em class="nav-txt">Preferências</em></button><button id="helpBtn" title="Central de Ajuda · abre o manual de uso em uma nova aba"><i class="nav-ico">?</i><em class="nav-txt">Central de Ajuda</em><small class="nav-ext" aria-hidden="true">↗</small></button></div><div class="operator"><div class="avatar">MC</div><div class="operator-txt"><b>Marina Costa</b><small>Operadora · Rede SP</small></div></div></aside>
+<aside class="side" id="sideNav"><button class="side-toggle" id="sideToggle" type="button" aria-controls="sideNav" aria-expanded="true" title="Recolher menu lateral (Ctrl + B)"><span aria-hidden="true">«</span></button><div class="brand"><div class="brand-mark">⌁</div><div class="brand-txt"><strong>GRUPO LABMEDIC</strong><span>Planejamento de Entregas</span></div></div><div class="workspace"><div class="eyebrow">Workspace ativo</div><div class="workspace-row"><i></i>Logística assistencial<b>⌄</b></div></div><div class="nav"><div class="nav-label">Operação</div><button class="active" data-tab="plan" title="Planejamento"><i class="nav-ico">➤</i><em class="nav-txt">Planejamento</em> <span id="navCount">5</span></button><button data-tab="history" title="Histórico"><i class="nav-ico">▦</i><em class="nav-txt">Histórico</em></button><button data-tab="metrics" title="Análise de Métricas"><i class="nav-ico">◈</i><em class="nav-txt">Análise de Métricas</em><span id="metricsCount">0</span></button><div class="nav-label second">Configuração</div><button id="preferencesBtn" title="Preferências"><i class="nav-ico">☷</i><em class="nav-txt">Preferências</em></button><button id="helpBtn" title="Central de Ajuda · abre o manual de uso em uma nova aba"><i class="nav-ico">?</i><em class="nav-txt">Central de Ajuda</em><small class="nav-ext" aria-hidden="true">↗</small></button></div><div class="operator"><div class="avatar">MC</div><div class="operator-txt"><b>Marina Costa</b><small>Operadora · Rede SP</small></div></div></aside>
 <main class="main"><header class="top"><div><div class="eyebrow">Centro de controle / <span id="crumb">Planejamento de rotas de entrega</span></div><h1 id="pageTitle">Planejamento de rotas</h1></div><div style="display:flex;align-items:center;gap:10px"><button class="theme-btn" id="themeBtn" title="Alternar tema">☾</button><div class="status sheets-pill pending" id="sheetsPill" title="Conectando ao Google Sheets…"><i></i><span id="sheetsPillTxt">Google Sheets · conectando…</span></div><div class="status"><i></i>API oficial Google</div></div></header>
 <section id="planPage"><section class="hero"><div><div class="eyebrow" style="color:#71d8bc">✦ Uso da API oficial do Google Maps</div><h2>Previsibilidade de rotas em poucos cliques<br><em>Monitore o trajeto dos condutores</em></h3><p>Você pode salvar as rotas diariamente, ganhando assim uma importante ferramenta de rastreabilidade histórica. </p></div><div class="hero-art"><div class="orbit o1"></div><div class="orbit o2"></div><div class="route-line"></div><div class="node n1">⌖</div><div class="node n2">⌖</div><div class="node n3">⌖</div></div></section>
 <section class="summary"><div class="card"><div class="ico">▣</div><div><span>Unidades no planejamento</span><b id="sumStops">5<small> / 8</small></b></div></div><div class="card"><div class="ico">◷</div><div><span>Tempo de trânsito estimado</span><b id="sumTravel">—</b></div><span class="trend" id="sumTravelSub">aguardando rota</span></div><div class="card"><div class="ico">◔</div><div><span>Urgências críticas</span><b id="sumCritical">4</b></div><span class="trend" id="sumCriticalSub">2 super · 2 alta</span></div><div class="card"><div class="ico">♙</div><div><span>Condutor responsável</span><b style="font-size:14px" id="sumDriver">Reginaldo Braga</b></div><span class="trend">dia 28</span></div></section>
 <div class="grid"><section><div class="section"><div><div class="over">01 · Configuração</div><h3>Monte a rota</h3></div><button class="link" id="clearBtn">Limpar seleção ×</button></div><div class="card form"><label>Condutor<select id="driver"><option>Reginaldo Braga</option><option>Marcelo Medeiros</option><option>Vendedor</option><option>Técnico</option><option>Coletor da cliente</option><option>Transportadora</option></select><input id="driverName" type="text" value="Reginaldo Braga" placeholder="Nome utilizado nos documentos" style="margin-top:7px"></label><div class="two"><label>Data da operação<input id="date" type="date" value=""></label><label>Saída prevista<input id="departure" type="time" value="08:00"></label></div><label>Base de partida<select id="baseSelect"></select></label><div class="base-tools"><button type="button" class="link" id="baseNewBtn" title="Cadastrar uma nova base de partida no Google Sheets">＋ Nova base</button><button type="button" class="link" id="baseEditBtn" title="Editar a base selecionada no Google Sheets">✎ Editar base</button></div><div class="base"><div class="base-icon">⌖</div><div><b id="baseName"></b><small id="baseAddr"></small></div><span class="ok">✓</span></div><div class="divider"></div><div class="labelrow"><label>Paradas da rota <span id="selectedLabel">5 selecionadas</span></label><button id="addPoint">＋ Adicionar ponto</button></div><div class="selected" id="selectedList"></div><div class="options"><label class="switchline"><input id="returnBase" type="checkbox" checked><span class="switch"></span>Retornar à base ao final</label><label>Trânsito<select id="traffic"><option value="estimated">Estimado por faixa horária</option><option value="off">Sem ajuste de trânsito</option></select></label></div><button class="primary" id="calcBtn" title="Calcular a melhor rota com a seleção atual">⌁ Calcular melhor rota <span id="calcBtnIcon">↑</span></button><div class="recalc-notice" id="recalcNotice">⚠ A seleção ou configuração mudou. Recalcule a rota antes de salvá-la ou exportá-la.</div><div class="foot">✓ O cálculo considera distância, janela de saída, tempo de atendimento e urgência.</div></div></section>
-<section><div class="section"><div><div class="over">02 · Visualização</div><h3 id="mapTitle">Mapa operacional</h3></div><div class="map-actions"><button class="outline" id="driverRoutesBtn" title="Ver todas as rotas deste condutor no formato do roteiro PDF">▤ Rotas do condutor</button><button class="outline" id="gmapsOpenBtn" title="Abrir a rota selecionada e otimizada no Google Maps, em uma nova aba">🗺 Google Maps</button><button class="outline" id="saveRouteBtn">▣ Salvar Rota</button><button class="outline" id="recalcBtn">↻ Recalcular</button></div></div><div class="card map"><div class="mapcanvas" id="mapCanvas"><div id="fallbackMap" class="fallback-map"><div class="road r1"></div><div class="road r2"></div><div class="road r3"></div><span class="maplabel l1">ZONA NORTE</span><span class="maplabel l2">CENTRO EXPANDIDO</span><span class="maplabel l3">ZONA SUL</span><svg class="route" id="routeSvg" viewBox="0 0 100 100" preserveAspectRatio="none"></svg></div><div id="gmap" class="gmap-container" style="display:none"></div><div class="zoom-controls" id="mapZoomCtrls" aria-label="Controles de zoom do mapa do painel" data-target="panel"><button class="zoom-btn" data-zoom="in" title="Aumentar zoom">＋</button><button class="zoom-btn" data-zoom="out" title="Diminuir zoom">－</button><button class="zoom-btn" data-zoom="reset" title="Ajustar à área">⌖</button></div><div class="float"><i id="gmapsDot" class="gdot off"></i><span id="gmapsLabel">Google Maps não configurado</span><br><small id="mapSub">pré-visualização da seleção</small></div></div><div class="legend"><span><i class="dot db"></i>Base</span><span><i class="dot dg"></i>Rota planejada</span><span><i class="dot do"></i>Urgência</span><small>⌁ Rota real via Google Maps (ou estimativa local por distância e horário, sem chave)</small></div></div><div class="card result" id="result"><div class="empty"><div class="circle">⌁</div><h3>A rota aparecerá aqui</h3><p>Selecione as unidades, defina a urgência e clique em <b>Calcular melhor rota</b>.</p></div></div></section></div>
-<section class="units" id="unitsSection"><div class="section"><div><div class="over">03 · Unidades disponíveis</div><h3>Escolha os pontos de ligação</h3></div><div class="filters" id="smartSearch"><input id="search" placeholder="🔎  Busca inteligente · unidade, cliente, endereço ou código"><button class="link units-toggle" id="unitsToggleBtn" type="button" aria-expanded="false" aria-controls="unitsBody" title="Expandir a lista completa de unidades"><span class="ut-ico" aria-hidden="true">▾</span><span class="ut-txt">Mostrar unidades</span></button></div></div><div class="geo-filter" id="geoFilter"><div class="gf-title"><span class="gf-ico" aria-hidden="true">⌖</span><div><b>Marcar por localidade</b><small>Filtre por estado e cidade e marque de uma vez todas as unidades exibidas.</small></div></div><label>Estado<select id="filterUF"><option value="">Todos os estados</option></select></label><label>Cidade<select id="filterCity"><option value="">Todas as cidades</option></select></label><div class="gf-actions"><button class="outline" id="markFiltered" type="button">✓ Marcar filtradas</button><button class="outline" id="unmarkFiltered" type="button">✕ Desmarcar</button><button class="link" id="clearGeoFilter" type="button">Limpar filtro</button></div><div class="gf-info" id="geoInfo"></div></div><div class="card table units-body" id="unitsBody"><div class="thead"><span id="tableCount">5 de 8</span><span>Unidade de saúde</span><span>Município</span><span>Urgência</span><span>Atendimento</span><span>Ação</span></div><div id="unitRows"></div></div></section><div class="footer"><span id="dataSourceFoot">… conectando ao Google Sheets</span><span>Última atualização: agora · <button data-tab="import">Importação manual</button></span></div></section>
-<section id="importPage" class="import-page" style="display:none"><div class="importhero"><div><div class="eyebrow" style="color:#71d8bc">⇧ Entrada de dados</div><h2>Traga sua planilha.<br><em>O restante fica organizado.</em></h2><p>O cadastro de unidades, bases e condutores vem automaticamente do <b>Google Sheets</b>. Use esta tela só como contingência (planilha sem conexão ou teste): o arquivo importado vale até a aplicação ser reaberta com o Google Sheets disponível. São lidas as colunas Cliente, Base, Endereço (padronizado), Cidade, UF, Latitude e Longitude.</p></div><div style="font-size:58px;color:#9af0d5">▧</div></div><div class="importgrid"><div class="card upload"><div class="drop" id="dropZone"><div class="uploadicon">⇧</div><h3>Arraste sua planilha aqui</h3><p>ou clique para procurar no computador</p><small>Formatos aceitos: .xlsx, .xls e .csv · até 20 MB</small><button class="primary" style="width:auto;margin-top:17px" id="fileBtn">⇧ Selecionar arquivo</button></div><input id="fileInput" type="file" accept=".xlsx,.xls,.csv" hidden><div class="file-status"><div style="font-size:20px;color:#0d8c78">▧</div><div><b id="fileName">Planilha de rede · aguardando importação</b><small id="fileInfo">Nenhum arquivo carregado ainda</small></div></div></div><div class="card mapping"><div class="over">Leitura da planilha</div><h3>Aba e colunas utilizadas</h3><p>A aba com a coluna <b>Endereço (padronizado)</b> é detectada automaticamente e abas “-Ant” são ignoradas. Se necessário, escolha outra aba.</p><div class="maprow"><span><b>Aba de dados</b><small>unidades e bases</small></span><select id="sheetStop"><option>Tarefas</option></select></div><div class="colmap" id="colMap"><div class="colrow"><span><b>Cliente</b><small>nome da unidade</small></span><em>aguardando</em></div><div class="colrow"><span><b>Base</b><small>pontos de saída</small></span><em>aguardando</em></div><div class="colrow"><span><b>Endereço (padronizado)</b><small>enviado ao Google Maps</small></span><em>aguardando</em></div><div class="colrow"><span><b>Cidade</b><small>filtro por cidade</small></span><em>aguardando</em></div><div class="colrow"><span><b>UF (estado)</b><small>filtro por estado</small></span><em>aguardando</em></div><div class="colrow"><span><b>Latitude</b><small>só se o Google falhar</small></span><em>aguardando</em></div><div class="colrow"><span><b>Longitude</b><small>só se o Google falhar</small></span><em>aguardando</em></div></div><button class="outline" style="width:100%;justify-content:center;margin-top:15px" id="changeFile">↻ Trocar arquivo</button></div><div class="card guide"><b>Como preparar a planilha?</b><p>Use a primeira linha como cabeçalho e inclua <strong>Cliente, Base, Endereço (padronizado), Cidade, UF, Latitude e Longitude</strong>. Os endereços são localizados pelo Google Maps; <strong>Latitude e Longitude só são usadas se essa pesquisa falhar</strong>. A urgência pode ser ajustada depois no planejamento.</p></div></div></section>
+<section><div class="section"><div><div class="over">02 · Visualização</div><h3 id="mapTitle">Mapa operacional</h3></div><div class="map-actions"><button class="outline" id="driverRoutesBtn" title="Ver todas as rotas deste condutor no formato do roteiro PDF">▤ Rotas do condutor</button><button class="outline" id="gmapsOpenBtn" title="Abrir a rota selecionada e otimizada no Google Maps, em uma nova aba">🗺 Google Maps</button><button class="outline" id="saveRouteBtn">▣ Salvar Rota</button><button class="outline" id="recalcBtn">↻ Recalcular</button></div></div><div class="card map"><div class="mapcanvas" id="mapCanvas"><div id="fallbackMap" class="fallback-map"><div class="road r1"></div><div class="road r2"></div><div class="road r3"></div><span class="maplabel l1">ZONA NORTE</span><span class="maplabel l2">CENTRO EXPANDIDO</span><span class="maplabel l3">ZONA SUL</span><svg class="route" id="routeSvg" viewBox="0 0 100 100" preserveAspectRatio="none"></svg></div><div id="gmap" class="gmap-container" style="display:none"></div><div class="zoom-controls" id="mapZoomCtrls" aria-label="Controles de zoom do mapa do painel" data-target="panel"><button class="zoom-btn" data-zoom="in" title="Aumentar zoom">＋</button><button class="zoom-btn" data-zoom="out" title="Diminuir zoom">－</button><button class="zoom-btn" data-zoom="reset" title="Ajustar à área">⌖</button></div><div class="float"><i id="gmapsDot" class="gdot off"></i><span id="gmapsLabel">Google Maps não configurado</span><br><small id="mapSub">pré-visualização da seleção</small></div></div><div class="legend"><span><i class="dot db"></i>Base</span><span><i class="dot dg"></i>Rota planejada</span><span><i class="dot do"></i>Urgência</span><small id="mapLegendNote">⌁ Rota real via Google Maps (ou estimativa local por distância e horário, sem chave)</small></div></div><div class="card result" id="result"><div class="empty"><div class="circle">⌁</div><h3>A rota aparecerá aqui</h3><p>Selecione as unidades, defina a urgência e clique em <b>Calcular melhor rota</b>.</p></div></div></section></div>
+<section class="units" id="unitsSection"><div class="section"><div><div class="over">03 · Unidades disponíveis</div><h3>Escolha os pontos de ligação</h3></div><div class="filters" id="smartSearch"><input id="search" placeholder="🔎  Busca inteligente · unidade, cliente, endereço ou código"><button class="link units-toggle" id="unitsToggleBtn" type="button" aria-expanded="false" aria-controls="unitsBody" title="Expandir a lista completa de unidades"><span class="ut-ico" aria-hidden="true">▾</span><span class="ut-txt">Mostrar unidades</span></button></div></div><div class="geo-filter" id="geoFilter"><div class="gf-title"><span class="gf-ico" aria-hidden="true">⌖</span><div><b>Marcar por localidade</b><small>Filtre por estado e cidade e marque de uma vez todas as unidades exibidas.</small></div></div><label>Estado<select id="filterUF"><option value="">Todos os estados</option></select></label><label>Cidade<select id="filterCity"><option value="">Todas as cidades</option></select></label><div class="gf-actions"><button class="outline" id="markFiltered" type="button">✓ Marcar filtradas</button><button class="outline" id="unmarkFiltered" type="button">✕ Desmarcar</button><button class="link" id="clearGeoFilter" type="button">Limpar filtro</button></div><div class="gf-info" id="geoInfo"></div></div><div class="card table units-body" id="unitsBody"><div class="thead"><span id="tableCount">5 de 8</span><span>Unidade de saúde</span><span>Município</span><span>Urgência</span><span>Atendimento</span><span>Ação</span></div><div id="unitRows"></div></div></section><div class="footer"><span id="dataSourceFoot">… conectando ao Google Sheets</span><span id="dataUpdated">Cadastro: aguardando leitura</span></div></section>
 <section id="historyPage" class="history-page" style="display:none"><div class="historyhead"><div><div class="over">Registro de operações</div><h2>Histórico de planejamentos</h2><p>Rotas salvas no Google Sheets, compartilhadas entre todos os usuários. Reabra, exporte ou exclua.</p></div><div style="display:flex;align-items:end;gap:7px;flex-wrap:wrap"><label class="muted">De<input id="historyFrom" type="date" aria-label="Filtrar histórico a partir de" style="display:block;margin-top:4px;padding:7px;border:1px solid var(--line);border-radius:7px;background:var(--card);color:var(--ink)"></label><label class="muted">Até<input id="historyTo" type="date" aria-label="Filtrar histórico até" style="display:block;margin-top:4px;padding:7px;border:1px solid var(--line);border-radius:7px;background:var(--card);color:var(--ink)"></label><button class="outline" id="refreshHistoryBtn" title="Recarregar as rotas do Google Sheets">↻ Atualizar</button><button class="outline" id="syncPendingBtn" style="display:none">⇪ Enviar ao Google Sheets</button><button class="outline" id="exportHistoryBtn">⇩ Exportar histórico</button></div></div><div class="card" id="historyList"><div class="history-empty">Nenhuma rota calculada ainda. Calcule uma rota para que ela apareça aqui.</div></div><div class="notice" id="historyNotice">△ Conectando ao Google Sheets…</div></section>
 <section id="metricsPage" class="metrics-page" style="display:none">
   <div class="metrics-head"><div><div class="over">Inteligência operacional</div><h2>Análise de Métricas</h2><p>Indicadores consolidados a partir das rotas salvas no Google Sheets.</p></div><div class="metrics-actions"><button class="outline" id="metricsRefresh">↻ Atualizar</button><button class="primary" id="metricsPdf" style="width:auto;margin-top:0">▤ Visualizar PDF A4</button></div></div>
@@ -3681,6 +3694,8 @@ function unitFromSheet(u, previous) {
         photoSearchName: name,
         client: name,
         address: norm(u.endereco) || 'Endereço não informado',
+        addr: { logradouro: norm(u.logradouro), numero: String(u.numero == null ? '' : u.numero).trim(), bairro: norm(u.bairro), cidade: norm(u.cidade), uf: normalizeUF(u.uf), cep: norm(u.cep), referencia: norm(u.referencia) },
+        observacoes: norm(u.observacoes),
         city: norm(u.cidade) || 'Sem cidade',
         state: normalizeUF(u.uf) || inferUF(u.endereco),
         baseName: norm(u.base),
@@ -3790,8 +3805,7 @@ function applyCadastro(data) {
     datasetSource = 'sheets';
     sheetsState.planilha = (data.info && data.info.planilha) || 'Rotas de Entrega';
     sheetsState.lidoEm = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-    if ($('fileName')) $('fileName').textContent = 'Google Sheets · ' + sheetsState.planilha;
-    if ($('fileInfo')) $('fileInfo').textContent = stops.length + ' unidades ativas · ' + bases.length + ' base(s) · ' + (cachedCondutores ? cachedCondutores.length : 0) + ' condutor(es) · lido às ' + sheetsState.lidoEm;
+    if ($('dataUpdated')) $('dataUpdated').textContent = stops.length + ' unidades ativas · ' + bases.length + ' base(s) · lido às ' + sheetsState.lidoEm;
     geoFilterSig = '';
     rebuildGeoFilters(true);
     persistDataset();
@@ -4185,6 +4199,301 @@ function basesListHtml() {
     }).join('') + '</div>';
 }
 
+/* ================================================================
+   MAPA OPERACIONAL · visão geral e pré-visualização parcial
+   Sem rota calculada e sem unidades selecionadas, o mapa mostra a base
+   escolhida e as unidades dela que já têm localização (clique = incluir
+   na rota). Com seleção ainda não localizada, mostra só o que já tem
+   coordenada, em vez de manter no mapa a rota anterior.
+   ================================================================ */
+const MAP_LEGEND_DEFAULT = '⌁ Rota real via Google Maps (ou estimativa local por distância e horário, sem chave)';
+const overviewTriedBases = new Set();
+let overviewGeocoding = false;
+
+function setMapLegendNote(text) {
+    const el = $('mapLegendNote');
+    if (el) el.textContent = text || MAP_LEGEND_DEFAULT;
+}
+
+function currentBase() {
+    return bases.find(function(b) { return b.id === $('baseSelect').value; }) || bases[0] || null;
+}
+
+function overviewLatLng(p) {
+    if (!p) return null;
+    if (hasValidCoordinates(p)) return { lat: Number(p.lat), lng: Number(p.lng) };
+    const la = parseCoord(p.sheetLat), ln = parseCoord(p.sheetLng);
+    return validBrazilCoord(la, ln) ? { lat: la, lng: ln } : null;
+}
+
+function clearGoogleLayers() {
+    gMarkers.forEach(function(m) { m.setMap(null); });
+    gMarkers = [];
+    if (gDirectionsRenderer) gDirectionsRenderer.set('directions', null);
+    if (gFallbackPolyline) {
+        gFallbackPolyline.setMap(null);
+        gFallbackPolyline = null;
+    }
+}
+
+/* points: [{ ll, label, color, scale, item, isBase }] */
+function drawPointsGoogle(points) {
+    clearGoogleLayers();
+    if (!gHoverInfo) gHoverInfo = new google.maps.InfoWindow();
+    const bounds = new google.maps.LatLngBounds();
+    gMarkers = points.map(function(pt) {
+        const marker = new google.maps.Marker({
+            position: pt.ll,
+            map: gmap,
+            label: pt.label ? { text: pt.label, color: '#fff', fontSize: '11px', fontWeight: '700' } : null,
+            icon: { path: google.maps.SymbolPath.CIRCLE, scale: pt.scale, fillColor: pt.color, fillOpacity: pt.label ? 1 : 0.78, strokeColor: '#fff', strokeWeight: pt.label ? 2 : 1.5 },
+            title: pt.item.name,
+            zIndex: pt.isBase ? 1000 : (pt.label ? 500 : 1)
+        });
+        marker.addListener('mouseover', function() {
+            gHoverInfo.setContent(markerHoverContent(pt.item.name, pt.item.address, pt.isBase ? null : { c: pt.color, label: pt.hint || (pt.item.urgency || 'Média') }, pt.ll.lat.toFixed(6) + ', ' + pt.ll.lng.toFixed(6)));
+            gHoverInfo.open({ map: gmap, anchor: marker });
+        });
+        marker.addListener('mouseout', function() { gHoverInfo.close(); });
+        if (pt.onClick) marker.addListener('click', pt.onClick);
+        bounds.extend(pt.ll);
+        return marker;
+    });
+    if (points.length > 1) {
+        gmap.fitBounds(bounds, 60);
+        panelMapBounds = bounds;
+    } else if (points.length === 1) {
+        gmap.setCenter(points[0].ll);
+        gmap.setZoom(12);
+        panelMapBounds = bounds;
+    }
+}
+
+function drawPointsSvg(points) {
+    const svg = $('routeSvg');
+    if (!svg) return;
+    if (!points.length) {
+        svg.innerHTML = '';
+        return;
+    }
+    const lats = points.map(function(p) { return p.ll.lat; }), lngs = points.map(function(p) { return p.ll.lng; });
+    const minLat = Math.min.apply(null, lats) - .03, maxLat = Math.max.apply(null, lats) + .03,
+        minLng = Math.min.apply(null, lngs) - .03, maxLng = Math.max.apply(null, lngs) + .03;
+    const xy = function(ll) {
+        return { x: 7 + (ll.lng - minLng) / (maxLng - minLng || 1) * 86, y: 8 + (1 - (ll.lat - minLat) / (maxLat - minLat || 1)) * 76 };
+    };
+    svg.innerHTML = points.map(function(pt, i) {
+        const p = xy(pt.ll);
+        const tip = pt.item.name + (pt.item.address ? ' — ' + pt.item.address : '') + (pt.hint ? ' (' + pt.hint + ')' : '');
+        return '<g data-ov="' + i + '" transform="translate(' + p.x.toFixed(2) + ' ' + p.y.toFixed(2) + ')" style="cursor:pointer"><title>' + escHtml(tip) + '</title><circle r="' + (pt.label ? 2.3 : 1.3) + '" fill="' + pt.color + '" fill-opacity="' + (pt.label ? 1 : .8) + '" stroke="#fff" stroke-width="' + (pt.label ? .8 : .4) + '"/>' + (pt.label ? '<text y=".8" text-anchor="middle" fill="#fff" font-size="2.2" font-weight="700">' + escHtml(pt.label) + '</text>' : '') + '</g>';
+    }).join('');
+    applyFallbackZoom(fallbackZoom);
+    svg.querySelectorAll('[data-ov]').forEach(function(node) {
+        const pt = points[Number(node.dataset.ov)];
+        if (pt && pt.onClick) node.onclick = pt.onClick;
+    });
+}
+
+function drawPoints(points) {
+    if (gmapsReady && gmap) drawPointsGoogle(points);
+    else drawPointsSvg(points);
+}
+
+function basePoint(base) {
+    const ll = overviewLatLng(base);
+    return ll ? { ll: ll, label: 'B', color: '#192d43', scale: 11, item: base, isBase: true } : null;
+}
+
+/* Sem rota e sem seleção: base escolhida + unidades dela já localizadas. */
+function drawOverviewMap() {
+    const base = currentBase();
+    $('mapTitle').textContent = 'Mapa operacional';
+    if (!base || base.id === 'none') {
+        if (gmapsReady && gmap) clearGoogleLayers();
+        drawPointsSvg([]);
+        setMapLegendNote('Aguardando o cadastro do Google Sheets para mostrar a base e as unidades.');
+        return;
+    }
+    const mine = stops.filter(function(s) { return !s.baseId || s.baseId === base.id; });
+    const located = [];
+    mine.forEach(function(s) {
+        const ll = overviewLatLng(s);
+        if (!ll) return;
+        located.push({
+            ll: ll, label: '', color: s.situacao === 'Revisar' ? '#d06b1e' : '#0d8c78', scale: 5, item: s,
+            hint: s.situacao === 'Revisar' ? 'endereço a revisar · clique para corrigir' : 'clique para incluir na rota',
+            onClick: function() { s.situacao === 'Revisar' ? openUnitAddressForm(s) : toggle(s.id); }
+        });
+    });
+    const bp = basePoint(base);
+    drawPoints((bp ? [bp] : []).concat(located));
+    if (!bp) locateBaseForOverview(base);
+    if ($('mapSub')) $('mapSub').textContent = 'visão geral · base ' + base.name;
+    setMapLegendNote('Visão geral · ' + base.name + ' · ' + located.length + ' de ' + mine.length + ' unidade(s) desta base já localizada(s)' + (bp ? '' : ' · base ainda sem localização') + '. Clique em um ponto para incluí-lo na rota.');
+}
+
+/* Seleção sem rota e com pontos ainda sem coordenada: mostra os já localizados, numerados. */
+function drawPartialSelection(arr) {
+    const base = currentBase();
+    const pts = [];
+    const bp = basePoint(base);
+    if (bp) pts.push(bp);
+    let missing = 0;
+    arr.forEach(function(s, i) {
+        const ll = overviewLatLng(s);
+        if (!ll) { missing++; return; }
+        pts.push({ ll: ll, label: String(i + 1), color: urgency[s.urgency || 'Média'].c, scale: 10, item: s, hint: s.urgency || 'Média' });
+    });
+    drawPoints(pts);
+    if ($('mapSub')) $('mapSub').textContent = 'pré-visualização da seleção';
+    setMapLegendNote(arr.length + ' unidade(s) selecionada(s)' + (missing ? ' · ' + missing + ' ainda sem localização: serão localizadas ao calcular a rota' : '') + '.');
+}
+
+async function locateBaseForOverview(base) {
+    if (!base || overviewGeocoding || overviewTriedBases.has(base.id) || !(gmapsReady && geocoderG)) return;
+    overviewTriedBases.add(base.id);
+    overviewGeocoding = true;
+    try {
+        await geocodePointGoogle(base);
+        if (hasValidCoordinates(base)) {
+            saveGeocodesToSheets([base]);
+            persistDataset();
+            if (!selected.size && !route) drawOverviewMap();
+        }
+    } catch (e) {
+        console.warn('Mapa: base não localizada.', e);
+    } finally {
+        overviewGeocoding = false;
+    }
+}
+
+/* ================================================================
+   CORREÇÃO DE ENDEREÇO · unidades com Situação = Revisar
+   Grava na aba Unidades (ação salvarUnidade do Apps Script).
+   ================================================================ */
+function composeAddress(a) {
+    const head = [a.logradouro, a.numero, a.bairro].map(norm).filter(Boolean).join(', ');
+    const tail = norm(a.cidade) ? norm(a.cidade) + (norm(a.uf) ? ' - ' + norm(a.uf) : '') : norm(a.uf);
+    return [head, tail, norm(a.cep), 'Brasil'].filter(Boolean).join(', ');
+}
+
+function formatCep(v) {
+    const d = String(v || '').replace(/\D/g, '');
+    return d.length === 8 ? d.slice(0, 5) + '-' + d.slice(5) : norm(v);
+}
+
+function openUnitAddressForm(stop) {
+    if (!stop) return;
+    if (!sheetsState.online) {
+        alert('A correção de endereço é gravada no Google Sheets, que está indisponível agora. Verifique a conexão (Preferências → Google Sheets) e tente novamente.');
+        return;
+    }
+    const a = stop.addr || {};
+    const ufOptions = UF_LIST.map(function(uf) {
+        return '<option' + ((a.uf || stop.state || 'RJ') === uf ? ' selected' : '') + '>' + uf + '</option>';
+    }).join('');
+    const motivo = norm(stop.observacoes);
+    const body = '<form class="base-form" id="addrForm" autocomplete="off">' +
+        '<div class="addr-current bf-wide"><small>Endereço atual no cadastro</small><b>' + escHtml(stop.address) + '</b>' + (motivo ? '<em>' + escHtml(motivo) + '</em>' : '') + '</div>' +
+        '<label class="bf-wide">Logradouro *<input id="afLog" required maxlength="120" value="' + escHtml(a.logradouro || '') + '" placeholder="Ex.: Rua Gonçalves Ledo"></label>' +
+        '<label>Número<input id="afNum" maxlength="12" value="' + escHtml(a.numero || '') + '" placeholder="Ex.: 120 ou S/N"></label>' +
+        '<label>Bairro<input id="afBai" maxlength="60" value="' + escHtml(a.bairro || '') + '"></label>' +
+        '<label>Cidade *<input id="afCid" required maxlength="60" value="' + escHtml(a.cidade || (stop.city === 'Sem cidade' ? '' : stop.city) || '') + '"></label>' +
+        '<label>UF *<select id="afUF" required>' + ufOptions + '</select></label>' +
+        '<label>CEP<input id="afCep" maxlength="9" inputmode="numeric" value="' + escHtml(a.cep || '') + '" placeholder="00000-000"></label>' +
+        '<label>Ponto de referência<input id="afRef" maxlength="80" value="' + escHtml(a.referencia || '') + '" placeholder="Ex.: entrada pela lateral"></label>' +
+        '<div class="addr-preview bf-wide"><small>Será gravado como</small><b id="afPreview"></b></div>' +
+        '<div class="bf-wide bf-locate"><button type="button" class="outline" id="afLocate">⌖ Conferir no mapa</button><small id="afLocateInfo">Opcional: confirma o endereço no Google Maps e já grava a localização.</small></div>' +
+        '<label>Latitude<input id="afLat" type="number" step="any" min="-34" max="6" placeholder="opcional"></label>' +
+        '<label>Longitude<input id="afLng" type="number" step="any" min="-74" max="-32" placeholder="opcional"></label>' +
+        '<div class="fiscal-modal-actions bf-wide"><button type="button" class="outline" id="afCancel">Cancelar</button><button type="submit" class="primary" id="afSave" style="width:auto;margin-top:0">Salvar correção</button></div>' +
+        '</form>';
+    openModal('Corrigir endereço · ' + escHtml(stop.name), body, '');
+    let fonte = '';
+    const read = function() {
+        return { logradouro: $('afLog').value, numero: $('afNum').value, bairro: $('afBai').value, cidade: $('afCid').value, uf: $('afUF').value, cep: formatCep($('afCep').value) };
+    };
+    const preview = function() { $('afPreview').textContent = composeAddress(read()); };
+    preview();
+    ['afLog', 'afNum', 'afBai', 'afCid', 'afUF', 'afCep'].forEach(function(id) {
+        $(id).addEventListener('input', function() {
+            preview();
+            if (fonte === 'Google') {   /* endereço mudou depois da conferência: a coordenada deixa de valer */
+                fonte = '';
+                $('afLat').value = '';
+                $('afLng').value = '';
+                $('afLocateInfo').textContent = 'Endereço alterado: confira no mapa de novo, se quiser gravar a localização.';
+            }
+        });
+    });
+    ['afLat', 'afLng'].forEach(function(id) {
+        $(id).addEventListener('input', function() {
+            fonte = 'Manual';
+            $('afLocateInfo').textContent = 'Coordenada digitada: será gravada como Manual (a aplicação não a substitui).';
+        });
+    });
+    $('afCancel').onclick = closeModal;
+    $('afLocate').onclick = async function() {
+        const info = $('afLocateInfo');
+        if (!norm($('afLog').value) || !norm($('afCid').value)) return alert('Informe ao menos logradouro e cidade antes de conferir no mapa.');
+        if (!(gmapsReady && geocoderG)) {
+            info.textContent = 'Google Maps indisponível agora: a localização será feita na próxima rota.';
+            return;
+        }
+        info.textContent = 'Localizando…';
+        const query = composeAddress(read());
+        const probe = { name: stop.name, address: query, searchText: query, city: $('afCid').value, state: $('afUF').value };
+        try { await geocodePointGoogle(probe, { force: true }); } catch (e) {}
+        if (hasValidCoordinates(probe) && probe.geoSource === 'google') {
+            $('afLat').value = Number(probe.lat).toFixed(6);
+            $('afLng').value = Number(probe.lng).toFixed(6);
+            fonte = 'Google';
+            const url = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(Number(probe.lat).toFixed(6) + ',' + Number(probe.lng).toFixed(6));
+            info.innerHTML = '✓ Google Maps encontrou: <b>' + escHtml(probe.googleFormattedAddress || query) + '</b> · <a href="' + url + '" target="_blank" rel="noopener">ver no mapa ↗</a>';
+        } else {
+            info.textContent = 'O Google não localizou este endereço. Confira o texto ou digite a latitude/longitude.';
+        }
+    };
+    $('addrForm').onsubmit = async function(e) {
+        e.preventDefault();
+        if (!this.reportValidity()) return;
+        const latV = $('afLat').value.trim(), lngV = $('afLng').value.trim();
+        if ((latV === '') !== (lngV === '')) return alert('Informe latitude e longitude juntas, ou deixe as duas em branco.');
+        if (latV !== '' && !validBrazilCoord(Number(latV), Number(lngV))) return alert('As coordenadas informadas ficam fora do Brasil. Confira latitude e longitude.');
+        const r = read();
+        const payload = {
+            id: stop.id,
+            logradouro: norm(r.logradouro),
+            numero: norm(r.numero),
+            bairro: norm(r.bairro),
+            cidade: norm(r.cidade),
+            uf: r.uf,
+            cep: r.cep,
+            referencia: norm($('afRef').value),
+            lat: latV === '' ? '' : Number(latV),
+            lng: lngV === '' ? '' : Number(lngV),
+            fonteCoord: latV === '' ? '' : (fonte || 'Manual')
+        };
+        const btn = $('afSave');
+        btn.disabled = true;
+        btn.textContent = 'Salvando…';
+        try {
+            const res = await sheetsCall('salvarUnidade', { unidade: payload });
+            const wasSelected = selected.has(stop.id) || (route && route.ordered && route.ordered.some(function(s) { return s.id === stop.id; }));
+            await loadCadastro();
+            setSheetsStatus(true);
+            if (wasSelected) invalidateRoute();
+            render();
+            closeModal();
+            alert('Endereço de "' + stop.name + '" gravado na planilha.\n' + res.endereco + (res.situacao === 'OK' ? '\nSituação: OK.' : '\nSituação continua "Revisar" (falta o número).'));
+        } catch (err) {
+            btn.disabled = false;
+            btn.textContent = 'Salvar correção';
+            alert('Não foi possível salvar a correção: ' + err.message);
+        }
+    };
+}
+
 /* Mudança de versão invalida rotas persistidas que ainda possam conter
    coordenadas determinísticas criadas pelo importador. */
 const ROUTE_ENGINE_VERSION = 'road-routing-v9-dwell-45min';
@@ -4198,7 +4507,7 @@ const $ = id => document.getElementById(id),
     baseFallback = () => ({
         id: 'none',
         name: 'Nenhuma base carregada',
-        address: 'Importe a planilha para carregar a coluna Base',
+        address: 'Aguardando o cadastro de bases do Google Sheets',
         lat: -22.83,
         lng: -43.3
     }),
@@ -4254,8 +4563,7 @@ function persistDataset() {
         source: datasetSource,
         condutores: cachedCondutores,
         basesAll: sheetBasesAll,
-        fileName: $('fileName') ? $('fileName').textContent : '',
-        fileInfo: $('fileInfo') ? $('fileInfo').textContent : ''
+        lidoEm: sheetsState.lidoEm
     });
 }
 
@@ -4290,7 +4598,7 @@ function clearSavedData() {
 function restoreState() {
     try {
         const dataset = loadJSON('planiroute-dataset', null);
-        if (dataset && Array.isArray(dataset.stops) && dataset.stops.length) {
+        if (dataset && dataset.source === 'sheets' && Array.isArray(dataset.stops) && dataset.stops.length) {
             stops = dataset.stops.map(function(stop) {
                 const restored = Object.assign({}, stop, {
                     service: normalizeServiceMinutes(stop.service),
@@ -4299,8 +4607,8 @@ function restoreState() {
                 ensureFiscalData(restored);
                 return restored;
             });
-            datasetSource = dataset.source || 'arquivo';
-            bases = datasetSource === 'sheets' && Array.isArray(dataset.bases) && dataset.bases.length ? dataset.bases : withDefaultBase(Array.isArray(dataset.bases) ? dataset.bases : []);
+            datasetSource = 'sheets';
+            bases = Array.isArray(dataset.bases) && dataset.bases.length ? dataset.bases : withDefaultBase([]);
             if (Array.isArray(dataset.basesAll)) sheetBasesAll = dataset.basesAll;
             if (Array.isArray(dataset.condutores)) {
                 cachedCondutores = dataset.condutores;
@@ -4309,8 +4617,6 @@ function restoreState() {
             $('baseSelect').innerHTML = bases.map(function(b) {
                 return '<option value="' + b.id + '">' + escHtml(b.name) + '</option>';
             }).join('');
-            if (dataset.fileName) $('fileName').textContent = dataset.fileName;
-            if (dataset.fileInfo) $('fileInfo').textContent = dataset.fileInfo;
         } else {
             $('baseSelect').innerHTML = bases.map(function(b) {
                 return '<option value="' + b.id + '">' + escHtml(b.name) + '</option>';
@@ -4645,8 +4951,8 @@ function setupGoogleMap() {
     container.style.display = 'block';
     gmap = new google.maps.Map(container, {
         center: {
-            lat: -23.55,
-            lng: -46.63
+            lat: -22.9,
+            lng: -43.3
         },
         zoom: 11,
         streetViewControl: false,
@@ -5228,7 +5534,7 @@ function renderUnits() {
     const list = stops.filter(function(stop) {
         if (geoFilter.uf && stop.state !== geoFilter.uf) return false;
         if (geoFilter.city && (stop.city !== geoFilter.city || (geoFilter.cityUF && stop.state !== geoFilter.cityUF))) return false;
-        const hay = [stop.name, stop.client, stop.address, stop.city, stop.state || '', stop.code || '', stop.cnpj || ''].join(' ').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+        const hay = [stop.name, stop.client, stop.address, stop.city, stop.state || '', stop.code || '', stop.cnpj || '', stop.situacao === 'Revisar' ? 'revisar endereco' : ''].join(' ').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
         return tokens.every(function(token) {
             return hay.includes(token);
         });
@@ -5237,7 +5543,7 @@ function renderUnits() {
     $('tableCount').textContent = list.length + ' de ' + stops.length;
     updateGeoInfo();
     $('unitRows').innerHTML = list.map(function(s) {
-        return `<div class="unit ${selected.has(s.id)?'chosen':''}"><button class="check ${selected.has(s.id)?'on':''}" data-toggle="${s.id}">${selected.has(s.id)?'✓':''}</button><div class="unitname"><b>${s.name}${s.geoFallback?'<em class="geo-fb" title="Endereço não localizado no Google Maps: usando a Latitude/Longitude da planilha">📍</em>':''}${s.situacao==='Revisar'?'<em class="unit-flag" title="Endereço incompleto no cadastro (Situação = Revisar). Confira a posição no mapa antes de sair.">revisar endereço</em>':''}</b><small>${s.client} · ${s.address}</small></div><span class="muted">${s.city}${s.state?' · '+s.state:''}</span><select class="urg" data-u="${s.id}" style="color:${urgency[s.urgency].c};background:${urgency[s.urgency].bg}"><option ${s.urgency==='Super'?'selected':''}>Super</option><option ${s.urgency==='Alta'?'selected':''}>Alta</option><option ${s.urgency==='Média'?'selected':''}>Média</option><option ${s.urgency==='Baixa'?'selected':''}>Baixa</option></select><span class="muted">${FIXED_DELIVERY_MINUTES} min</span><button class="${selected.has(s.id)?'included':'add'}" data-toggle="${s.id}">${selected.has(s.id)?'✓ Incluída':'＋ Adicionar'}</button></div>`
+        return `<div class="unit ${selected.has(s.id)?'chosen':''}${s.situacao==='Revisar'?' unit-review':''}" data-unit="${escHtml(s.id)}"${s.situacao==='Revisar'?' title="Endereço a revisar: clique na linha para corrigir"':''}><button class="check ${selected.has(s.id)?'on':''}" data-toggle="${s.id}">${selected.has(s.id)?'✓':''}</button><div class="unitname"><b>${s.name}${s.geoFallback?'<em class="geo-fb" title="Endereço não localizado no Google Maps: usando a Latitude/Longitude da planilha">📍</em>':''}${s.situacao==='Revisar'?'<button type="button" class="unit-fix" data-fix="'+escHtml(s.id)+'" title="Endereço incompleto no cadastro: corrigir agora">✎ Corrigir endereço</button>':''}</b><small>${s.client} · ${s.address}</small></div><span class="muted">${s.city}${s.state?' · '+s.state:''}</span><select class="urg" data-u="${s.id}" style="color:${urgency[s.urgency].c};background:${urgency[s.urgency].bg}"><option ${s.urgency==='Super'?'selected':''}>Super</option><option ${s.urgency==='Alta'?'selected':''}>Alta</option><option ${s.urgency==='Média'?'selected':''}>Média</option><option ${s.urgency==='Baixa'?'selected':''}>Baixa</option></select><span class="muted">${FIXED_DELIVERY_MINUTES} min</span><button class="${selected.has(s.id)?'included':'add'}" data-toggle="${s.id}">${selected.has(s.id)?'✓ Incluída':'＋ Adicionar'}</button></div>`
     }).join('') || '<div style="padding:25px;text-align:center;color:#9aa7a7">Nenhuma unidade encontrada para a busca atual.</div>';
 }
 
@@ -5337,7 +5643,7 @@ function hideProgress() {
 }
 async function calc() {
     if (!bases.length) {
-        alert('Importe uma planilha com a coluna Base antes de calcular a rota.');
+        alert('Nenhuma base de partida carregada. Verifique a conexão com o Google Sheets (Preferências → Google Sheets).');
         return;
     }
     if (!selected.size) {
@@ -5763,11 +6069,19 @@ function mapPointModal(item, index, base) {
 }
 
 function drawMap(arr, legs) {
-    if (!stops.length && !route) return showEmptyMap();
+    arr = arr || [];
+    legs = legs || [];
+    const hasRoute = !!(route && Array.isArray(route.ordered) && route.ordered.length);
+    /* sem rota e sem seleção: visão geral da base escolhida (nunca a rota anterior) */
+    if (!arr.length && !hasRoute) return drawOverviewMap();
     const base = bases.find(function(b) {
         return b.id === $('baseSelect').value;
     }) || bases[0] || baseFallback();
-    if (gmapsReady && gmap && [base].concat(arr).every(hasValidCoordinates)) return drawGoogleMap(arr, legs);
+    const allLocated = [base].concat(arr).every(hasValidCoordinates);
+    if (!hasRoute) $('mapTitle').textContent = 'Mapa operacional · pré-visualização';
+    if (!allLocated) return drawPartialSelection(arr);
+    setMapLegendNote('');
+    if (gmapsReady && gmap) return drawGoogleMap(arr, legs);
     return drawFallbackMap(arr, legs);
 }
 
@@ -5782,7 +6096,7 @@ function showEmptyMap() {
         gFallbackPolyline = null;
     }
     if ($('routeSvg')) $('routeSvg').innerHTML = '';
-    if ($('mapSub')) $('mapSub').textContent = 'Importe uma planilha ou selecione uma rota no Histórico para visualizar o mapa.';
+    if ($('mapSub')) $('mapSub').textContent = 'Aguardando o cadastro do Google Sheets.';
 }
 
 function drawFallbackMap(arr, legs) {
@@ -6267,7 +6581,7 @@ function closeModal() {
 
 function openPreferences() {
     const currentKey = getGoogleKey();
-    openModal('Preferências operacionais', `<div class="pref-row"><span>Tema da aplicação</span><select id="prefTheme"><option value="light">Claro</option><option value="dark">Escuro</option></select></div><div class="pref-row"><span>Trânsito padrão</span><select id="prefTraffic"><option value="estimated">Estimado por faixa horária</option><option value="off">Sem ajuste de trânsito</option></select></div><div class="pref-row"><span>Retornar à base ao final</span><input id="prefReturn" type="checkbox" checked></div><div class="divider" style="margin:18px 0"></div><div class="over" style="margin-bottom:6px">Google Maps</div><p style="margin:0 0 10px">Rotas em tempo real e fotos das unidades exigem uma chave de API do Google Maps com <b>Maps JavaScript API</b>, <b>Directions API</b>, <b>Geocoding API</b> e <b>Places API</b> habilitadas (e faturamento ativo no projeto). Sem chave, a aplicação usa apenas uma estimativa local por distância e faixa horária (sem geocodificação real de endereços).</p><p id="prefGmapsServerNote" style="display:none;margin:0 0 10px;padding:9px 11px;border:1px solid var(--line);border-radius:8px;background:var(--mint);font-size:11px">🔒 Esta chave está sendo carregada automaticamente e com segurança a partir da variável de ambiente configurada na Vercel — não fica salva neste navegador.</p><div id="prefGmapsManualBox"><label style="display:block;margin-bottom:10px">Chave de API (uso manual/local)<input id="prefGmapsKey" type="text" placeholder="AIza…" value="${escHtml(currentKey)}" style="margin-top:6px"></label><div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px"><button class="primary" style="width:auto" id="prefGmapsSave">Salvar e conectar</button><button class="outline" id="prefGmapsClear">Remover chave</button><a class="outline" href="https://console.cloud.google.com/google/maps-apis/credentials" target="_blank" rel="noopener">↗ Obter chave</a></div></div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px"><button class="outline" id="prefGmapsRetry">↻ Testar conexão novamente</button></div><p id="prefGmapsStatus" style="font-size:10px;margin:6px 0 0"></p><div class="divider" style="margin:18px 0"></div><div class="over" style="margin-bottom:6px">Google Sheets</div><p id="prefSheetsStatus" style="margin:0 0 10px;font-size:11px">${sheetsStatusHtml()}</p><div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px"><button class="outline" id="prefSheetsReload">↻ Recarregar cadastro e histórico</button></div><details class="pref-sheets-manual"${sheetsState.mode === 'proxy' ? '' : ' open'}><summary>Conexão direta com o Apps Script (uso local, sem a Vercel)</summary><p style="margin:0 0 8px;font-size:10px">Na Vercel a conexão é feita pela função <code>/api/rotas</code>, com o token guardado nas variáveis de ambiente — não é preciso preencher nada aqui. Use estes campos só para abrir o arquivo localmente.</p><label style="display:block;margin-bottom:8px">URL do Aplicativo da Web (termina em /exec)<input id="prefSheetsUrl" type="text" placeholder="https://script.google.com/macros/s/…/exec" value="${escHtml(sheetsDirectUrl())}" style="margin-top:6px"></label><label style="display:block;margin-bottom:8px">Token (propriedade API_TOKEN do Apps Script)<input id="prefSheetsToken" type="password" value="${escHtml(sheetsDirectToken())}" style="margin-top:6px"></label><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="primary" style="width:auto;margin-top:0" id="prefSheetsSave">Salvar e conectar</button><button class="outline" id="prefSheetsClear">Remover</button></div></details><div class="divider" style="margin:18px 0"></div><div class="over" style="margin-bottom:6px">Bases de partida</div><div id="prefBasesList">${basesListHtml()}</div><button class="outline" id="prefBaseNew">＋ Nova base</button><div class="divider" style="margin:18px 0"></div><div class="over" style="margin-bottom:6px">Dados salvos neste navegador</div><p style="margin:0 0 10px">Planilha importada, seleção, formulário e última rota calculada ficam salvos para uso após fechar ou reiniciar a aplicação.</p><button class="outline" id="prefClearData">🗑 Limpar dados ativos e reiniciar</button><p style="margin-top:17px">As preferências são aplicadas imediatamente e ficam salvas neste navegador.</p>`);
+    openModal('Preferências operacionais', `<div class="pref-row"><span>Tema da aplicação</span><select id="prefTheme"><option value="light">Claro</option><option value="dark">Escuro</option></select></div><div class="pref-row"><span>Trânsito padrão</span><select id="prefTraffic"><option value="estimated">Estimado por faixa horária</option><option value="off">Sem ajuste de trânsito</option></select></div><div class="pref-row"><span>Retornar à base ao final</span><input id="prefReturn" type="checkbox" checked></div><div class="divider" style="margin:18px 0"></div><div class="over" style="margin-bottom:6px">Google Maps</div><p style="margin:0 0 10px">Rotas em tempo real e fotos das unidades exigem uma chave de API do Google Maps com <b>Maps JavaScript API</b>, <b>Directions API</b>, <b>Geocoding API</b> e <b>Places API</b> habilitadas (e faturamento ativo no projeto). Sem chave, a aplicação usa apenas uma estimativa local por distância e faixa horária (sem geocodificação real de endereços).</p><p id="prefGmapsServerNote" style="display:none;margin:0 0 10px;padding:9px 11px;border:1px solid var(--line);border-radius:8px;background:var(--mint);font-size:11px">🔒 Esta chave está sendo carregada automaticamente e com segurança a partir da variável de ambiente configurada na Vercel — não fica salva neste navegador.</p><div id="prefGmapsManualBox"><label style="display:block;margin-bottom:10px">Chave de API (uso manual/local)<input id="prefGmapsKey" type="text" placeholder="AIza…" value="${escHtml(currentKey)}" style="margin-top:6px"></label><div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px"><button class="primary" style="width:auto" id="prefGmapsSave">Salvar e conectar</button><button class="outline" id="prefGmapsClear">Remover chave</button><a class="outline" href="https://console.cloud.google.com/google/maps-apis/credentials" target="_blank" rel="noopener">↗ Obter chave</a></div></div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px"><button class="outline" id="prefGmapsRetry">↻ Testar conexão novamente</button></div><p id="prefGmapsStatus" style="font-size:10px;margin:6px 0 0"></p><div class="divider" style="margin:18px 0"></div><div class="over" style="margin-bottom:6px">Google Sheets</div><p id="prefSheetsStatus" style="margin:0 0 10px;font-size:11px">${sheetsStatusHtml()}</p><div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px"><button class="outline" id="prefSheetsReload">↻ Recarregar cadastro e histórico</button></div><details class="pref-sheets-manual"${sheetsState.mode === 'proxy' ? '' : ' open'}><summary>Conexão direta com o Apps Script (uso local, sem a Vercel)</summary><p style="margin:0 0 8px;font-size:10px">Na Vercel a conexão é feita pela função <code>/api/rotas</code>, com o token guardado nas variáveis de ambiente — não é preciso preencher nada aqui. Use estes campos só para abrir o arquivo localmente.</p><label style="display:block;margin-bottom:8px">URL do Aplicativo da Web (termina em /exec)<input id="prefSheetsUrl" type="text" placeholder="https://script.google.com/macros/s/…/exec" value="${escHtml(sheetsDirectUrl())}" style="margin-top:6px"></label><label style="display:block;margin-bottom:8px">Token (propriedade API_TOKEN do Apps Script)<input id="prefSheetsToken" type="password" value="${escHtml(sheetsDirectToken())}" style="margin-top:6px"></label><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="primary" style="width:auto;margin-top:0" id="prefSheetsSave">Salvar e conectar</button><button class="outline" id="prefSheetsClear">Remover</button></div></details><div class="divider" style="margin:18px 0"></div><div class="over" style="margin-bottom:6px">Bases de partida</div><div id="prefBasesList">${basesListHtml()}</div><button class="outline" id="prefBaseNew">＋ Nova base</button><div class="divider" style="margin:18px 0"></div><div class="over" style="margin-bottom:6px">Dados salvos neste navegador</div><p style="margin:0 0 10px">Uma cópia do cadastro, a seleção, o formulário e a última rota calculada ficam guardados neste navegador para uso sem conexão. Limpar recarrega tudo do Google Sheets.</p><button class="outline" id="prefClearData">🗑 Limpar dados ativos e reiniciar</button><p style="margin-top:17px">As preferências são aplicadas imediatamente e ficam salvas neste navegador.</p>`);
     $('prefTheme').value = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
     $('prefTraffic').value = $('traffic').value;
     $('prefReturn').checked = $('returnBase').checked;
@@ -6317,7 +6631,7 @@ function openPreferences() {
         await initGoogleMapsIfConfigured(true);
     };
     $('prefClearData').onclick = function() {
-        if (confirm('Isto apaga a planilha importada, seleção e rota salvas neste navegador (o histórico de planejamentos é mantido). Deseja continuar?')) {
+        if (confirm('Isto apaga a cópia local do cadastro, a seleção e a rota em andamento neste navegador e recarrega o cadastro do Google Sheets (as rotas salvas não são afetadas). Deseja continuar?')) {
             resetActiveData();
         }
     };
@@ -6420,8 +6734,19 @@ function toggle(id) {
     });
 }
 $('unitRows').onclick = e => {
+    const fix = e.target.closest('[data-fix]');
+    if (fix) {
+        openUnitAddressForm(stops.find(function(s) { return s.id === fix.dataset.fix; }));
+        return;
+    }
     const b = e.target.closest('[data-toggle]');
-    if (b) toggle(b.dataset.toggle)
+    if (b) {
+        toggle(b.dataset.toggle);
+        return;
+    }
+    if (e.target.closest('select, button, input, a')) return;
+    const row = e.target.closest('.unit.unit-review');
+    if (row) openUnitAddressForm(stops.find(function(s) { return s.id === row.dataset.unit; }));
 };
 $('selectedList').onclick = e => {
     const edit = e.target.closest('[data-fiscal-edit]');
@@ -6494,6 +6819,7 @@ $('driverName').oninput = () => {
 $('calcBtn').onclick = calc;
 $('recalcBtn').onclick = calc;
 $('clearBtn').onclick = () => {
+    $('mapTitle').textContent = 'Mapa operacional';
     selected.clear();
     invalidateRoute();
     render();
@@ -6668,295 +6994,6 @@ if ($('landingPage')) {
     };
 }
 
-let importedWorkbook = null;
-let importedFileName = '';
-
-/* Localiza a linha de cabeçalho (Cliente/Base + Endereço) dentro da aba. */
-function detectHeader(sheet) {
-    const matrix = XLSX.utils.sheet_to_json(sheet, {
-        header: 1,
-        defval: '',
-        raw: false
-    });
-    let headerIndex = -1;
-    for (let i = 0; i < Math.min(matrix.length, 30); i++) {
-        const text = matrix[i].map(function(v) {
-            return key(v);
-        }).join('|');
-        if (text.includes('endereco') && (text.includes('cliente') || text.includes('base'))) {
-            headerIndex = i;
-            break;
-        }
-    }
-    return {
-        matrix: matrix,
-        headerIndex: headerIndex,
-        headers: headerIndex >= 0 ? matrix[headerIndex].map(function(v) {
-            return norm(v);
-        }) : []
-    };
-}
-
-/* Escolhe automaticamente a aba certa: a que contém "Endereço (padronizado)"
-   e as demais colunas da nova estrutura. Abas terminadas em "-Ant" (versão
-   anterior) são penalizadas para nunca serem lidas por engano. */
-function pickSheetName(workbook) {
-    let best = workbook.SheetNames[0],
-        bestScore = -Infinity;
-    workbook.SheetNames.forEach(function(name, idx) {
-        const info = detectHeader(workbook.Sheets[name]);
-        const ks = info.headers.map(key);
-        let score = info.headerIndex >= 0 ? 10 : 0;
-        if (ks.includes('enderecopadronizado')) score += 8;
-        ['cliente', 'base', 'cidade', 'uf', 'latitude', 'longitude'].forEach(function(k) {
-            if (ks.includes(k)) score += 1;
-        });
-        if (/(ant|anterior|antigo|old|bkp|backup)$/.test(key(name))) score -= 6;
-        score -= idx * 0.01;
-        if (score > bestScore) {
-            bestScore = score;
-            best = name;
-        }
-    });
-    return best;
-}
-
-/* Casa o cabeçalho pelo nome exato (sem acentos/pontuação) e só depois por
-   trecho. Cabeçalhos "Base – Latitude" e "URL …" nunca são confundidos com
-   as colunas de unidade. */
-function findColumn(headers, exact, partial) {
-    for (const e of exact) {
-        const found = headers.find(function(x) {
-            return key(x) === e;
-        });
-        if (found !== undefined) return found;
-    }
-    for (const p of (partial || [])) {
-        const found = headers.find(function(x) {
-            const k = key(x);
-            return k.includes(p) && !k.startsWith('base') && !k.startsWith('url');
-        });
-        if (found !== undefined) return found;
-    }
-    return null;
-}
-
-const COL_SPECS = [
-    ['name', 'Cliente', 'nome da unidade'],
-    ['base', 'Base', 'pontos de saída'],
-    ['address', 'Endereço (padronizado)', 'enviado ao Google Maps'],
-    ['city', 'Cidade', 'filtro por cidade'],
-    ['uf', 'UF (estado)', 'filtro por estado'],
-    ['lat', 'Latitude', 'só se o Google falhar'],
-    ['lng', 'Longitude', 'só se o Google falhar']
-];
-
-function renderColMap(cols, stats) {
-    const box = $('colMap');
-    if (!box) return;
-    box.innerHTML = COL_SPECS.map(function(spec) {
-        const found = cols ? cols[spec[0]] : null;
-        let extra = '';
-        if (cols && found && (spec[0] === 'lat' || spec[0] === 'lng') && stats) extra = ' · ' + stats.coords + ' válidas';
-        const cls = !cols ? '' : (found ? 'ok' : 'miss');
-        const state = !cols ? 'aguardando' : (found ? '✓ ' + escHtml(found) + extra : '✕ não encontrada');
-        return '<div class="colrow ' + cls + '"><span><b>' + spec[1] + '</b><small>' + spec[2] + '</small></span><em>' + state + '</em></div>';
-    }).join('');
-}
-
-function processSheet(sheetName) {
-    const sheet = importedWorkbook.Sheets[sheetName];
-    const info = detectHeader(sheet);
-    const headerIndex = info.headerIndex < 0 ? 0 : info.headerIndex;
-    const headers = (info.matrix[headerIndex] || []).map(function(v) {
-        return norm(v);
-    });
-    const cols = {
-        name: findColumn(headers, ['cliente', 'unidade', 'estabelecimento', 'hospital'], ['cliente', 'unidade', 'estabelecimento']),
-        address: findColumn(headers, ['enderecopadronizado', 'enderecopadr', 'endereco'], ['endereco', 'logradouro', 'address']),
-        addressAlt: findColumn(headers, ['endereco'], []),
-        base: findColumn(headers, ['base'], []),
-        city: findColumn(headers, ['cidade', 'municipio', 'city'], ['cidade', 'municipio']),
-        uf: findColumn(headers, ['uf', 'estado'], ['estado']),
-        lat: findColumn(headers, ['latitude', 'lat'], ['latitude']),
-        lng: findColumn(headers, ['longitude', 'lng', 'long', 'lon'], ['longitude']),
-        urgency: findColumn(headers, ['prioridade', 'urgencia', 'criticidade'], ['prioridade', 'urgencia', 'criticidade']),
-        code: findColumn(headers, ['codigodocliente', 'codigocliente', 'idcliente'], ['codigodocliente', 'codigocliente']),
-        cnpj: findColumn(headers, ['cpfcnpj', 'cnpj'], ['cnpj'])
-    };
-    if (!cols.address) {
-        renderColMap(cols, null);
-        const err = new Error('missing-address');
-        err.userMessage = 'A aba "' + sheetName + '" não tem a coluna "Endereço (padronizado)" (nem "Endereço"). Escolha outra aba em "Aba de dados" ou confira o cabeçalho.';
-        throw err;
-    }
-    const rows = XLSX.utils.sheet_to_json(sheet, {
-        range: headerIndex,
-        defval: '',
-        raw: false
-    });
-    showProgress('Consolidando registros únicos e bases…', 58);
-
-    function value(row, column) {
-        return column && row[column] !== undefined ? norm(row[column]) : '';
-    }
-    const grouped = new Map();
-    const baseMap = new Map();
-    const stats = {
-        coords: 0,
-        noCoords: 0,
-        noUF: 0,
-        noCity: 0,
-        skipped: 0
-    };
-    rows.forEach(function(row, index) {
-        const rawName = value(row, cols.name);
-        const address = value(row, cols.address) || (cols.addressAlt ? value(row, cols.addressAlt) : '');
-        if (!rawName && !address) {
-            stats.skipped++;
-            return;
-        }
-        /* Coluna Base: 1 ponto de saída por texto distinto (espaços extras ignorados). */
-        const baseValue = value(row, cols.base).replace(/\s+/g, ' ');
-        if (baseValue && !baseMap.has(baseValue)) {
-            const isDefault = key(baseValue) === key(DEFAULT_BASE.name) || key(baseValue).includes('albericodiniz');
-            baseMap.set(baseValue, {
-                id: 'base' + baseMap.size,
-                name: isDefault ? DEFAULT_BASE.name : baseValue,
-                address: isDefault ? DEFAULT_BASE.address : baseValue,
-                searchText: isDefault ? DEFAULT_BASE.searchText : baseValue + ', Brasil',
-                /* Sem coordenadas inventadas: o Google Geocoder localiza a base
-                   no cálculo da rota. */
-                lat: null,
-                lng: null
-            });
-        }
-        const name = rawName || 'Unidade ' + (index + 1);
-        let state = normalizeUF(value(row, cols.uf)) || inferUF(address);
-        const city = value(row, cols.city) || 'Sem cidade';
-        if (!state) stats.noUF++;
-        if (!value(row, cols.city)) stats.noCity++;
-        const lat = parseCoord(value(row, cols.lat)),
-            lng = parseCoord(value(row, cols.lng));
-        const okCoord = validBrazilCoord(lat, lng);
-        okCoord ? stats.coords++ : stats.noCoords++;
-        const finalAddress = address || 'Endereço não informado';
-        const code = value(row, cols.code);
-        const identity = code || key(name + '|' + finalAddress);
-        const rawUrgency = value(row, cols.urgency);
-        const urgencyValue = Object.keys(urgency).find(function(item) {
-            return key(rawUrgency).includes(key(item));
-        }) || 'Média';
-        /* Cada entrega usa exatamente 45 minutos, qualquer que seja a planilha. */
-        const service = FIXED_DELIVERY_MINUTES;
-        const previous = grouped.get(identity);
-        if (previous) {
-            if (urgency[urgencyValue].w > urgency[previous.urgency].w) previous.urgency = urgencyValue;
-            previous.service = normalizeServiceMinutes((previous.service + service) / 2);
-            previous.tasks++;
-        } else {
-            const unit = {
-                id: 'imp' + grouped.size,
-                code: code,
-                name: name,
-                photoSearchName: name,
-                client: name,
-                address: finalAddress,
-                city: city,
-                state: state,
-                baseName: baseValue,
-                lat: null,
-                lng: null,
-                sheetLat: okCoord ? lat : null,
-                sheetLng: okCoord ? lng : null,
-                urgency: urgencyValue,
-                service: normalizeServiceMinutes(service),
-                tasks: 1,
-                cnpj: value(row, cols.cnpj)
-            };
-            unit.searchText = addressQuery(unit);
-            grouped.set(identity, unit);
-        }
-    });
-    stops = Array.from(grouped.values());
-    datasetSource = 'arquivo';
-    bases = withDefaultBase(Array.from(baseMap.values()));
-    showProgress('Atualizando unidades disponíveis e filtros…', 84);
-    $('baseSelect').innerHTML = bases.map(function(base) {
-        return '<option value=\"' + base.id + '\">' + escHtml(base.name) + '</option>';
-    }).join('');
-    selected = new Set();
-    route = null;
-    geoFilter.uf = '';
-    geoFilter.city = '';
-    geoFilter.cityUF = '';
-    geoFilterSig = '';
-    rebuildGeoFilters(true);
-    render();
-    renderColMap(cols, stats);
-    const ufs = new Set(stops.map(function(s) {
-        return s.state;
-    }).filter(Boolean)).size;
-    const cities = new Set(stops.map(function(s) {
-        return s.state + '|' + s.city;
-    })).size;
-    let info2 = rows.length.toLocaleString('pt-BR') + ' registros · ' + stops.length.toLocaleString('pt-BR') + ' unidades únicas · ' + bases.length + ' bases · ' + ufs + ' UF · ' + cities + ' cidades · aba "' + sheetName + '" · cabeçalho na linha ' + (headerIndex + 1);
-    if (stats.noUF || stats.noCity) info2 += ' · atenção: ' + stats.noUF + ' sem UF e ' + stats.noCity + ' sem cidade';
-    $('fileInfo').textContent = info2;
-    persistDataset();
-    persistSelected();
-    persistRoute();
-    persistForm();
-    showProgress('Importação concluída.', 100);
-    setTimeout(hideProgress, 450);
-}
-
-function importFile(file) {
-    showProgress('Abrindo a planilha selecionada…', 10);
-    const reader = new FileReader();
-    reader.onload = function(event) {
-        try {
-            const workbook = XLSX.read(event.target.result, {
-                type: 'array',
-                raw: false
-            });
-            showProgress('Lendo abas e identificando cabeçalhos…', 32);
-            importedWorkbook = workbook;
-            importedFileName = file.name;
-            const names = workbook.SheetNames;
-            const picked = pickSheetName(workbook);
-            $('sheetStop').innerHTML = names.map(function(name) {
-                return '<option' + (name === picked ? ' selected' : '') + '>' + escHtml(name) + '</option>';
-            }).join('');
-            $('sheetStop').value = picked;
-            $('fileName').textContent = file.name;
-            processSheet(picked);
-        } catch (error) {
-            console.error(error);
-            hideProgress();
-            alert(error && error.userMessage ? error.userMessage : 'Não foi possível ler a planilha. Verifique o formato e a linha de cabeçalho.');
-        }
-    };
-    reader.readAsArrayBuffer(file);
-}
-if ($('sheetStop')) $('sheetStop').onchange = function() {
-    if (!importedWorkbook) return;
-    showProgress('Lendo a aba "' + this.value + '"…', 40);
-    try {
-        processSheet(this.value);
-    } catch (error) {
-        console.error(error);
-        hideProgress();
-        alert(error && error.userMessage ? error.userMessage : 'Não foi possível ler a aba selecionada.');
-    }
-};
-$('fileBtn').onclick = () => $('fileInput').click();
-$('changeFile').onclick = () => $('fileInput').click();
-$('dropZone').onclick = e => {
-    if (e.target.id !== 'fileBtn') $('fileInput').click()
-};
-$('fileInput').onchange = e => e.target.files[0] && importFile(e.target.files[0]);
-
 /* ================================================================
    ANÁLISE DE MÉTRICAS · histórico operacional
    ================================================================ */
@@ -7064,11 +7101,10 @@ function tabs(tab) {
     if (tab === 'metrics') initMetrics();
     document.querySelectorAll('[data-tab]').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
     $('planPage').style.display = tab === 'plan' ? 'block' : 'none';
-    $('importPage').style.display = tab === 'import' ? 'block' : 'none';
     $('historyPage').style.display = tab === 'history' ? 'block' : 'none';
     $('metricsPage').style.display = tab === 'metrics' ? 'block' : 'none';
-    $('pageTitle').textContent = tab === 'plan' ? 'Planejamento de rotas' : tab === 'import' ? 'Importar e organizar dados' : tab === 'history' ? 'Histórico de planejamentos' : 'Análise de Métricas';
-    $('crumb').textContent = tab === 'plan' ? 'Planejamento de rotas' : tab === 'import' ? 'Importação de dados' : tab === 'history' ? 'Histórico' : 'Análise de métricas'
+    $('pageTitle').textContent = tab === 'plan' ? 'Planejamento de rotas' : tab === 'history' ? 'Histórico de planejamentos' : 'Análise de Métricas';
+    $('crumb').textContent = tab === 'plan' ? 'Planejamento de rotas' : tab === 'history' ? 'Histórico' : 'Análise de métricas'
 }
 document.querySelectorAll('[data-tab]').forEach(b => b.onclick = () => tabs(b.dataset.tab));
 const savedTheme = localStorage.getItem('planiroute-theme') || 'light';
@@ -7312,18 +7348,11 @@ function resetActiveData() {
         return '<option value="' + b.id + '">' + escHtml(b.name) + '</option>';
     }).join('');
     $('baseSelect').value = DEFAULT_BASE.id;
-    $('fileName').textContent = 'Planilha de rede · aguardando importação';
-    $('fileInfo').textContent = 'Nenhum arquivo carregado ainda';
-    importedWorkbook = null;
-    importedFileName = '';
-    if ($('sheetStop')) $('sheetStop').innerHTML = '<option>Tarefas</option>';
-    renderColMap(null, null);
     geoFilter.uf = '';
     geoFilter.city = '';
     geoFilter.cityUF = '';
     geoFilterSig = '';
     setUnitsOpen(false);
-    if ($('fileInput')) $('fileInput').value = '';
     $('search').value = '';
     $('driverName').value = $('driver').value;
     $('date').value = systemDate();
