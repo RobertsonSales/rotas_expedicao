@@ -3420,6 +3420,14 @@ body.landing-lock {
 .dark .edit-banner .edit-txt span { color: #f3d77a }
 .dark .edit-banner .outline { background: #2a2416; color: #f3d77a; border-color: #6b5a24 }
 .editing-mark { display: inline !important; color: #a5521c; font-size: 9px !important }
+
+/* v5 · nova unidade */
+.unit-new-btn { white-space: nowrap; flex: none }
+.units-empty { padding: 25px; text-align: center; color: #9aa7a7; display: flex; flex-direction: column; align-items: center; gap: 12px }
+.nu-dup { margin: -4px 0 12px; padding: 9px 11px; border: 1px solid #efd48c; border-radius: 9px; background: #fff7e0; color: #7a5b00; font-size: 10.5px; line-height: 1.5 }
+.nu-dup[hidden] { display: none }
+.nu-dup .link { padding: 0; font-size: 10.5px; text-decoration: underline }
+.dark .nu-dup { background: #3a3220; border-color: #6b5a24; color: #f3d77a }
 </style>
 </head>
 <body>
@@ -3482,7 +3490,7 @@ body.landing-lock {
 <section class="summary"><div class="card"><div class="ico">▣</div><div><span>Unidades no planejamento</span><b id="sumStops">5<small> / 8</small></b></div></div><div class="card"><div class="ico">◷</div><div><span>Tempo de trânsito estimado</span><b id="sumTravel">—</b></div><span class="trend" id="sumTravelSub">aguardando rota</span></div><div class="card"><div class="ico">◔</div><div><span>Urgências críticas</span><b id="sumCritical">4</b></div><span class="trend" id="sumCriticalSub">2 super · 2 alta</span></div><div class="card"><div class="ico">♙</div><div><span>Condutor responsável</span><b style="font-size:14px" id="sumDriver">Reginaldo Braga</b></div><span class="trend">dia 28</span></div></section>
 <div class="grid"><section><div class="section"><div><div class="over">01 · Configuração</div><h3>Monte a rota</h3></div><button class="link" id="clearBtn">Limpar seleção ×</button></div><div class="card form"><div class="edit-banner" id="editBanner" hidden><div class="edit-txt"><b>✎ Editando rota salva</b><span id="editLabel"></span><small>Salvar substitui esta rota no Google Sheets, mantendo o mesmo código.</small></div><div class="edit-actions"><button type="button" class="outline" id="editSaveNewBtn" title="Mantém a rota original e grava esta como uma nova rota">Salvar como nova</button><button type="button" class="link" id="editExitBtn" title="Encerra a edição; a rota na tela continua, e o próximo salvamento cria uma rota nova">Sair da edição</button></div></div><label>Condutor<select id="driver"><option>Reginaldo Braga</option><option>Marcelo Medeiros</option><option>Vendedor</option><option>Técnico</option><option>Coletor da cliente</option><option>Transportadora</option></select><input id="driverName" type="text" value="Reginaldo Braga" placeholder="Nome utilizado nos documentos" style="margin-top:7px"></label><div class="two"><label>Data da operação<input id="date" type="date" value=""></label><label>Saída prevista<input id="departure" type="time" value="08:00"></label></div><label>Base de partida<select id="baseSelect"></select></label><div class="base-tools"><button type="button" class="link" id="baseNewBtn" title="Cadastrar uma nova base de partida no Google Sheets">＋ Nova base</button><button type="button" class="link" id="baseEditBtn" title="Editar a base selecionada no Google Sheets">✎ Editar base</button></div><div class="base"><div class="base-icon">⌖</div><div><b id="baseName"></b><small id="baseAddr"></small></div><span class="ok">✓</span></div><div class="divider"></div><div class="labelrow"><label>Paradas da rota <span id="selectedLabel">5 selecionadas</span></label><button id="addPoint">＋ Adicionar ponto</button></div><div class="selected" id="selectedList"></div><div class="options"><label class="switchline"><input id="returnBase" type="checkbox" checked><span class="switch"></span>Retornar à base ao final</label><label>Trânsito<select id="traffic"><option value="estimated">Estimado por faixa horária</option><option value="off">Sem ajuste de trânsito</option></select></label></div><button class="primary" id="calcBtn" title="Calcular a melhor rota com a seleção atual">⌁ Calcular melhor rota <span id="calcBtnIcon">↑</span></button><div class="recalc-notice" id="recalcNotice">⚠ A seleção ou configuração mudou. Recalcule a rota antes de salvá-la ou exportá-la.</div><div class="foot">✓ O cálculo considera distância, janela de saída, tempo de atendimento e urgência.</div></div></section>
 <section><div class="section"><div><div class="over">02 · Visualização</div><h3 id="mapTitle">Mapa operacional</h3></div><div class="map-actions"><button class="outline" id="driverRoutesBtn" title="Ver todas as rotas deste condutor no formato do roteiro PDF">▤ Rotas do condutor</button><button class="outline" id="gmapsOpenBtn" title="Abrir a rota selecionada e otimizada no Google Maps, em uma nova aba">🗺 Google Maps</button><button class="outline" id="saveRouteBtn">▣ Salvar Rota</button><button class="outline" id="recalcBtn">↻ Recalcular</button></div></div><div class="card map"><div class="mapcanvas" id="mapCanvas"><div id="fallbackMap" class="fallback-map"><div class="road r1"></div><div class="road r2"></div><div class="road r3"></div><span class="maplabel l1">ZONA NORTE</span><span class="maplabel l2">CENTRO EXPANDIDO</span><span class="maplabel l3">ZONA SUL</span><svg class="route" id="routeSvg" viewBox="0 0 100 100" preserveAspectRatio="none"></svg></div><div id="gmap" class="gmap-container" style="display:none"></div><div class="zoom-controls" id="mapZoomCtrls" aria-label="Controles de zoom do mapa do painel" data-target="panel"><button class="zoom-btn" data-zoom="in" title="Aumentar zoom">＋</button><button class="zoom-btn" data-zoom="out" title="Diminuir zoom">－</button><button class="zoom-btn" data-zoom="reset" title="Ajustar à área">⌖</button></div><div class="float"><i id="gmapsDot" class="gdot off"></i><span id="gmapsLabel">Google Maps não configurado</span><br><small id="mapSub">pré-visualização da seleção</small></div></div><div class="legend"><span><i class="dot db"></i>Base</span><span><i class="dot dg"></i>Rota planejada</span><span><i class="dot do"></i>Urgência</span><small id="mapLegendNote">⌁ Rota real via Google Maps (ou estimativa local por distância e horário, sem chave)</small></div></div><div class="card result" id="result"><div class="empty"><div class="circle">⌁</div><h3>A rota aparecerá aqui</h3><p>Selecione as unidades, defina a urgência e clique em <b>Calcular melhor rota</b>.</p></div></div></section></div>
-<section class="units" id="unitsSection"><div class="section"><div><div class="over">03 · Unidades disponíveis</div><h3>Escolha os pontos de ligação</h3></div><div class="filters" id="smartSearch"><input id="search" placeholder="🔎  Busca inteligente · unidade, cliente, endereço ou código"><button class="link units-toggle" id="unitsToggleBtn" type="button" aria-expanded="false" aria-controls="unitsBody" title="Expandir a lista completa de unidades"><span class="ut-ico" aria-hidden="true">▾</span><span class="ut-txt">Mostrar unidades</span></button></div></div><div class="geo-filter" id="geoFilter"><div class="gf-title"><span class="gf-ico" aria-hidden="true">⌖</span><div><b>Marcar por localidade</b><small>Filtre por estado e cidade e marque de uma vez todas as unidades exibidas.</small></div></div><label>Estado<select id="filterUF"><option value="">Todos os estados</option></select></label><label>Cidade<select id="filterCity"><option value="">Todas as cidades</option></select></label><div class="gf-actions"><button class="outline" id="markFiltered" type="button">✓ Marcar filtradas</button><button class="outline" id="unmarkFiltered" type="button">✕ Desmarcar</button><button class="link" id="clearGeoFilter" type="button">Limpar filtro</button></div><div class="gf-info" id="geoInfo"></div></div><div class="card table units-body" id="unitsBody"><div class="thead"><span id="tableCount">5 de 8</span><span>Unidade de saúde</span><span>Município</span><span>Urgência</span><span>Atendimento</span><span>Ação</span></div><div id="unitRows"></div></div></section><div class="footer"><span id="dataSourceFoot">… conectando ao Google Sheets</span><span id="dataUpdated">Cadastro: aguardando leitura</span></div></section>
+<section class="units" id="unitsSection"><div class="section"><div><div class="over">03 · Unidades disponíveis</div><h3>Escolha os pontos de ligação</h3></div><div class="filters" id="smartSearch"><input id="search" placeholder="🔎  Busca inteligente · unidade, cliente, endereço ou código"><button type="button" class="outline unit-new-btn" id="unitNewBtn" title="Cadastrar uma unidade que ainda não existe no Google Sheets">＋ Nova unidade</button><button class="link units-toggle" id="unitsToggleBtn" type="button" aria-expanded="false" aria-controls="unitsBody" title="Expandir a lista completa de unidades"><span class="ut-ico" aria-hidden="true">▾</span><span class="ut-txt">Mostrar unidades</span></button></div></div><div class="geo-filter" id="geoFilter"><div class="gf-title"><span class="gf-ico" aria-hidden="true">⌖</span><div><b>Marcar por localidade</b><small>Filtre por estado e cidade e marque de uma vez todas as unidades exibidas.</small></div></div><label>Estado<select id="filterUF"><option value="">Todos os estados</option></select></label><label>Cidade<select id="filterCity"><option value="">Todas as cidades</option></select></label><div class="gf-actions"><button class="outline" id="markFiltered" type="button">✓ Marcar filtradas</button><button class="outline" id="unmarkFiltered" type="button">✕ Desmarcar</button><button class="link" id="clearGeoFilter" type="button">Limpar filtro</button></div><div class="gf-info" id="geoInfo"></div></div><div class="card table units-body" id="unitsBody"><div class="thead"><span id="tableCount">5 de 8</span><span>Unidade de saúde</span><span>Município</span><span>Urgência</span><span>Atendimento</span><span>Ação</span></div><div id="unitRows"></div></div></section><div class="footer"><span id="dataSourceFoot">… conectando ao Google Sheets</span><span id="dataUpdated">Cadastro: aguardando leitura</span></div></section>
 <section id="historyPage" class="history-page" style="display:none"><div class="historyhead"><div><div class="over">Registro de operações</div><h2>Histórico de planejamentos</h2><p>Rotas salvas no Google Sheets, compartilhadas entre todos os usuários. Reabra, exporte ou exclua.</p></div><div style="display:flex;align-items:end;gap:7px;flex-wrap:wrap"><label class="muted">De<input id="historyFrom" type="date" aria-label="Filtrar histórico a partir de" style="display:block;margin-top:4px;padding:7px;border:1px solid var(--line);border-radius:7px;background:var(--card);color:var(--ink)"></label><label class="muted">Até<input id="historyTo" type="date" aria-label="Filtrar histórico até" style="display:block;margin-top:4px;padding:7px;border:1px solid var(--line);border-radius:7px;background:var(--card);color:var(--ink)"></label><button class="outline" id="refreshHistoryBtn" title="Recarregar as rotas do Google Sheets">↻ Atualizar</button><button class="outline" id="syncPendingBtn" style="display:none">⇪ Enviar ao Google Sheets</button><button class="outline" id="exportHistoryBtn">⇩ Exportar histórico</button></div></div><div class="card" id="historyList"><div class="history-empty">Nenhuma rota calculada ainda. Calcule uma rota para que ela apareça aqui.</div></div><div class="notice" id="historyNotice">△ Conectando ao Google Sheets…</div></section>
 <section id="metricsPage" class="metrics-page" style="display:none">
   <div class="metrics-head"><div><div class="over">Inteligência operacional</div><h2>Análise de Métricas</h2><p>Indicadores consolidados a partir das rotas salvas no Google Sheets.</p></div><div class="metrics-actions"><button class="outline" id="metricsRefresh">↻ Atualizar</button><button class="primary" id="metricsPdf" style="width:auto;margin-top:0">▤ Visualizar PDF A4</button></div></div>
@@ -4593,6 +4601,160 @@ async function saveCurrentRoute(mode) {
     }
 }
 
+/* ================================================================
+   NOVA UNIDADE · cadastro pela aplicação (aba Unidades)
+   Usa a ação salvarUnidade do Apps Script sem id (v1.3).
+   ================================================================ */
+function openNewUnitForm(prefillName) {
+    if (!sheetsState.online) {
+        alert('O cadastro de unidades fica no Google Sheets, que está indisponível agora. Verifique a conexão (Preferências → Google Sheets) e tente novamente.');
+        return;
+    }
+    const cur = currentBase();
+    const baseOptions = bases.filter(function(b) { return b.source === 'sheets'; }).map(function(b) {
+        return '<option value="' + escHtml(b.id) + '"' + (cur && cur.id === b.id ? ' selected' : '') + '>' + escHtml(b.name) + '</option>';
+    }).join('');
+    const ufDefault = (cur && cur.state) || 'RJ';
+    const body = '<form class="base-form" id="unitNewForm" autocomplete="off">' +
+        '<p class="fiscal-modal-intro bf-wide">A unidade é gravada na aba <b>Unidades</b> do Google Sheets, com o próximo código (UN-…), e fica disponível para todos os usuários.</p>' +
+        '<label class="bf-wide">Nome da unidade (cliente) *<input id="nuNome" required maxlength="120" value="' + escHtml(prefillName || '') + '" placeholder="Ex.: HOSPITAL MUNICIPAL SÃO JOSÉ"></label>' +
+        '<div class="bf-wide nu-dup" id="nuDup" hidden></div>' +
+        '<label>Base de atendimento *<select id="nuBase" required>' + baseOptions + '</select></label>' +
+        '<label>Urgência padrão<select id="nuUrg"><option>Super</option><option>Alta</option><option selected>Média</option><option>Baixa</option></select></label>' +
+        '<label class="bf-wide">Logradouro *<input id="afLog" required maxlength="120" placeholder="Ex.: Rua Gonçalves Ledo"></label>' +
+        '<label>Número<input id="afNum" maxlength="12" placeholder="Ex.: 120 ou S/N"></label>' +
+        '<label>Bairro<input id="afBai" maxlength="60"></label>' +
+        '<label>Cidade *<input id="afCid" required maxlength="60"></label>' +
+        '<label>UF *<select id="afUF" required>' + UF_LIST.map(function(uf) { return '<option' + (uf === ufDefault ? ' selected' : '') + '>' + uf + '</option>'; }).join('') + '</select></label>' +
+        '<label>CEP<input id="afCep" maxlength="9" inputmode="numeric" placeholder="00000-000"></label>' +
+        '<label>Ponto de referência<input id="afRef" maxlength="80" placeholder="Ex.: entrada pela lateral"></label>' +
+        '<div class="addr-preview bf-wide"><small>Endereço que será gravado</small><b id="afPreview">—</b></div>' +
+        '<div class="bf-wide bf-locate"><button type="button" class="outline" id="afLocate">⌖ Conferir no mapa</button><small id="afLocateInfo">Opcional: confirma o endereço no Google Maps e já grava a localização.</small></div>' +
+        '<label>Latitude<input id="afLat" type="number" step="any" min="-34" max="6" placeholder="opcional"></label>' +
+        '<label>Longitude<input id="afLng" type="number" step="any" min="-74" max="-32" placeholder="opcional"></label>' +
+        '<label class="switchline bf-check bf-wide"><input id="nuAdd" type="checkbox" checked><span class="switch"></span>Incluir esta unidade na rota em seguida</label>' +
+        '<div class="fiscal-modal-actions bf-wide"><button type="button" class="outline" id="afCancel">Cancelar</button><button type="submit" class="primary" id="afSave" style="width:auto;margin-top:0">Cadastrar unidade</button></div>' +
+        '</form>';
+    openModal('Nova unidade de saúde', body, '');
+    let fonte = '';
+    const read = function() {
+        return { logradouro: $('afLog').value, numero: $('afNum').value, bairro: $('afBai').value, cidade: $('afCid').value, uf: $('afUF').value, cep: formatCep($('afCep').value) };
+    };
+    const preview = function() {
+        const r = read();
+        $('afPreview').textContent = norm(r.logradouro) || norm(r.cidade) ? composeAddress(r) : '—';
+    };
+    /* nome parecido com uma unidade que já existe: avisa antes de duplicar */
+    const checkDup = function() {
+        const k = key($('nuNome').value);
+        const box = $('nuDup');
+        if (k.length < 4) { box.hidden = true; return; }
+        const same = stops.filter(function(s) { return s.source === 'sheets' && (key(s.name) === k || key(s.name).includes(k) || k.includes(key(s.name))); }).slice(0, 3);
+        box.hidden = !same.length;
+        box.innerHTML = same.length ? '△ Já existe' + (same.length > 1 ? 'm unidades parecidas' : ' uma unidade parecida') + ': ' + same.map(function(s) {
+            return '<button type="button" class="link" data-use-unit="' + escHtml(s.id) + '">' + escHtml(s.name) + ' (' + escHtml(s.id) + ')</button>';
+        }).join(' · ') + '. Clique no nome para usá-la em vez de cadastrar outra.' : '';
+    };
+    checkDup();
+    $('nuNome').addEventListener('input', checkDup);
+    $('nuDup').onclick = function(e) {
+        const b = e.target.closest('[data-use-unit]');
+        if (!b) return;
+        const s = stops.find(function(x) { return x.id === b.dataset.useUnit; });
+        closeModal();
+        if (!s) return;
+        $('search').value = s.name;
+        setUnitsOpen(true);
+        renderUnits();
+        if (!selected.has(s.id)) toggle(s.id);
+    };
+    ['afLog', 'afNum', 'afBai', 'afCid', 'afUF', 'afCep'].forEach(function(id) {
+        $(id).addEventListener('input', function() {
+            preview();
+            if (fonte === 'Google') {
+                fonte = '';
+                $('afLat').value = '';
+                $('afLng').value = '';
+                $('afLocateInfo').textContent = 'Endereço alterado: confira no mapa de novo, se quiser gravar a localização.';
+            }
+        });
+    });
+    ['afLat', 'afLng'].forEach(function(id) {
+        $(id).addEventListener('input', function() {
+            fonte = 'Manual';
+            $('afLocateInfo').textContent = 'Coordenada digitada: será gravada como Manual (a aplicação não a substitui).';
+        });
+    });
+    $('afCancel').onclick = closeModal;
+    $('afLocate').onclick = async function() {
+        const info = $('afLocateInfo');
+        if (!norm($('afLog').value) || !norm($('afCid').value)) return alert('Informe ao menos logradouro e cidade antes de conferir no mapa.');
+        if (!(gmapsReady && geocoderG)) {
+            info.textContent = 'Google Maps indisponível agora: a localização será feita na primeira rota.';
+            return;
+        }
+        info.textContent = 'Localizando…';
+        const query = composeAddress(read());
+        const probe = { name: $('nuNome').value, address: query, searchText: query, city: $('afCid').value, state: $('afUF').value };
+        try { await geocodePointGoogle(probe, { force: true }); } catch (e) {}
+        if (hasValidCoordinates(probe) && probe.geoSource === 'google') {
+            $('afLat').value = Number(probe.lat).toFixed(6);
+            $('afLng').value = Number(probe.lng).toFixed(6);
+            fonte = 'Google';
+            const url = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(Number(probe.lat).toFixed(6) + ',' + Number(probe.lng).toFixed(6));
+            info.innerHTML = '✓ Google Maps encontrou: <b>' + escHtml(probe.googleFormattedAddress || query) + '</b> · <a href="' + url + '" target="_blank" rel="noopener">ver no mapa ↗</a>';
+        } else {
+            info.textContent = 'O Google não localizou este endereço. Confira o texto ou digite a latitude/longitude.';
+        }
+    };
+    $('unitNewForm').onsubmit = async function(e) {
+        e.preventDefault();
+        if (!this.reportValidity()) return;
+        const latV = $('afLat').value.trim(), lngV = $('afLng').value.trim();
+        if ((latV === '') !== (lngV === '')) return alert('Informe latitude e longitude juntas, ou deixe as duas em branco.');
+        if (latV !== '' && !validBrazilCoord(Number(latV), Number(lngV))) return alert('As coordenadas informadas ficam fora do Brasil. Confira latitude e longitude.');
+        const nome = norm($('nuNome').value);
+        const exact = stops.find(function(s) { return key(s.name) === key(nome); });
+        if (exact) return alert('Já existe a unidade "' + exact.name + '" (' + exact.id + '). Use-a na busca, ou corrija o endereço dela pelo botão ✎ Corrigir endereço.');
+        const r = read();
+        const payload = {
+            cliente: nome,
+            baseId: $('nuBase').value,
+            urgencia: $('nuUrg').value,
+            logradouro: norm(r.logradouro),
+            numero: norm(r.numero),
+            bairro: norm(r.bairro),
+            cidade: norm(r.cidade),
+            uf: r.uf,
+            cep: r.cep,
+            referencia: norm($('afRef').value),
+            lat: latV === '' ? '' : Number(latV),
+            lng: lngV === '' ? '' : Number(lngV),
+            fonteCoord: latV === '' ? '' : (fonte || 'Manual')
+        };
+        const addNow = $('nuAdd').checked;
+        const btn = $('afSave');
+        btn.disabled = true;
+        btn.textContent = 'Cadastrando…';
+        try {
+            const res = await sheetsCall('salvarUnidade', { unidade: payload });
+            await loadCadastro();
+            setSheetsStatus(true);
+            closeModal();
+            $('search').value = nome;
+            setUnitsOpen(true);
+            renderUnits();
+            alert('Unidade "' + nome + '" cadastrada (' + res.id + ').\n' + res.endereco + (res.situacao === 'OK' ? '' : '\nSem número: ela aparece como "endereço a revisar".'));
+            const created = stops.find(function(s) { return s.id === res.id; });
+            if (addNow && created && !selected.has(created.id)) toggle(created.id);
+        } catch (err) {
+            btn.disabled = false;
+            btn.textContent = 'Cadastrar unidade';
+            alert('Não foi possível cadastrar a unidade: ' + err.message);
+        }
+    };
+}
+
 /* Mudança de versão invalida rotas persistidas que ainda possam conter
    coordenadas determinísticas criadas pelo importador. */
 const ROUTE_ENGINE_VERSION = 'road-routing-v9-dwell-45min';
@@ -5643,7 +5805,7 @@ function renderUnits() {
     updateGeoInfo();
     $('unitRows').innerHTML = list.map(function(s) {
         return `<div class="unit ${selected.has(s.id)?'chosen':''}${s.situacao==='Revisar'?' unit-review':''}" data-unit="${escHtml(s.id)}"${s.situacao==='Revisar'?' title="Endereço a revisar: clique na linha para corrigir"':''}><button class="check ${selected.has(s.id)?'on':''}" data-toggle="${s.id}">${selected.has(s.id)?'✓':''}</button><div class="unitname"><b>${s.name}${s.geoFallback?'<em class="geo-fb" title="Endereço não localizado no Google Maps: usando a Latitude/Longitude da planilha">📍</em>':''}${s.situacao==='Revisar'?'<button type="button" class="unit-fix" data-fix="'+escHtml(s.id)+'" title="Endereço incompleto no cadastro: corrigir agora">✎ Corrigir endereço</button>':''}</b><small>${s.client} · ${s.address}</small></div><span class="muted">${s.city}${s.state?' · '+s.state:''}</span><select class="urg" data-u="${s.id}" style="color:${urgency[s.urgency].c};background:${urgency[s.urgency].bg}"><option ${s.urgency==='Super'?'selected':''}>Super</option><option ${s.urgency==='Alta'?'selected':''}>Alta</option><option ${s.urgency==='Média'?'selected':''}>Média</option><option ${s.urgency==='Baixa'?'selected':''}>Baixa</option></select><span class="muted">${FIXED_DELIVERY_MINUTES} min</span><button class="${selected.has(s.id)?'included':'add'}" data-toggle="${s.id}">${selected.has(s.id)?'✓ Incluída':'＋ Adicionar'}</button></div>`
-    }).join('') || '<div style="padding:25px;text-align:center;color:#9aa7a7">Nenhuma unidade encontrada para a busca atual.</div>';
+    }).join('') || ('<div class="units-empty">Nenhuma unidade encontrada para a busca atual.' + (norm($('search').value) ? '<button type="button" class="outline" data-new-unit="1">＋ Cadastrar “' + escHtml(norm($('search').value)) + '” como nova unidade</button>' : '') + '</div>');
 }
 
 function wait(ms) {
@@ -6844,6 +7006,10 @@ function toggle(id) {
     });
 }
 $('unitRows').onclick = e => {
+    if (e.target.closest('[data-new-unit]')) {
+        openNewUnitForm(norm($('search').value));
+        return;
+    }
     const fix = e.target.closest('[data-fix]');
     if (fix) {
         openUnitAddressForm(stops.find(function(s) { return s.id === fix.dataset.fix; }));
@@ -7517,6 +7683,7 @@ $('syncPendingBtn').onclick = async function() {
 };
 updateHistoryNotice();
 renderEditBanner();
+$('unitNewBtn').onclick = function() { openNewUnitForm(''); };
 initSheets();
 </script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v31edd6df95cf4e85bb4c19e7a9bdbcba1788362987495" integrity="sha512-iIg7k2xntmwu6/uSb5tpc/hySgZc4eoL31yB29W6tJFo2akwjPWcEqnCEdJvGexCL0KEQwVYv5BlowfhVz26hg==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
