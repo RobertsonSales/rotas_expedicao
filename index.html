@@ -3428,6 +3428,19 @@ body.landing-lock {
 .nu-dup[hidden] { display: none }
 .nu-dup .link { padding: 0; font-size: 10.5px; text-decoration: underline }
 .dark .nu-dup { background: #3a3220; border-color: #6b5a24; color: #f3d77a }
+
+/* v6 · várias NF-e por parada */
+.docs-form .docs-head, .docs-form .doc-row { display: grid; grid-template-columns: 1.25fr 1fr 1fr 26px; gap: 8px; align-items: center }
+.docs-form .docs-head { color: var(--soft); font-size: 10px; font-weight: 800; margin-bottom: 2px }
+.docs-form .doc-row { margin-bottom: 7px }
+.docs-form .doc-row input { margin-top: 0 }
+.docs-form .doc-amt { text-align: right; font-variant-numeric: tabular-nums }
+.docs-form .doc-row.doc-bad input { border-color: #c26b55; background: #fff6f3 }
+.docs-form .trash:disabled { opacity: .3; cursor: default }
+.docs-form .docs-add { padding: 4px 0; font-size: 11px }
+.docs-total { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; padding: 10px 12px; border-radius: 9px; background: var(--mint); color: var(--ink); font-size: 12px }
+.stop-docs { white-space: normal !important }
+@media (max-width: 620px) { .docs-form .docs-head { display: none } .docs-form .doc-row { grid-template-columns: 1fr 1fr 26px } .docs-form .doc-num { grid-column: 1 / -1 } }
 </style>
 </head>
 <body>
@@ -3738,7 +3751,7 @@ function unitFromSheet(u, previous) {
     stop.searchText = addressQuery(stop);
     if (previous) {
         /* preserva o que o operador fez neste navegador (documento fiscal, urgência alterada) */
-        if (previous.fiscal) stop.fiscal = previous.fiscal;
+        if (Array.isArray(previous.docs) || previous.fiscal) stop.docs = docsOf(previous);
         if (previous.urgencyEdited && urgency[previous.urgency]) {
             stop.urgency = previous.urgency;
             stop.urgencyEdited = true;
@@ -3886,11 +3899,7 @@ function itemFromSheet(r) {
             state: normalizeUF(p.uf),
             urgency: urgency[urg] ? urg : 'Média',
             service: FIXED_DELIVERY_MINUTES,
-            fiscal: {
-                number: String(p.docNumero == null ? '' : p.docNumero),
-                issueDate: norm(p.docEmissao),
-                amount: p.docValor === '' || p.docValor == null ? '' : Number(p.docValor)
-            },
+            docs: docsFromParada(p),
             lat: ok ? lat : null,
             lng: ok ? lng : null
         };
@@ -3900,6 +3909,7 @@ function itemFromSheet(r) {
             s.geoProvider = 'google';
         }
         s.searchText = addressQuery(s);
+        ensureFiscalData(s);
         return s;
     });
     const legs = paradas.map(function(p) {
@@ -3979,7 +3989,8 @@ function routeToSheetPayload(item) {
         },
         paradas: ordered.map(function(s, i) {
             const leg = legs[i] || {};
-            const f = s.fiscal || {};
+            const f = ensureFiscalData(s);
+            const docs = docsOf(s);
             const coords = hasValidCoordinates(s) && s.geoSource;
             return {
                 ordem: i + 1,
@@ -3998,6 +4009,8 @@ function routeToSheetPayload(item) {
                 docNumero: f.number || '',
                 docEmissao: f.issueDate || '',
                 docValor: f.amount === '' || f.amount == null ? '' : Number(f.amount),
+                docQtd: docs.length,
+                docDetalhe: docDetailText(docs),
                 lat: coords ? Number(Number(s.lat).toFixed(6)) : '',
                 lng: coords ? Number(Number(s.lng).toFixed(6)) : ''
             };
@@ -4755,6 +4768,98 @@ function openNewUnitForm(prefillName) {
     };
 }
 
+/* ================================================================
+   DOCUMENTOS FISCAIS · várias NF-e por parada + máscara R$ (pt-BR)
+   stop.docs = [{ number, issueDate (AAAA-MM-DD), amount (número) }]
+   stop.fiscal = resumo derivado (números juntos, emissão mais antiga,
+   valor total, quantidade) — usado por histórico, métricas e exportações.
+   Na planilha: uma linha por parada; "Nº documento fiscal" com todos os
+   números, "Valor do documento (R$)" com o total, "Qtd. documentos
+   fiscais" e "Documentos fiscais (detalhe)" com uma NF-e por linha.
+   ================================================================ */
+function parseBRL(v) {
+    if (v === '' || v === null || v === undefined) return '';
+    if (typeof v === 'number') return Number.isFinite(v) ? v : '';
+    const t = String(v).replace(/[^\d,.-]/g, '');
+    if (!t) return '';
+    const n = Number(t.indexOf(',') >= 0 ? t.replace(/\./g, '').replace(',', '.') : t);
+    return Number.isFinite(n) ? n : '';
+}
+
+function formatBRL(v) {
+    const n = Number(v);
+    return v === '' || v === null || v === undefined || !Number.isFinite(n) ? '' : n.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+}
+
+/* Máscara monetária: o operador digita só números e o campo mostra R$ 1.234,56. */
+function attachMoneyMask(input) {
+    if (!input || input.dataset.money) return;
+    input.dataset.money = '1';
+    input.setAttribute('inputmode', 'numeric');
+    input.setAttribute('autocomplete', 'off');
+    const apply = function() {
+        const digits = input.value.replace(/\D/g, '').replace(/^0+(?=\d)/, '').slice(0, 13);
+        input.value = digits ? formatBRL(Number(digits) / 100) : '';
+    };
+    input.addEventListener('input', apply);
+    if (input.value && !/R\$/.test(input.value)) input.value = formatBRL(parseBRL(input.value));
+}
+
+function fiscalSummary(docs) {
+    const list = (docs || []).filter(function(d) { return norm(d.number) || (d.amount !== '' && d.amount != null); });
+    if (!list.length) return { number: '', issueDate: systemDate(), amount: '', count: 0 };
+    const dates = list.map(function(d) { return norm(d.issueDate); }).filter(Boolean).sort();
+    const amounts = list.map(function(d) { return Number(d.amount); }).filter(Number.isFinite);
+    return {
+        number: list.map(function(d) { return norm(d.number); }).filter(Boolean).join('; '),
+        issueDate: dates[0] || '',
+        amount: amounts.length ? Math.round(amounts.reduce(function(a, b) { return a + b; }, 0) * 100) / 100 : '',
+        count: list.length
+    };
+}
+
+function docsOf(stop) {
+    ensureFiscalData(stop);
+    return stop.docs.map(function(d) { return { number: d.number, issueDate: d.issueDate, amount: d.amount }; });
+}
+
+function docDetailText(docs) {
+    return (docs || []).map(function(d) {
+        return 'NF-e ' + norm(d.number) + ' · ' + fiscalDateBR(d.issueDate) + ' · ' + formatBRL(d.amount);
+    }).join('\n');
+}
+
+function docsFromParada(p) {
+    const lines = String(p.docDetalhe || '').split(/\r?\n/).map(norm).filter(Boolean);
+    const parsed = lines.map(function(line) {
+        const m = line.match(/^(?:NF-e\s+)?(.*?)\s+·\s+(\d{2})\/(\d{2})\/(\d{4})\s+·\s+(.+)$/);
+        return m ? { number: norm(m[1]), issueDate: m[4] + '-' + m[3] + '-' + m[2], amount: parseBRL(m[5]) } : null;
+    });
+    if (parsed.length && parsed.every(Boolean)) return parsed;
+    const number = String(p.docNumero == null ? '' : p.docNumero).trim();
+    const amount = p.docValor === '' || p.docValor == null ? '' : parseBRL(p.docValor);
+    return number || amount !== '' ? [{ number: number, issueDate: norm(p.docEmissao), amount: amount }] : [];
+}
+
+/* Células do PDF: uma NF-e por linha nas três colunas (alinhadas) e o total quando houver mais de uma. */
+function docCellsHtml(stop, esc) {
+    const docs = docsOf(stop);
+    if (!docs.length) return ['—', '—', '—'];
+    const many = docs.length > 1;
+    const total = fiscalSummary(docs).amount;
+    return [
+        docs.map(function(d) { return esc(d.number || '—'); }).join('<br>') + (many ? '<br><b>Total</b>' : ''),
+        docs.map(function(d) { return esc(fiscalDateBR(d.issueDate)); }).join('<br>') + (many ? '<br>&nbsp;' : ''),
+        docs.map(function(d) { return esc(formatBRL(d.amount) || '—'); }).join('<br>') + (many ? '<br><b>' + esc(formatBRL(total)) + '</b>' : '')
+    ];
+}
+
+function docsSummaryText(stop) {
+    const f = ensureFiscalData(stop);
+    if (!f.count) return 'Sem documento fiscal';
+    return f.count === 1 ? 'NF-e ' + f.number + ' · emissão ' + fiscalDateBR(f.issueDate) + ' · ' + formatBRL(f.amount) : f.count + ' NF-e (' + f.number + ') · total ' + formatBRL(f.amount);
+}
+
 /* Mudança de versão invalida rotas persistidas que ainda possam conter
    coordenadas determinísticas criadas pelo importador. */
 const ROUTE_ENGINE_VERSION = 'road-routing-v9-dwell-45min';
@@ -4805,10 +4910,13 @@ function systemDate() {
 }
 
 function ensureFiscalData(stop) {
-    if (!stop.fiscal || typeof stop.fiscal !== 'object') stop.fiscal = {};
-    if (stop.fiscal.issueDate === undefined || stop.fiscal.issueDate === null || stop.fiscal.issueDate === '') stop.fiscal.issueDate = systemDate();
-    if (stop.fiscal.number === undefined || stop.fiscal.number === null) stop.fiscal.number = '';
-    if (stop.fiscal.amount === undefined || stop.fiscal.amount === null) stop.fiscal.amount = '';
+    if (!Array.isArray(stop.docs)) {
+        /* rotas e cópias antigas: um único documento em stop.fiscal */
+        const f = stop.fiscal && typeof stop.fiscal === 'object' ? stop.fiscal : {};
+        const hasOne = norm(f.number) || (f.amount !== '' && f.amount !== undefined && f.amount !== null);
+        stop.docs = hasOne ? [{ number: String(f.number == null ? '' : f.number), issueDate: f.issueDate || systemDate(), amount: parseBRL(f.amount) }] : [];
+    }
+    stop.fiscal = fiscalSummary(stop.docs);
     return stop.fiscal;
 }
 
@@ -5785,7 +5893,7 @@ function renderSelected() {
     const arr = stops.filter(s => selected.has(s.id));
     $('selectedList').innerHTML = arr.length ? arr.map((s, i) => {
         const fiscal = ensureFiscalData(s);
-        return `<div class="stop"><div class="num">${i+1}</div><div class="stop-main"><b>${escHtml(s.name)}</b><small>${escHtml(s.city)} · ${escHtml(s.address)}</small><small>Doc. fiscal: ${escHtml(fiscal.number)} · Emissão: ${escHtml(fiscal.issueDate)} · Valor: ${escHtml(formatMoney(fiscal.amount))}</small></div><select data-u="${s.id}" class="urg"><option ${s.urgency==='Super'?'selected':''}>Super</option><option ${s.urgency==='Alta'?'selected':''}>Alta</option><option ${s.urgency==='Média'?'selected':''}>Média</option><option ${s.urgency==='Baixa'?'selected':''}>Baixa</option></select><button class="link" data-fiscal-edit="${s.id}" title="Editar documento fiscal">Editar documento</button><button class="trash" data-remove="${s.id}" title="Remover da rota">×</button></div>`;
+        return `<div class="stop"><div class="num">${i+1}</div><div class="stop-main"><b>${escHtml(s.name)}</b><small>${escHtml(s.city)} · ${escHtml(s.address)}</small><small class="stop-docs">${escHtml(docsSummaryText(s))}</small></div><select data-u="${s.id}" class="urg"><option ${s.urgency==='Super'?'selected':''}>Super</option><option ${s.urgency==='Alta'?'selected':''}>Alta</option><option ${s.urgency==='Média'?'selected':''}>Média</option><option ${s.urgency==='Baixa'?'selected':''}>Baixa</option></select><button class="link" data-fiscal-edit="${s.id}" title="Incluir ou alterar as NF-e desta parada">${fiscal.count > 1 ? fiscal.count + ' NF-e' : 'NF-e'} ✎</button><button class="trash" data-remove="${s.id}" title="Remover da rota">×</button></div>`;
     }).join('') : `<div style="padding:20px;text-align:center;color:#9da9aa;border:1px dashed #dce6e3;border-radius:9px">Adicione unidades abaixo para montar esta rota.</div>`;
 }
 
@@ -6467,7 +6575,7 @@ function buildRouteSheets(data, wb, suffix) {
     ordered.forEach(function(s, i) {
         const leg = legs[i] || {};
         const fiscal = ensureFiscalData(s);
-        agenda.push([i + 1, s.name, s.address, s.city, s.urgency, clock(leg.arrival), fmt(FIXED_DELIVERY_MINUTES), +Number(leg.km || 0).toFixed(1), fmt(leg.m || 0), leg.l || '', s.client, fiscal.number || '', fiscal.issueDate || '', fiscal.amount === '' ? '' : Number(fiscal.amount)]);
+        agenda.push([i + 1, s.name, s.address, s.city, s.urgency, clock(leg.arrival), fmt(FIXED_DELIVERY_MINUTES), +Number(leg.km || 0).toFixed(1), fmt(leg.m || 0), leg.l || '', s.client, fiscal.number || '', docsOf(s).map(function(d) { return fiscalDateBR(d.issueDate); }).join('; '), fiscal.amount === '' ? '' : Number(fiscal.amount)]);
     });
     const returnLeg = legs[ordered.length];
     if (returnLeg) {
@@ -6595,6 +6703,10 @@ function buildRouteSheets(data, wb, suffix) {
             wrapText: true
         }
     };
+    for (let r = 2; r < agenda.length; r++) {
+        const cell = ws[XLSX.utils.encode_cell({ r: r, c: 13 })];
+        if (cell && typeof cell.v === 'number') cell.z = '"R$" #,##0.00';
+    }
     sumWs['!autofilter'] = {
         ref: 'A2:B11'
     };
@@ -6651,7 +6763,9 @@ async function saveHistory(replaceInfo) {
         const ordered = route.ordered.map(function(it) {
             const current = stops.find(function(stop) { return String(stop.id) === String(it.id); }) || it;
             const copy = { ...it, ...current };
-            copy.fiscal = { ...ensureFiscalData(current) };
+            ensureFiscalData(current);
+            copy.docs = docsOf(current);
+            copy.fiscal = { ...current.fiscal };
             return copy;
         });
         const incomplete = ordered.filter(function(stop) { return !hasCompleteFiscalData(stop); });
@@ -6744,11 +6858,11 @@ function printHistory(item) {
     const rows = item.ordered.map(function(s, i) {
         const leg = item.legs[i] || {};
         const fiscal = ensureFiscalData(s);
-        return `<tr><td>${i+1}</td><td><strong>${escHtml(s.name)}</strong><br><small>${escHtml(s.address)}</small></td><td>${s.urgency}</td><td>${clock(leg.arrival)}</td><td>${Number(leg.km || 0).toFixed(1)} km</td><td>${fmt(leg.m || 0)}</td><td>${fmt(FIXED_DELIVERY_MINUTES)}<br><small>tempo padrão por entrega</small></td><td class="fx">${escHtml(fiscal.number || '—')}</td><td class="fx">${escHtml(fiscalDateBR(fiscal.issueDate))}</td><td class="fx">${escHtml(formatMoney(fiscal.amount))}</td></tr>`
+        return `<tr><td>${i+1}</td><td><strong>${escHtml(s.name)}</strong><br><small>${escHtml(s.address)}</small></td><td>${s.urgency}</td><td>${clock(leg.arrival)}</td><td>${Number(leg.km || 0).toFixed(1)} km</td><td>${fmt(leg.m || 0)}</td><td>${fmt(FIXED_DELIVERY_MINUTES)}<br><small>tempo padrão por entrega</small></td>${docCellsHtml(s, escHtml).map(function(c) { return '<td class="fx">' + c + '</td>'; }).join('')}</tr>`
     }).join('') + (item.legs[item.ordered.length] ? `<tr style="font-weight:700;background:#eff8f4"><td>↩</td><td><strong>Retorno à base</strong><br><small>${item.meta.base}</small></td><td>—</td><td>${clock(item.legs[item.ordered.length].arrival)}</td><td>${Number(item.legs[item.ordered.length].km || 0).toFixed(1)} km</td><td>${fmt(item.legs[item.ordered.length].m || 0)}</td><td>Chegada à base: ${clock(item.end)}</td><td colspan="3"></td></tr>` : '');
     const w = window.open('', '_blank');
     if (!w) return alert('Permita pop-ups para gerar o PDF.');
-    w.document.write(`<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>GRUPO LABMEDIC - Roteiro</title><style>@page{size:A4 landscape;margin:10mm}body{font-family:Arial;color:#183345;padding:18px}.toolbar{display:flex;gap:8px;margin-bottom:16px}.toolbar button{border:0;border-radius:6px;padding:9px 13px;background:#0d806d;color:#fff;cursor:pointer}.toolbar button.alt{background:#193345}h1{margin:0;color:#0d806d}h2{font-size:15px;margin-top:28px;border-bottom:2px solid #0d806d;padding-bottom:8px}.sub{color:#6d7e80;font-size:12px;margin:6px 0 22px}.meta{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.box{background:#eff8f4;padding:12px;border-radius:7px}.box small{display:block;color:#718184;font-size:10px}.box b{display:block;margin-top:4px;font-size:13px}table{width:100%;border-collapse:collapse;margin-top:12px;font-size:11px}th{text-align:left;background:#193345;color:white;padding:9px}td{padding:9px;border-bottom:1px solid #dce8e3}table.agenda{table-layout:fixed}table.agenda td{word-break:break-word}table.agenda .fx{text-align:center;white-space:nowrap;font-variant-numeric:tabular-nums}table.agenda td.fx{overflow:hidden;text-overflow:ellipsis}small{color:#758789}@media print{button{display:none}}.unit-photo{width:100%;height:150px;object-fit:cover;border-radius:10px;background:var(--mint);display:block;margin-bottom:12px}.map-details{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin:12px 0}.map-detail{padding:9px;border:1px solid var(--line);border-radius:8px;background:var(--card)}.map-detail small{display:block;color:var(--soft);font-size:9px}.map-detail b{display:block;color:var(--ink);margin-top:3px}.maps-frame{width:100%;height:220px;border:1px solid var(--line);border-radius:10px;margin-top:12px;background:var(--mint)}.progress-backdrop{position:fixed;inset:0;background:rgba(8,27,38,.58);backdrop-filter:blur(5px);z-index:100;display:grid;place-items:center}.progress-card{width:min(390px,calc(100vw - 36px));background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:18px;padding:25px;box-shadow:0 22px 60px rgba(0,0,0,.25);text-align:center}.progress-ring{width:62px;height:62px;border:5px solid var(--line);border-top-color:var(--teal);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 15px}@keyframes spin{to{transform:rotate(360deg)}}.progress-bar{height:7px;background:var(--line);border-radius:99px;overflow:hidden;margin-top:16px}.progress-bar i{display:block;height:100%;width:18%;background:linear-gradient(90deg,var(--teal),#70dfbf);border-radius:inherit;transition:width .3s ease}@page{size:A4 landscape;margin:10mm}</style></head><body><div class="toolbar"><button onclick="window.print()">▤ Imprimir / Salvar como PDF</button><button class="alt" onclick="downloadReport()">⇩ Baixar relatório</button></div><h1>GRUPO LABMEDIC - Planejamento de Rotas</h1><div class="sub">Roteiro profissional de visitação · ${fiscalDateBR(item.meta.date)}</div><div class="meta"><div class="box"><small>Condutor</small><b>${item.meta.driver}</b></div><div class="box"><small>Base de partida</small><b>${item.meta.base}</b></div><div class="box"><small>Resumo</small><b>${item.meta.stops} paradas · ${Number(item.meta.km).toFixed(1)} km</b></div></div><h2>Agenda otimizada</h2><table class="agenda"><colgroup><col style="width:3%"><col style="width:27%"><col style="width:7%"><col style="width:6%"><col style="width:7%"><col style="width:8%"><col style="width:9%"><col style="width:11%"><col style="width:11%"><col style="width:11%"></colgroup><thead><tr><th>#</th><th>Unidade</th><th>Urgência</th><th>Chegada</th><th>Km do trecho</th><th>Deslocamento</th><th>Atendimento padrão</th><th class="fx">Documento fiscal</th><th class="fx">Emissão</th><th class="fx">Valor</th></tr></thead><tbody>${rows}</tbody></table><p style="margin-top:24px;color:#718184;font-size:10px">A coluna “Km do trecho” indica a quilometragem entre a origem e o destino de cada linha. Cada parada considera exatamente ${FIXED_DELIVERY_MINUTES} minutos de atendimento padrão, independentemente de colunas de duração na planilha. A última linha mostra o retorno à base · Documento gerado localmente pelo GRUPO LABMEDIC - Planejamento de Rotas.</p><script>function downloadReport(){const blob=new Blob([document.documentElement.outerHTML],{type:"text/html;charset=utf-8"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="GRUPO LABMEDIC - Planejamento de Rotas.html";a.click();setTimeout(function(){URL.revokeObjectURL(a.href)},500)}window.onload=function(){setTimeout(function(){window.print()},350)}</body></html>`);
+    w.document.write(`<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>GRUPO LABMEDIC - Roteiro</title><style>@page{size:A4 landscape;margin:10mm}body{font-family:Arial;color:#183345;padding:18px}.toolbar{display:flex;gap:8px;margin-bottom:16px}.toolbar button{border:0;border-radius:6px;padding:9px 13px;background:#0d806d;color:#fff;cursor:pointer}.toolbar button.alt{background:#193345}h1{margin:0;color:#0d806d}h2{font-size:15px;margin-top:28px;border-bottom:2px solid #0d806d;padding-bottom:8px}.sub{color:#6d7e80;font-size:12px;margin:6px 0 22px}.meta{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.box{background:#eff8f4;padding:12px;border-radius:7px}.box small{display:block;color:#718184;font-size:10px}.box b{display:block;margin-top:4px;font-size:13px}table{width:100%;border-collapse:collapse;margin-top:12px;font-size:11px}th{text-align:left;background:#193345;color:white;padding:9px}td{padding:9px;border-bottom:1px solid #dce8e3}table.agenda{table-layout:fixed}table.agenda td{word-break:break-word}table.agenda .fx{text-align:center;white-space:nowrap;font-variant-numeric:tabular-nums}table.agenda td.fx{overflow:hidden;text-overflow:ellipsis}small{color:#758789}@media print{button{display:none}}.unit-photo{width:100%;height:150px;object-fit:cover;border-radius:10px;background:var(--mint);display:block;margin-bottom:12px}.map-details{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin:12px 0}.map-detail{padding:9px;border:1px solid var(--line);border-radius:8px;background:var(--card)}.map-detail small{display:block;color:var(--soft);font-size:9px}.map-detail b{display:block;color:var(--ink);margin-top:3px}.maps-frame{width:100%;height:220px;border:1px solid var(--line);border-radius:10px;margin-top:12px;background:var(--mint)}.progress-backdrop{position:fixed;inset:0;background:rgba(8,27,38,.58);backdrop-filter:blur(5px);z-index:100;display:grid;place-items:center}.progress-card{width:min(390px,calc(100vw - 36px));background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:18px;padding:25px;box-shadow:0 22px 60px rgba(0,0,0,.25);text-align:center}.progress-ring{width:62px;height:62px;border:5px solid var(--line);border-top-color:var(--teal);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 15px}@keyframes spin{to{transform:rotate(360deg)}}.progress-bar{height:7px;background:var(--line);border-radius:99px;overflow:hidden;margin-top:16px}.progress-bar i{display:block;height:100%;width:18%;background:linear-gradient(90deg,var(--teal),#70dfbf);border-radius:inherit;transition:width .3s ease}@page{size:A4 landscape;margin:10mm}</style></head><body><div class="toolbar"><button onclick="window.print()">▤ Imprimir / Salvar como PDF</button><button class="alt" onclick="downloadReport()">⇩ Baixar relatório</button></div><h1>GRUPO LABMEDIC - Planejamento de Rotas</h1><div class="sub">Roteiro profissional de visitação · ${fiscalDateBR(item.meta.date)}</div><div class="meta"><div class="box"><small>Condutor</small><b>${item.meta.driver}</b></div><div class="box"><small>Base de partida</small><b>${item.meta.base}</b></div><div class="box"><small>Resumo</small><b>${item.meta.stops} paradas · ${Number(item.meta.km).toFixed(1)} km</b></div></div><h2>Agenda otimizada</h2><table class="agenda"><colgroup><col style="width:3%"><col style="width:27%"><col style="width:7%"><col style="width:6%"><col style="width:7%"><col style="width:8%"><col style="width:9%"><col style="width:11%"><col style="width:11%"><col style="width:11%"></colgroup><thead><tr><th>#</th><th>Unidade</th><th>Urgência</th><th>Chegada</th><th>Km do trecho</th><th>Deslocamento</th><th>Atendimento padrão</th><th class="fx">NF-e</th><th class="fx">Emissão</th><th class="fx">Valor (R$)</th></tr></thead><tbody>${rows}</tbody></table><p style="margin-top:24px;color:#718184;font-size:10px">A coluna “Km do trecho” indica a quilometragem entre a origem e o destino de cada linha. Cada parada considera exatamente ${FIXED_DELIVERY_MINUTES} minutos de atendimento padrão, independentemente de colunas de duração na planilha. A última linha mostra o retorno à base · Documento gerado localmente pelo GRUPO LABMEDIC - Planejamento de Rotas.</p><script>function downloadReport(){const blob=new Blob([document.documentElement.outerHTML],{type:"text/html;charset=utf-8"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="GRUPO LABMEDIC - Planejamento de Rotas.html";a.click();setTimeout(function(){URL.revokeObjectURL(a.href)},500)}window.onload=function(){setTimeout(function(){window.print()},350)}</body></html>`);
     w.document.close();
 }
 
@@ -6756,7 +6870,8 @@ function reopenHistory(item) {
     const routeStops = (item.ordered || []).map(function(s) {
         const current = stops.find(function(x) { return String(x.id) === String(s.id); }) || (s.code ? stops.find(function(x) { return String(x.id) === String(s.code); }) : null);
         if (current) {
-            current.fiscal = { ...(s.fiscal || {}) };
+            current.docs = docsOf(s);
+            ensureFiscalData(current);
             if (urgency[s.urgency]) current.urgency = s.urgency;
             if (!hasValidCoordinates(current) && hasValidCoordinates(s) && s.geoSource) {
                 ['lat', 'lng', 'geoReady', 'geoSource', 'geoProvider', 'geoFallback', 'geoQuery'].forEach(function(k) { current[k] = s[k]; });
@@ -6958,27 +7073,84 @@ function openHelp() {
 }
 
 function hasCompleteFiscalData(stop) {
-    const fiscal = ensureFiscalData(stop);
-    return !!norm(fiscal.number) && !!norm(fiscal.issueDate) && fiscal.amount !== '' && Number.isFinite(Number(fiscal.amount)) && Number(fiscal.amount) >= 0;
+    ensureFiscalData(stop);
+    return stop.docs.length > 0 && stop.docs.every(function(d) {
+        return !!norm(d.number) && !!norm(d.issueDate) && d.amount !== '' && Number.isFinite(Number(d.amount)) && Number(d.amount) >= 0;
+    });
 }
 
 function requestFiscalData(stop, onComplete) {
-    const fiscal = ensureFiscalData(stop);
-    const title = 'Documento fiscal · ' + escHtml(stop.name);
-    const body = `<p class="fiscal-modal-intro">Preencha todos os campos obrigatórios para incluir esta unidade na rota.</p><form class="fiscal-modal-form" id="fiscalModalForm"><label>Nº do documento fiscal *<input id="fiscalNumber" type="text" maxlength="40" required placeholder="Ex.: NF 12345" value="${escHtml(fiscal.number)}"></label><label>Data de emissão *<input id="fiscalIssueDate" type="date" required value="${escHtml(fiscal.issueDate)}"></label><label>Valor do documento (R$) *<input id="fiscalAmount" type="number" min="0" step="0.01" inputmode="decimal" required placeholder="0,00" value="${escHtml(fiscal.amount)}"></label><div class="fiscal-modal-actions"><button type="button" class="outline" id="fiscalCancel">Cancelar</button><button type="submit" class="primary" style="width:auto;margin-top:0">Confirmar e incluir</button></div></form>`;
-    openModal(title, body, 'modal-sm');
+    const docs = docsOf(stop);
+    if (!docs.length) docs.push({ number: '', issueDate: systemDate(), amount: '' });
+    const rowHtml = function(d) {
+        return '<div class="doc-row"><input class="doc-num" type="text" maxlength="40" placeholder="Ex.: 12345" value="' + escHtml(d.number || '') + '" aria-label="Nº da NF-e"><input class="doc-date" type="date" value="' + escHtml(d.issueDate || systemDate()) + '" aria-label="Data de emissão"><input class="doc-amt" type="text" placeholder="R$ 0,00" value="' + escHtml(formatBRL(d.amount)) + '" aria-label="Valor (R$)"><button type="button" class="trash" data-del-doc title="Remover esta NF-e">×</button></div>';
+    };
+    const body = '<p class="fiscal-modal-intro">Informe todas as NF-e entregues nesta unidade. Todas ficam na mesma parada da rota (uma linha na aba Paradas).</p>' +
+        '<form class="fiscal-modal-form docs-form" id="fiscalModalForm" novalidate>' +
+        '<div class="docs-head"><span>Nº da NF-e *</span><span>Emissão *</span><span>Valor (R$) *</span><span></span></div>' +
+        '<div id="docsRows">' + docs.map(rowHtml).join('') + '</div>' +
+        '<button type="button" class="link docs-add" id="docsAdd">＋ Adicionar outra NF-e</button>' +
+        '<div class="docs-total"><span id="docsCount"></span><b id="docsTotal">R$ 0,00</b></div>' +
+        '<div class="fiscal-modal-actions"><button type="button" class="outline" id="fiscalCancel">Cancelar</button><button type="submit" class="primary" id="fiscalOk" style="width:auto;margin-top:0">' + (stop.docs.length ? 'Salvar documentos' : 'Confirmar e incluir') + '</button></div></form>';
+    openModal('Documentos fiscais · ' + escHtml(stop.name), body, '');
+    const rows = $('docsRows');
+    const readRows = function() {
+        return Array.from(rows.querySelectorAll('.doc-row')).map(function(r) {
+            return { el: r, number: norm(r.querySelector('.doc-num').value), issueDate: r.querySelector('.doc-date').value, amount: parseBRL(r.querySelector('.doc-amt').value) };
+        });
+    };
+    const refresh = function() {
+        rows.querySelectorAll('.doc-amt').forEach(attachMoneyMask);
+        const list = readRows().filter(function(d) { return d.number || d.amount !== ''; });
+        const total = list.reduce(function(a, d) { return a + (Number(d.amount) || 0); }, 0);
+        $('docsCount').textContent = list.length + (list.length === 1 ? ' NF-e' : ' NF-e') + ' nesta parada';
+        $('docsTotal').textContent = 'Total ' + formatBRL(total);
+        rows.querySelectorAll('[data-del-doc]').forEach(function(b) { b.disabled = rows.children.length === 1; });
+    };
+    refresh();
+    rows.addEventListener('input', refresh);
+    rows.addEventListener('click', function(e) {
+        const del = e.target.closest('[data-del-doc]');
+        if (!del || rows.children.length === 1) return;
+        del.closest('.doc-row').remove();
+        refresh();
+    });
+    $('docsAdd').onclick = function() {
+        const last = readRows().pop();
+        rows.insertAdjacentHTML('beforeend', rowHtml({ number: '', issueDate: last && last.issueDate || systemDate(), amount: '' }));
+        refresh();
+        rows.lastElementChild.querySelector('.doc-num').focus();
+    };
     $('fiscalCancel').onclick = closeModal;
+    const firstNum = rows.querySelector('.doc-num');
+    if (firstNum && !firstNum.value) firstNum.focus();
     $('fiscalModalForm').onsubmit = function(e) {
         e.preventDefault();
-        if (!this.reportValidity()) return;
-        const number = $('fiscalNumber').value.trim();
-        const issueDate = $('fiscalIssueDate').value;
-        const amount = $('fiscalAmount').value;
-        if (!number || !issueDate || amount === '' || !Number.isFinite(Number(amount)) || Number(amount) < 0) {
-            alert('Preencha corretamente o número, a data de emissão e o valor do documento fiscal.');
+        const all = readRows();
+        all.forEach(function(d) { d.el.classList.remove('doc-bad'); });
+        const filled = all.filter(function(d) { return d.number || d.amount !== ''; });
+        const bad = filled.filter(function(d) { return !d.number || !d.issueDate || d.amount === '' || !(Number(d.amount) >= 0); });
+        if (!filled.length) {
+            all[0] && all[0].el.classList.add('doc-bad');
+            alert('Informe ao menos uma NF-e: número, data de emissão e valor.');
             return;
         }
-        stop.fiscal = { number, issueDate, amount };
+        if (bad.length) {
+            bad.forEach(function(d) { d.el.classList.add('doc-bad'); });
+            alert('Complete número, data de emissão e valor de cada NF-e (ou remova a linha incompleta).');
+            return;
+        }
+        const nums = filled.map(function(d) { return key(d.number); });
+        if (nums.some(function(n, i) { return nums.indexOf(n) !== i; })) {
+            alert('Há NF-e com o mesmo número repetida nesta parada.');
+            return;
+        }
+        const elsewhere = stops.filter(function(o) { return o !== stop && selected.has(o.id); }).filter(function(o) {
+            return docsOf(o).some(function(d) { return nums.indexOf(key(d.number)) >= 0; });
+        });
+        if (elsewhere.length && !confirm('A mesma NF-e já está informada em: ' + elsewhere.map(function(o) { return o.name; }).join(', ') + '. Deseja continuar?')) return;
+        stop.docs = filled.map(function(d) { return { number: d.number, issueDate: d.issueDate, amount: Math.round(Number(d.amount) * 100) / 100 }; });
+        ensureFiscalData(stop);
         closeModal();
         if (typeof onComplete === 'function') onComplete(stop.fiscal);
     };
@@ -7252,7 +7424,7 @@ if ($('landingPage')) {
    ANÁLISE DE MÉTRICAS · histórico operacional
    ================================================================ */
 function metricKey(v) { return String(v ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim() }
-function metricDocNumber(stop) { return String((stop && stop.fiscal && stop.fiscal.number) ?? '').trim() }
+function metricDocNumber(stop) { return stop ? String(ensureFiscalData(stop).number || '').trim() : '' }
 function metricHistoryData() {
     const driver = $('metricsDriver')?.value || '', from = $('metricsFrom')?.value || '', to = $('metricsTo')?.value || '', base = $('metricsBase')?.value || '';
     const unitQ = metricKey($('metricsUnit')?.value), docQ = metricKey($('metricsDoc')?.value);
@@ -7294,7 +7466,7 @@ function populateMetricFilters() {
     base.innerHTML='<option value="">Todas as bases</option>'+bases.map(x=>'<option value="'+metricEsc(x)+'">'+metricEsc(x)+'</option>').join('');
     if (drivers.includes(oldD)) driver.value=oldD; if (bases.includes(oldB)) base.value=oldB;
     const units=new Set(), docs=new Set();
-    history.forEach(function(x){ (x.ordered||[]).forEach(function(s){ if(s.name) units.add(s.name); const n=metricDocNumber(s); if(n) docs.add(n); }); });
+    history.forEach(function(x){ (x.ordered||[]).forEach(function(s){ if(s.name) units.add(s.name); docsOf(s).forEach(function(d){ if(norm(d.number)) docs.add(norm(d.number)); }); }); });
     const collator=new Intl.Collator('pt-BR',{numeric:true});
     $('metricsUnitList').innerHTML=[...units].sort(collator.compare).map(x=>'<option value="'+metricEsc(x)+'"></option>').join('');
     $('metricsDocList').innerHTML=[...docs].sort(collator.compare).map(x=>'<option value="'+metricEsc(x)+'"></option>').join('');
@@ -7337,7 +7509,7 @@ function metricsPdf() {
     items.slice().sort((a,b)=>String(a.meta?.date||'').localeCompare(String(b.meta?.date||''))).forEach(function(item){
         (item.ordered||[]).forEach(function(stop,i){
             const leg=(item.legs||[])[i]||{}, fiscal=ensureFiscalData(stop);
-            details.push('<tr><td>'+metricEsc(item.meta?.date||'—')+'</td><td>'+metricEsc(item.meta?.driver||'—')+'</td><td>'+metricEsc(item.meta?.base||'—')+'</td><td>'+ (i+1) +'</td><td><strong>'+metricEsc(stop.name||'—')+'</strong><small>'+metricEsc([stop.address,stop.city,stop.state].filter(Boolean).join(' · '))+'</small></td><td>'+metricEsc(stop.urgency||'—')+'</td><td>'+metricEsc(leg.arrival!==undefined?clock(leg.arrival):'—')+'</td><td>'+metricNum(leg.km).toFixed(1)+' km</td><td class="fx">'+metricEsc(fiscal.number||'—')+'</td><td class="fx">'+metricEsc(fiscalDateBR(fiscal.issueDate))+'</td><td class="fx">'+metricEsc(formatMoney(fiscal.amount))+'</td></tr>');
+            details.push('<tr><td>'+metricEsc(item.meta?.date||'—')+'</td><td>'+metricEsc(item.meta?.driver||'—')+'</td><td>'+metricEsc(item.meta?.base||'—')+'</td><td>'+ (i+1) +'</td><td><strong>'+metricEsc(stop.name||'—')+'</strong><small>'+metricEsc([stop.address,stop.city,stop.state].filter(Boolean).join(' · '))+'</small></td><td>'+metricEsc(stop.urgency||'—')+'</td><td>'+metricEsc(leg.arrival!==undefined?clock(leg.arrival):'—')+'</td><td>'+metricNum(leg.km).toFixed(1)+' km</td>'+docCellsHtml(stop, metricEsc).map(function(c){return '<td class="fx">'+c+'</td>';}).join('')+'</tr>');
         });
     });
     const insights=[top[0]?'O condutor com maior volume é '+top[0][0]+', com '+top[0][1].stops+' paradas.':'Não há líder de volume no recorte.',critical&&totalUrg?'Paradas Super/Alta correspondem a '+Math.round(critical/totalUrg*100)+'% do total.':'Não foi possível calcular concentração de urgências.',d.routes>1?'A média operacional é de '+d.avgStops.toFixed(1)+' paradas e '+d.avgKm.toFixed(1)+' km por rota.':'Uma única rota foi analisada; use-a como linha de base.',d.fiscal?'O valor fiscal acumulado informado é '+metricFmtMoney(d.fiscal)+'.':'Não há valores fiscais informados no período.'];
