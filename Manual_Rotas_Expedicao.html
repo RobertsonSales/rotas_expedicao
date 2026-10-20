@@ -173,12 +173,20 @@ td { padding: 9px 12px; border-top: 1px solid var(--line); vertical-align: top }
         <li><b>Condutor</b>Escolha o condutor na lista (ela vem da aba Condutores). No campo logo abaixo fica o nome usado nos documentos; altere-o quando a modalidade for genérica, como Vendedor ou Transportadora.</li>
         <li><b>Data da operação e saída prevista</b>A data entra no registro da rota; a hora de saída é o ponto de partida de todos os horários de chegada.</li>
         <li><b>Base de partida</b>Escolha de onde o condutor sai. A base padrão já vem selecionada. Para cadastrar ou alterar bases, veja <a href="#bases">Bases de partida</a>.</li>
-        <li><b>Unidades da rota</b>No quadro 03, clique em <span class="ui">＋ Adicionar</span> em cada unidade. Para cada uma, a aplicação pede o <b>documento fiscal</b>: número, data de emissão e valor, todos obrigatórios. Para trocar os dados depois, use <span class="ui">Editar documento</span> na lista de paradas.</li>
+        <li><b>Unidades da rota</b>No quadro 03, clique em <span class="ui">＋ Adicionar</span> em cada unidade. Para cada uma, a aplicação pede as <b>NF-e</b> entregues ali: número, data de emissão e valor de cada nota (<a href="#nfe">veja abaixo</a>). Para trocar as notas depois, clique em <span class="ui">NF-e ✎</span> na lista de paradas.</li>
         <li><b>Urgência</b>Ajuste a urgência de cada parada (Super, Alta, Média ou Baixa). Unidades Super e Alta próximas do ponto atual entram antes na sequência.</li>
         <li><b>Opções</b>Marque ou desmarque <span class="ui">Retornar à base ao final</span> e escolha o ajuste de trânsito (estimado por faixa horária ou sem ajuste).</li>
         <li><b>Calcular</b>Clique em <span class="ui primary">⌁ Calcular melhor rota</span>. A aplicação localiza os endereços, define a ordem e mostra o resumo: distância, deslocamento, atendimento e horário de término, com a agenda parada a parada.</li>
         <li><b>Salvar</b>Clique em <span class="ui">▣ Salvar Rota</span>, acima do mapa. A mensagem confirma o código da rota gravada, por exemplo <code>RT-20261020-0001</code>.</li>
     </ol>
+    <h3 id="nfe">Várias NF-e na mesma parada</h3>
+    <p>Uma unidade pode receber várias notas na mesma visita. No formulário <b>Documentos fiscais</b>:</p>
+    <ul>
+        <li>Preencha número, emissão e valor da primeira NF-e e use <span class="ui">＋ Adicionar outra NF-e</span> para as seguintes; o <b>×</b> remove uma linha.</li>
+        <li>No valor, digite só os números: o campo forma sozinho o valor em reais (digitando <code>517000</code> aparece <code>R$ 5.170,00</code>).</li>
+        <li>O rodapé mostra quantas notas há e o total da parada. Linhas incompletas ficam destacadas e impedem a confirmação; números repetidos na mesma parada não são aceitos, e a aplicação avisa se a nota já foi informada em outra parada da rota.</li>
+    </ul>
+    <p>Todas as notas continuam sendo <b>uma única parada</b>: não mudam a contagem de paradas, a ordem nem os horários. Na lista de paradas aparece, por exemplo, “2 NF-e (00987; 00988) · total R$ 200,00”; no PDF, cada nota ocupa uma linha nas colunas NF-e, Emissão e Valor, com o total ao final.</p>
     <div class="callout warn"><p>Se você mudar a seleção, a urgência, a base ou a hora depois de calcular, o botão de cálculo fica laranja (<span class="ui warn">⚠ Recalcular rota</span>). Recalcule antes de salvar ou exportar.</p></div>
     <div class="callout tip"><p>Se já existir no Histórico uma rota com as mesmas unidades e a mesma base, a aplicação pergunta antes de salvar outra igual.</p></div>
     <h3>Documentos da rota</h3>
@@ -310,7 +318,7 @@ td { padding: 9px 12px; border-top: 1px solid var(--line); vertical-align: top }
         <tr><td>Bases</td><td>Bases de partida (também editáveis pela aplicação).</td></tr>
         <tr><td>Condutores</td><td>Nomes oferecidos no campo Condutor.</td></tr>
         <tr><td>Rotas</td><td>Uma linha por rota salva: data, condutor, base, horários, distância, tempos, valor total e status.</td></tr>
-        <tr><td>Paradas</td><td>Uma linha por unidade visitada: ordem, chegada, trecho, documento fiscal e coordenadas.</td></tr>
+        <tr><td>Paradas</td><td>Uma linha por unidade visitada: ordem, chegada, trecho, coordenadas e documentos fiscais. Com várias NF-e, “Nº documento fiscal” traz todos os números, “Valor do documento (R$)” o total da parada, “Qtd. documentos fiscais” a quantidade e “Documentos fiscais (detalhe)” uma nota por linha, com emissão e valor.</td></tr>
         <tr><td>Endereços_Variantes</td><td>Registro da revisão inicial de endereços. Não é lida pela aplicação.</td></tr>
     </table>
     <table>
@@ -321,6 +329,7 @@ td { padding: 9px 12px; border-top: 1px solid var(--line); vertical-align: top }
         <tr><td>Fixar a posição</td><td>Digite Latitude e Longitude com Fonte da coordenada = Manual.</td></tr>
         <tr><td>Condutores</td><td>Linha nova com Ativo = Sim; Ativo = Não tira o nome da lista.</td></tr>
     </table>
+    <p>Os valores ficam gravados como números no formato monetário R$ (por exemplo, R$ 5.170,00), o que mantém somas e filtros funcionando na planilha. Para ver vírgula nos centavos e ponto nos milhares, a planilha deve estar com a localidade Brasil (Arquivo → Configurações).</p>
     <div class="callout warn"><p>Não renomeie as abas nem os títulos da primeira linha, e não apague linhas de Rotas e Paradas: o histórico e as métricas dependem delas. Colunas novas podem ser acrescentadas à direita.</p></div>
 </section>
 
