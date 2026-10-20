@@ -12,7 +12,7 @@
  * O token NUNCA vai para o navegador: o front-end chama /api/rotas e esta
  * função acrescenta o token antes de repassar a chamada ao Apps Script.
  */
-const ACOES = ['cadastro', 'listarRotas', 'salvarRota', 'excluirRota', 'salvarBase', 'salvarCoordenadas', 'versao'];
+const ACOES = ['cadastro', 'listarRotas', 'salvarRota', 'excluirRota', 'salvarBase', 'salvarCoordenadas', 'salvarUnidade', 'versao'];
 
 module.exports = async (req, res) => {
     res.setHeader('Cache-Control', 'no-store');
