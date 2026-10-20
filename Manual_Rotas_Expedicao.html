@@ -123,7 +123,7 @@ td { padding: 9px 12px; border-top: 1px solid var(--line); vertical-align: top }
         <a href="#mapa">Mapa operacional</a>
         <a href="#unidades">Unidades e correção de endereço</a>
         <a href="#bases">Bases de partida</a>
-        <a href="#historico">Histórico</a>
+        <a href="#historico">Histórico e edição de rotas</a>
         <a href="#metricas">Análise de Métricas</a>
         <div class="toc-label">Configuração</div>
         <a href="#preferencias">Preferências</a>
@@ -183,7 +183,7 @@ td { padding: 9px 12px; border-top: 1px solid var(--line); vertical-align: top }
     <div class="callout tip"><p>Se já existir no Histórico uma rota com as mesmas unidades e a mesma base, a aplicação pergunta antes de salvar outra igual.</p></div>
     <h3>Documentos da rota</h3>
     <ul>
-        <li><span class="ui">▤ PDF</span> e <span class="ui">▧ Excel</span>, no resumo da rota, geram o roteiro do condutor. O PDF abre em nova aba: permita pop-ups no navegador.</li>
+        <li><span class="ui">▤ PDF</span> e <span class="ui">▧ Excel</span>, no resumo da rota, geram o roteiro do condutor, com número, data de emissão e valor do documento fiscal de cada parada. O PDF abre em nova aba: permita pop-ups no navegador.</li>
         <li><span class="ui">▤ Rotas do condutor</span> mostra a rota atual no formato do roteiro, sem sair da tela.</li>
         <li><span class="ui">🗺 Google Maps</span> abre a rota no Google Maps. Rotas com mais de 9 paradas são divididas em trechos, e cada link abre um deles.</li>
     </ul>
@@ -239,21 +239,30 @@ td { padding: 9px 12px; border-top: 1px solid var(--line); vertical-align: top }
 </section>
 
 <section id="historico">
-    <h2><span class="num">7</span>Histórico</h2>
+    <h2><span class="num">7</span>Histórico e edição de rotas</h2>
     <p class="lead">Lista as rotas salvas por todos os usuários, lidas da planilha, da mais recente para a mais antiga.</p>
     <p>Use <b>De</b> e <b>Até</b> para filtrar o período. <span class="ui">↻ Atualizar</span> relê a planilha (útil para ver rotas que outra pessoa acabou de salvar) e <span class="ui">⇩ Exportar histórico</span> gera um Excel com as rotas do período.</p>
     <table>
         <tr><th style="width:30%">Etiqueta</th><th>Significado</th></tr>
         <tr><td><span class="tag">Google Sheets</span></td><td>Rota gravada na planilha, com o código ao lado da data.</td></tr>
-        <tr><td><span class="tag warn">Envio pendente</span></td><td>Salva sem conexão. É enviada sozinha quando a aplicação abre de novo com conexão.</td></tr>
+        <tr><td><span class="tag warn">Envio pendente</span> / <span class="tag warn">Edição pendente</span></td><td>Salva (ou alterada) sem conexão. Vai para a planilha sozinha quando a aplicação abre de novo com conexão.</td></tr>
         <tr><td><span class="tag local">Só neste navegador</span></td><td>Rota salva antes da integração com o Google Sheets. Use <span class="ui">Enviar</span> na linha ou <span class="ui">⇪ Enviar ao Google Sheets</span> no topo para gravá-la. Rotas que já estão na planilha não são duplicadas.</td></tr>
     </table>
     <p>Em cada rota:</p>
     <ul>
-        <li><span class="ui">Abrir</span> carrega a rota no Planejamento, com as unidades selecionadas, os documentos fiscais e o mapa.</li>
+        <li><span class="ui">Abrir</span> carrega a rota no Planejamento, com as unidades selecionadas, os documentos fiscais e o mapa, já em modo de edição (veja abaixo).</li>
         <li><span class="ui">PDF</span> e <span class="ui">Excel</span> geram o roteiro.</li>
         <li><span class="ui">Excluir</span> tira a rota da lista de todos os usuários. Na planilha ela continua registrada com Status “Excluída”, e pode ser recuperada trocando o status para “Salva”.</li>
     </ul>
+    <h3 id="editar">Editar uma rota salva</h3>
+    <p>Ao abrir uma rota pelo Histórico, aparece no topo de “Monte a rota” a faixa <span class="ui warn">✎ Editando rota salva</span>, com o código da rota, o condutor e a data. Enquanto ela estiver visível:</p>
+    <ol class="steps">
+        <li><b>Altere o que precisar</b>Inclua ou retire unidades, troque urgências, documentos fiscais, data, saída, condutor ou base, e clique em <span class="ui warn">⚠ Recalcular rota</span>.</li>
+        <li><b>Salve as alterações</b>O botão acima do mapa passa a se chamar <span class="ui">▣ Salvar alterações</span>. Ao confirmar, a rota é <b>substituída</b> na planilha: o código (<code>RT-…</code>) e a data em que foi salva originalmente são mantidos; paradas, horários e documentos passam a ser os da tela. A planilha registra “Editado em” e o número de edições, e o Histórico mostra a rota como “editada”.</li>
+        <li><b>Ou grave uma rota nova</b><span class="ui">Salvar como nova</span>, na faixa, mantém a rota original intacta, grava a versão da tela com um código novo e encerra a edição.</li>
+    </ol>
+    <p><span class="ui">Sair da edição</span> encerra o modo de edição sem salvar: a rota continua na tela, e o próximo <span class="ui">▣ Salvar Rota</span> cria uma rota nova. <span class="ui">Limpar seleção ×</span> e a exclusão da rota também encerram a edição.</p>
+    <div class="callout tip"><p>Sem conexão, a alteração fica no Histórico como <span class="tag warn">Edição pendente</span> e substitui a rota na planilha assim que a conexão voltar.</p></div>
 </section>
 
 <section id="metricas">
@@ -317,6 +326,7 @@ td { padding: 9px 12px; border-top: 1px solid var(--line); vertical-align: top }
         <tr><td>Rota salva não aparece no Histórico</td><td>Confira o filtro De/Até e clique em <span class="ui">↻ Atualizar</span>.</td></tr>
         <tr><td>PDF não abre</td><td>Permita pop-ups para o endereço da aplicação no navegador.</td></tr>
         <tr><td>Botão de cálculo laranja</td><td>Algo mudou depois do último cálculo: clique para recalcular antes de salvar.</td></tr>
+        <tr><td>Quero corrigir uma rota já salva sem criar outra</td><td>Abra-a pelo Histórico, altere, recalcule e use <span class="ui">▣ Salvar alterações</span> (<a href="#editar">Editar uma rota salva</a>).</td></tr>
     </table>
 </section>
 
