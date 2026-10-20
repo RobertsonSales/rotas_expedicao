@@ -121,7 +121,7 @@ td { padding: 9px 12px; border-top: 1px solid var(--line); vertical-align: top }
         <div class="toc-label">Operação</div>
         <a href="#rota">Montar e salvar uma rota</a>
         <a href="#mapa">Mapa operacional</a>
-        <a href="#unidades">Unidades e correção de endereço</a>
+        <a href="#unidades">Unidades: cadastro e endereço</a>
         <a href="#bases">Bases de partida</a>
         <a href="#historico">Histórico e edição de rotas</a>
         <a href="#metricas">Análise de Métricas</a>
@@ -203,13 +203,21 @@ td { padding: 9px 12px; border-top: 1px solid var(--line); vertical-align: top }
 </section>
 
 <section id="unidades">
-    <h2><span class="num">5</span>Unidades disponíveis e correção de endereço</h2>
+    <h2><span class="num">5</span>Unidades disponíveis: cadastro e correção de endereço</h2>
     <p class="lead">O quadro <b>03 · Unidades disponíveis</b> lista todas as unidades ativas do cadastro. Clique em <span class="ui">▾ Mostrar unidades</span> para abrir a lista completa.</p>
     <h3>Encontrar unidades</h3>
     <ul>
         <li><b>Busca inteligente</b>: digite parte do nome, do endereço, da cidade ou o código (<code>UN-0128</code>). Digite <code>revisar</code> para ver só as unidades com endereço a revisar.</li>
         <li><b>Marcar por localidade</b>: filtre por estado e cidade e use <span class="ui">✓ Marcar filtradas</span> para incluir todas de uma vez (cada uma pede o documento fiscal) ou <span class="ui">✕ Desmarcar</span>. Acima de 25 paradas a aplicação avisa, porque o Google Maps calcula no máximo 25 por rota.</li>
     </ul>
+    <h3 id="nova-unidade">Cadastrar uma unidade nova</h3>
+    <p>Se a unidade ainda não existe no cadastro, clique em <span class="ui">＋ Nova unidade</span>, ao lado da busca. Quando a busca não encontra nada, a própria lista oferece <span class="ui">＋ Cadastrar “…” como nova unidade</span>, já com o nome digitado.</p>
+    <ol class="steps">
+        <li><b>Nome, base e urgência</b>Informe o nome da unidade, a base que a atende (vem marcada a base de partida atual) e a urgência padrão. Se o nome lembrar uma unidade já cadastrada, o formulário avisa e mostra o nome dela: clique nele para usá-la em vez de criar outra.</li>
+        <li><b>Endereço</b>Os mesmos campos da correção de endereço: logradouro, cidade e UF obrigatórios; número, bairro, CEP e ponto de referência completam. <span class="ui">⌖ Conferir no mapa</span> confirma no Google Maps e grava a localização.</li>
+        <li><b>Cadastrar</b><span class="ui primary">Cadastrar unidade</span> grava a unidade na aba Unidades com o próximo código (<code>UN-0284</code>, <code>UN-0285</code>…), Ativo = Sim. Com <b>Incluir esta unidade na rota em seguida</b> marcado, a aplicação já pede o documento fiscal para colocá-la na rota.</li>
+    </ol>
+    <div class="callout warn"><p>Nomes repetidos não são aceitos. Se a unidade existir mas estiver inativa, a mensagem informa o código dela: basta marcar Ativo = Sim na planilha.</p></div>
     <h3>Corrigir um endereço</h3>
     <p>Unidades cujo endereço está incompleto no cadastro (sem número, ou só com o nome do local) aparecem com o botão <span class="ui warn">✎ Corrigir endereço</span>. Clicar no botão ou em qualquer ponto vazio da linha abre o formulário de correção.</p>
     <ol class="steps">
@@ -307,7 +315,7 @@ td { padding: 9px 12px; border-top: 1px solid var(--line); vertical-align: top }
     </table>
     <table>
         <tr><th style="width:30%">Tarefa</th><th>Como</th></tr>
-        <tr><td>Nova unidade</td><td>Linha nova na aba Unidades com o próximo ID (UN-0284, UN-0285…), Cliente, Endereço (padronizado), Cidade, UF, ID Base, Urgência padrão e Ativo = Sim.</td></tr>
+        <tr><td>Nova unidade</td><td>Pela aplicação, botão <span class="ui">＋ Nova unidade</span> (<a href="#nova-unidade">seção 5</a>). Direto na planilha: linha nova na aba Unidades com o próximo ID (UN-0284, UN-0285…), Cliente, Endereço (padronizado), Cidade, UF, ID Base, Urgência padrão e Ativo = Sim.</td></tr>
         <tr><td>Tirar unidade da lista</td><td>Ativo = Não. As rotas antigas continuam íntegras.</td></tr>
         <tr><td>Corrigir endereço na planilha</td><td>Ajuste o endereço e apague Latitude, Longitude e Fonte da coordenada, para a aplicação localizar de novo. Pela aplicação, use <a href="#unidades">Corrigir endereço</a>.</td></tr>
         <tr><td>Fixar a posição</td><td>Digite Latitude e Longitude com Fonte da coordenada = Manual.</td></tr>
@@ -322,7 +330,8 @@ td { padding: 9px 12px; border-top: 1px solid var(--line); vertical-align: top }
         <tr><th style="width:32%">Situação</th><th>O que fazer</th></tr>
         <tr><td>Selo “Google Sheets offline”</td><td>Verifique a internet e use Preferências → Recarregar. Persistindo, passe o mouse sobre o selo e informe a mensagem ao administrador.</td></tr>
         <tr><td>“Não foi possível localizar no mapa: …”</td><td>O Google não achou o endereço da unidade citada. Corrija-o pelo botão <span class="ui warn">✎ Corrigir endereço</span> (ou digite as coordenadas) e recalcule, ou tire a unidade da rota.</td></tr>
-        <tr><td>Unidade nova não aparece</td><td>Confira na planilha se ID Unidade, Cliente e Ativo = Sim estão preenchidos e recarregue o cadastro.</td></tr>
+        <tr><td>A unidade não existe no cadastro</td><td>Cadastre-a pelo botão <span class="ui">＋ Nova unidade</span>, no quadro 03.</td></tr>
+        <tr><td>Unidade incluída na planilha não aparece</td><td>Confira se ID Unidade, Cliente e Ativo = Sim estão preenchidos e recarregue o cadastro.</td></tr>
         <tr><td>Rota salva não aparece no Histórico</td><td>Confira o filtro De/Até e clique em <span class="ui">↻ Atualizar</span>.</td></tr>
         <tr><td>PDF não abre</td><td>Permita pop-ups para o endereço da aplicação no navegador.</td></tr>
         <tr><td>Botão de cálculo laranja</td><td>Algo mudou depois do último cálculo: clique para recalcular antes de salvar.</td></tr>
