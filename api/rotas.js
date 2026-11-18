@@ -14,7 +14,9 @@
  */
 const ACOES = ['cadastro', 'listarRotas', 'salvarRota', 'excluirRota', 'salvarBase', 'salvarCoordenadas', 'salvarUnidade', 'versao'];
 
-module.exports = async (req, res) => {
+/* Limite de execução desta função na Vercel (segundos). Deve ser maior que
+   a espera pelo Apps Script (55 s) — veja também "functions" no vercel.json. */
+const handler = async (req, res) => {
     res.setHeader('Cache-Control', 'no-store');
     const scriptUrl = process.env.ROTAS_SCRIPT_URL;
     const token = process.env.ROTAS_API_TOKEN || '';
@@ -45,7 +47,7 @@ module.exports = async (req, res) => {
 
     try {
         const controller = new AbortController();
-        const timer = setTimeout(() => controller.abort(), 25000);
+        const timer = setTimeout(() => controller.abort(), 55000);
         /* text/plain evita o pré-voo CORS; o Apps Script responde com um
            redirecionamento 302 que o fetch segue automaticamente. */
         const upstream = await fetch(scriptUrl, {
@@ -74,7 +76,9 @@ module.exports = async (req, res) => {
     } catch (error) {
         res.status(504).json({
             ok: false,
-            error: error && error.name === 'AbortError' ? 'O Apps Script demorou mais de 25 s para responder.' : 'Falha ao contatar o Apps Script: ' + (error && error.message ? error.message : error)
+            error: error && error.name === 'AbortError' ? 'O Apps Script demorou mais de 55 s para responder.' : 'Falha ao contatar o Apps Script: ' + (error && error.message ? error.message : error)
         });
     }
 };
+module.exports = handler;
+module.exports.config = { maxDuration: 60 };
