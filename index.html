@@ -3430,6 +3430,16 @@ body.landing-lock {
 .dark .nu-dup { background: #3a3220; border-color: #6b5a24; color: #f3d77a }
 
 /* v10 · permanência configurável por unidade */
+.selected { grid-template-columns: minmax(0, 1fr); overflow-x: hidden }
+.selected .stop { min-width: 0; row-gap: 6px }
+.selected .stop .stop-main { flex: 1 1 calc(100% - 40px) }
+.selected .stop .urg { margin-left: 30px; min-width: 62px; max-width: 80px }
+.selected .stop .dwell-wrap { padding: 2px 6px; border-radius: 6px; background: #eef6f3; color: #3f5f5c }
+.dark .selected .stop .dwell-wrap { background: #1f4250; color: #cfe2df }
+.selected .stop .trash { margin-left: auto }
+.dwell-wrap { display: inline-flex !important; flex-direction: row !important; flex: none; width: auto !important }
+.dwell-wrap .dwell { width: 44px !important; flex: none; margin: 0 !important }
+.selected .stop .urg, .selected .stop .dwell-wrap, .selected .stop [data-fiscal-edit] { flex: none }
 .dwell-wrap { display: inline-flex; align-items: center; gap: 3px; margin: 0; font-size: 9px; font-weight: 700; color: var(--soft, #7a8a8c); white-space: nowrap }
 .dwell-wrap .dwell { width: 52px; margin: 0; padding: 4px 5px; border: 1px solid #dce6e3; border-radius: 6px; font-size: 10px; font-weight: 800; text-align: right; background: #fff; color: inherit }
 .dwell-wrap .dwell:focus { outline: 2px solid #0d8c78; outline-offset: 0; border-color: #0d8c78 }
@@ -5915,7 +5925,7 @@ function renderSelected() {
     const arr = stops.filter(s => selected.has(s.id));
     $('selectedList').innerHTML = arr.length ? arr.map((s, i) => {
         const fiscal = ensureFiscalData(s);
-        return `<div class="stop"><div class="num">${i+1}</div><div class="stop-main"><b>${escHtml(s.name)}</b><small>${escHtml(s.city)} · ${escHtml(s.address)}</small><small class="stop-docs">${escHtml(docsSummaryText(s))}</small></div><select data-u="${s.id}" class="urg"><option ${s.urgency==='Super'?'selected':''}>Super</option><option ${s.urgency==='Alta'?'selected':''}>Alta</option><option ${s.urgency==='Média'?'selected':''}>Média</option><option ${s.urgency==='Baixa'?'selected':''}>Baixa</option></select><label class="dwell-wrap" title="Tempo de permanência do condutor nesta unidade (minutos)">⏱<input class="dwell" type="number" min="0" max="${MAX_DELIVERY_MINUTES}" step="5" inputmode="numeric" data-dwell="${escHtml(s.id)}" value="${dwellOf(s)}" aria-label="Permanência em minutos"><span>min</span></label><button class="link" data-fiscal-edit="${s.id}" title="Incluir ou alterar as NF-e desta parada">${fiscal.count > 1 ? fiscal.count + ' NF-e' : 'NF-e'} ✎</button><button class="trash" data-remove="${s.id}" title="Remover da rota">×</button></div>`;
+        return `<div class="stop"><div class="num">${i+1}</div><div class="stop-main"><b>${escHtml(s.name)}</b><small>${escHtml(s.city)} · ${escHtml(s.address)}</small><small class="stop-docs">${escHtml(docsSummaryText(s))}</small></div><select data-u="${s.id}" class="urg"><option ${s.urgency==='Super'?'selected':''}>Super</option><option ${s.urgency==='Alta'?'selected':''}>Alta</option><option ${s.urgency==='Média'?'selected':''}>Média</option><option ${s.urgency==='Baixa'?'selected':''}>Baixa</option></select><label class="dwell-wrap" title="Tempo de permanência do condutor nesta unidade (minutos)">⏱ Permanência<input class="dwell" type="number" min="0" max="${MAX_DELIVERY_MINUTES}" step="5" inputmode="numeric" data-dwell="${escHtml(s.id)}" value="${dwellOf(s)}" aria-label="Permanência em minutos"><span>min</span></label><button class="link" data-fiscal-edit="${s.id}" title="Incluir ou alterar as NF-e desta parada">${fiscal.count > 1 ? fiscal.count + ' NF-e' : 'NF-e'} ✎</button><button class="trash" data-remove="${s.id}" title="Remover da rota">×</button></div>`;
     }).join('') : `<div style="padding:20px;text-align:center;color:#9da9aa;border:1px dashed #dce6e3;border-radius:9px">Adicione unidades abaixo para montar esta rota.</div>`;
 }
 
