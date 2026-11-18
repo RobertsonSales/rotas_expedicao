@@ -3429,6 +3429,44 @@ body.landing-lock {
 .nu-dup .link { padding: 0; font-size: 10.5px; text-decoration: underline }
 .dark .nu-dup { background: #3a3220; border-color: #6b5a24; color: #f3d77a }
 
+/* v12 · editor da parada (modal) */
+.selected .stop.stop-click { cursor: pointer; transition: border-color .15s, box-shadow .15s }
+.selected .stop.stop-click:hover, .selected .stop.stop-click:focus-visible { border-color: #0d8c78; box-shadow: 0 0 0 2px rgba(13,140,120,.15); outline: none }
+.selected .stop.stop-click .stop-main { flex: 1 1 0 }
+.stop-chips { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 6px }
+.stop-chips span { font-size: 9.5px; font-weight: 800; padding: 3px 7px; border-radius: 999px; background: #eef4f2; color: #3f5f5c; white-space: nowrap }
+.stop-chips .chip-nf.is-missing { background: #fff4e0; color: #9a6a00 }
+.stop-chips .chip-edit { background: transparent; color: #0d8c78; padding-left: 2px }
+.dark .stop-chips span { background: #1f4250; color: #cfe2df }
+.dark .stop-chips .chip-edit { background: transparent; color: #5fd3bd }
+.event.event-click .event-body { cursor: pointer }
+.event.event-click:hover .event-body b { text-decoration: underline; text-decoration-color: #0d8c78 }
+.modal.stop-editor { max-width: 470px }
+.stop-editor .se-head { display: flex; gap: 10px; align-items: center; margin-bottom: 14px }
+.stop-editor .se-head small { color: var(--soft, #6d7e80); line-height: 1.4 }
+.stop-editor .se-field { margin-bottom: 16px }
+.stop-editor .se-label { display: block; font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: .04em; color: var(--soft, #6d7e80); margin-bottom: 7px }
+.stop-editor .se-seg { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px }
+.stop-editor .se-seg button { padding: 8px 4px; border-radius: 8px; border: 1px solid #dce6e3; background: transparent; color: inherit; font-weight: 800; font-size: 12px; cursor: pointer }
+.stop-editor .se-seg button.on { border-color: var(--u); background: var(--ubg); color: var(--u) }
+.stop-editor .se-dwell { display: flex; align-items: center; gap: 8px }
+.stop-editor .se-dwell input { width: 90px; margin: 0; font-size: 20px; font-weight: 800; text-align: center; padding: 7px }
+.stop-editor .se-dwell span { font-weight: 700 }
+.stop-editor .se-step { width: 36px; height: 36px; border-radius: 50%; border: 1px solid #dce6e3; background: transparent; color: inherit; font-size: 18px; font-weight: 800; cursor: pointer }
+.stop-editor .se-presets { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 9px }
+.stop-editor .se-presets button { padding: 5px 10px; border-radius: 999px; border: 1px solid #dce6e3; background: transparent; color: inherit; font-size: 11px; font-weight: 700; cursor: pointer }
+.stop-editor .se-presets button.on { background: #0d8c78; border-color: #0d8c78; color: #fff }
+.stop-editor .se-note { display: block; margin-top: 8px; font-size: 10.5px; color: var(--soft, #6d7e80) }
+.stop-editor .se-nf { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; font-size: 12px }
+.stop-editor .se-warn { margin: 0 0 12px; padding: 8px 10px; border-radius: 8px; background: #fff4e0; color: #9a6a00; font-size: 11px }
+.stop-editor .se-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; border-top: 1px solid #e6eeec; padding-top: 14px }
+.stop-editor .se-actions > span { flex: 1 }
+.stop-editor .se-actions .primary { width: auto; margin-top: 0 }
+.stop-editor .se-remove { color: #b42318 }
+.dark .stop-editor .se-seg button, .dark .stop-editor .se-step, .dark .stop-editor .se-presets button { border-color: #2e5564 }
+.dark .stop-editor .se-warn { background: #3a3014 !important; color: #f2c46d !important }
+.dark .stop-editor .se-actions { border-top-color: #2e5564 }
+.dark .stop-editor .se-remove { color: #ff8a7a }
 /* v11 · progresso do salvamento */
 .progress-done { width: 62px; height: 62px; margin: 0 auto 15px; border-radius: 50%; display: grid; place-items: center; font-size: 30px; font-weight: 800; color: #fff }
 .progress-done.is-ok { background: var(--teal, #0d8c78) }
@@ -5977,7 +6015,9 @@ function renderSelected() {
     const arr = stops.filter(s => selected.has(s.id));
     $('selectedList').innerHTML = arr.length ? arr.map((s, i) => {
         const fiscal = ensureFiscalData(s);
-        return `<div class="stop"><div class="num">${i+1}</div><div class="stop-main"><b>${escHtml(s.name)}</b><small>${escHtml(s.city)} · ${escHtml(s.address)}</small><small class="stop-docs">${escHtml(docsSummaryText(s))}</small></div><select data-u="${s.id}" class="urg"><option ${s.urgency==='Super'?'selected':''}>Super</option><option ${s.urgency==='Alta'?'selected':''}>Alta</option><option ${s.urgency==='Média'?'selected':''}>Média</option><option ${s.urgency==='Baixa'?'selected':''}>Baixa</option></select><label class="dwell-wrap" title="Tempo de permanência do condutor nesta unidade (minutos)">⏱ Permanência<input class="dwell" type="number" min="0" max="${MAX_DELIVERY_MINUTES}" step="5" inputmode="numeric" data-dwell="${escHtml(s.id)}" value="${dwellOf(s)}" aria-label="Permanência em minutos"><span>min</span></label><button class="link" data-fiscal-edit="${s.id}" title="Incluir ou alterar as NF-e desta parada">${fiscal.count > 1 ? fiscal.count + ' NF-e' : 'NF-e'} ✎</button><button class="trash" data-remove="${s.id}" title="Remover da rota">×</button></div>`;
+        const u = urgency[s.urgency] || urgency['Média'];
+        /* Linha compacta: o clique (ou Enter) abre o modal de edição da parada. */
+        return `<div class="stop stop-click" data-stop-edit="${escHtml(s.id)}" tabindex="0" role="button" title="Clique para editar urgência, permanência e NF-e desta parada"><div class="num">${i+1}</div><div class="stop-main"><b>${escHtml(s.name)}</b><small>${escHtml(s.city)} · ${escHtml(s.address)}</small><small class="stop-docs">${escHtml(docsSummaryText(s))}</small><div class="stop-chips"><span class="chip-urg" style="color:${u.c};background:${u.bg}">● ${escHtml(s.urgency || 'Média')}</span><span class="chip-dwell">⏱ ${dwellOf(s)} min</span><span class="chip-nf${hasCompleteFiscalData(s) ? '' : ' is-missing'}">${hasCompleteFiscalData(s) ? (fiscal.count > 1 ? fiscal.count + ' NF-e' : 'NF-e') + ' ✓' : 'NF-e pendente'}</span><span class="chip-edit">✎ Editar</span></div></div><button class="trash" data-remove="${s.id}" title="Remover da rota">×</button></div>`;
     }).join('') : `<div style="padding:20px;text-align:center;color:#9da9aa;border:1px dashed #dce6e3;border-radius:9px">Adicione unidades abaixo para montar esta rota.</div>`;
 }
 
@@ -6697,7 +6737,7 @@ function renderResult() {
     const base = bases.find(b => b.id === $('baseSelect').value) || bases[0] || baseFallback();
     const hasReturn = !!$('returnBase').checked && route.legs.length > route.ordered.length,
         finalEvent = hasReturn ? `<div class="event last"><div class="marker" style="background:#fff;color:#193346;border-color:#193346">⌖</div><div class="event-body"><div><b>Retorno à base</b><small>${base.name}</small></div><div class="etime"><strong>${clock(route.end)}</strong><small>chegada prevista · ${fmt(route.legs[route.ordered.length].m)} de retorno</small></div></div></div>` : `<div class="event last"><div class="marker" style="background:#fff;color:#193346;border-color:#193346">✓</div><div class="event-body"><div><b>Encerramento da rota</b><small>Última unidade visitada</small></div><div class="etime"><strong>${clock(route.end)}</strong><small>sem retorno à base</small></div></div></div>`;
-    $('result').innerHTML = `<div class="resulthead"><div><div class="over">Resumo da rota · ${$('date').value.split('-').reverse().join('/')}</div><h3>${driverValue()} <span>· ${base.name.split('·')[0]}</span></h3></div><div class="result-actions"><button class="export" id="pdfBtn">▤ PDF</button><button class="export" id="xlsxBtn">▧ Excel</button></div></div><div class="kpis"><div><span>Distância total</span><b>${route.km.toFixed(1)} <small>km</small></b></div><div><span>Deslocamento</span><b>${fmt(route.travel)}</b></div><div><span>Permanência nas unidades</span><b>${fmt(route.service)}</b></div><div><span>${hasReturn ? 'Retorno à base' : 'Encerramento'}</span><b>${clock(route.end)}</b></div></div><div class="timeline">${route.ordered.map((s,i)=>`<div class="event"><div class="marker" style="background:${urgency[s.urgency].c}">${i+1}</div><div class="event-body"><div><b>${s.name}</b><small class="route-address">${s.address}</small><small>${s.city} · ${dwellOf(s)} min de permanência</small></div><div class="etime"><strong>${clock(route.legs[i].arrival)}</strong><small>${fmt(route.legs[i].m)} · ${route.legs[i].l}</small></div></div></div>`).join('')}${finalEvent}</div>`;
+    $('result').innerHTML = `<div class="resulthead"><div><div class="over">Resumo da rota · ${$('date').value.split('-').reverse().join('/')}</div><h3>${driverValue()} <span>· ${base.name.split('·')[0]}</span></h3></div><div class="result-actions"><button class="export" id="pdfBtn">▤ PDF</button><button class="export" id="xlsxBtn">▧ Excel</button></div></div><div class="kpis"><div><span>Distância total</span><b>${route.km.toFixed(1)} <small>km</small></b></div><div><span>Deslocamento</span><b>${fmt(route.travel)}</b></div><div><span>Permanência nas unidades</span><b>${fmt(route.service)}</b></div><div><span>${hasReturn ? 'Retorno à base' : 'Encerramento'}</span><b>${clock(route.end)}</b></div></div><div class="timeline">${route.ordered.map((s,i)=>`<div class="event event-click" data-stop-edit="${escHtml(s.id)}" title="Clique para editar esta parada"><div class="marker" style="background:${urgency[s.urgency].c}">${i+1}</div><div class="event-body"><div><b>${s.name}</b><small class="route-address">${s.address}</small><small>${s.city} · ${dwellOf(s)} min de permanência</small></div><div class="etime"><strong>${clock(route.legs[i].arrival)}</strong><small>${fmt(route.legs[i].m)} · ${route.legs[i].l}</small></div></div></div>`).join('')}${finalEvent}</div>`;
     $('pdfBtn').onclick = () => printHistory(currentRouteItem());
     $('xlsxBtn').onclick = () => exportExcel()
 }
@@ -7130,6 +7170,110 @@ async function handleHistory(e) {
     }
 }
 
+/* ================================================================
+   EDITOR DA PARADA · modal aberto ao clicar numa unidade da rota
+   (quadro "Monte a rota" ou roteiro calculado). Reúne urgência,
+   tempo de permanência e NF-e num espaço confortável.
+   ================================================================ */
+function openStopEditor(stopId) {
+    const s = stops.find(function(x) { return String(x.id) === String(stopId); });
+    if (!s) return;
+    const order = stops.filter(function(x) { return selected.has(x.id); }).findIndex(function(x) { return x.id === s.id; });
+    const inRoute = !!(route && Array.isArray(route.ordered) && route.ordered.some(function(x) { return String(x.id) === String(s.id); }));
+    const curUrg = urgency[s.urgency] ? s.urgency : 'Média';
+    const curDwell = dwellOf(s);
+    const presets = [15, 30, 45, 60, 90, 120];
+    const body =
+        '<div class="se-head"><div class="num">' + (order >= 0 ? order + 1 : '•') + '</div><div><small>' + escHtml(s.city) + ' · ' + escHtml(s.address) + '</small></div></div>' +
+        '<div class="se-field"><span class="se-label">Urgência da entrega</span><div class="se-seg" id="seUrg">' +
+        Object.keys(urgency).map(function(k) {
+            return '<button type="button" data-urg="' + k + '" class="' + (k === curUrg ? 'on' : '') + '" style="--u:' + urgency[k].c + ';--ubg:' + urgency[k].bg + '">' + k + '</button>';
+        }).join('') + '</div></div>' +
+        '<div class="se-field"><span class="se-label">Tempo de permanência do condutor na unidade</span>' +
+        '<div class="se-dwell"><button type="button" class="se-step" data-step="-5" aria-label="Menos 5 minutos">−</button>' +
+        '<input id="seDwell" type="number" min="0" max="' + MAX_DELIVERY_MINUTES + '" step="5" inputmode="numeric" value="' + curDwell + '" aria-label="Permanência em minutos"><span>min</span>' +
+        '<button type="button" class="se-step" data-step="5" aria-label="Mais 5 minutos">+</button></div>' +
+        '<div class="se-presets" id="sePresets">' + presets.map(function(m) {
+            return '<button type="button" data-min="' + m + '" class="' + (m === curDwell ? 'on' : '') + '">' + m + ' min</button>';
+        }).join('') + '</div>' +
+        '<small class="se-note">Entra no horário de chegada das paradas seguintes e no tempo total do condutor. Padrão sugerido: ' + DEFAULT_DELIVERY_MINUTES + ' min.</small></div>' +
+        '<div class="se-field"><span class="se-label">Documentos fiscais</span><div class="se-nf"><span>' + escHtml(docsSummaryText(s) || 'Nenhuma NF-e informada') + '</span><button type="button" class="outline" id="seNf">✎ Incluir / alterar NF-e</button></div></div>' +
+        (inRoute ? '<p class="se-warn" id="seWarn" hidden>Alterar urgência ou permanência exige recalcular a rota.</p>' : '') +
+        '<div class="se-actions"><button type="button" class="link se-remove" id="seRemove">Remover da rota</button><span></span>' +
+        '<button type="button" class="outline" id="seCancel">Cancelar</button>' +
+        (inRoute ? '<button type="button" class="outline" id="seApply">Aplicar</button><button type="button" class="primary" id="seApplyCalc">Aplicar e recalcular</button>'
+            : '<button type="button" class="primary" id="seApply">Aplicar</button>') + '</div>';
+    openModal(escHtml(s.name), body, 'stop-editor');
+    let urgSel = curUrg;
+    const dwellInput = $('seDwell');
+    const readDwell = function() {
+        const raw = String(dwellInput.value).trim();
+        return raw === '' ? DEFAULT_DELIVERY_MINUTES : normalizeServiceMinutes(raw);
+    };
+    const changed = function() { return urgSel !== curUrg || readDwell() !== curDwell; };
+    const sync = function() {
+        const v = readDwell();
+        document.querySelectorAll('#sePresets button').forEach(function(b) { b.classList.toggle('on', Number(b.dataset.min) === v); });
+        if ($('seWarn')) $('seWarn').hidden = !changed();
+    };
+    $('seUrg').onclick = function(e) {
+        const b = e.target.closest('[data-urg]');
+        if (!b) return;
+        urgSel = b.dataset.urg;
+        this.querySelectorAll('button').forEach(function(x) { x.classList.toggle('on', x === b); });
+        sync();
+    };
+    $('sePresets').onclick = function(e) {
+        const b = e.target.closest('[data-min]');
+        if (!b) return;
+        dwellInput.value = b.dataset.min;
+        sync();
+    };
+    document.querySelectorAll('.stop-editor .se-step').forEach(function(b) {
+        b.onclick = function() {
+            dwellInput.value = Math.max(0, Math.min(MAX_DELIVERY_MINUTES, readDwell() + Number(b.dataset.step)));
+            sync();
+        };
+    });
+    dwellInput.oninput = sync;
+    dwellInput.onkeydown = function(e) { if (e.key === 'Enter') { e.preventDefault(); ($('seApplyCalc') || $('seApply')).click(); } };
+    const apply = function() {
+        if (!changed()) return false;
+        s.urgency = urgSel;
+        s.urgencyEdited = true;
+        s.service = readDwell();
+        s.serviceEdited = true;
+        if (inRoute) invalidateRoute();
+        render();
+        persistDataset();
+        persistRoute();
+        return true;
+    };
+    $('seCancel').onclick = closeModal;
+    $('seApply').onclick = function() { apply(); closeModal(); };
+    if ($('seApplyCalc')) $('seApplyCalc').onclick = function() {
+        const did = apply();
+        closeModal();
+        if (did || routeNeedsRecalc) calc();
+    };
+    $('seRemove').onclick = function() {
+        closeModal();
+        if (selected.has(s.id)) toggle(s.id);
+    };
+    $('seNf').onclick = function() {
+        /* guarda o que já foi escolhido aqui antes de trocar de modal */
+        apply();
+        closeModal();
+        requestFiscalData(s, function() {
+            render();
+            persistDataset();
+            persistSelected();
+            openStopEditor(s.id);
+        });
+    };
+    setTimeout(function() { dwellInput.focus(); dwellInput.select(); }, 30);
+}
+
 function openModal(title, body, extraClass) {
     $('modalRoot').innerHTML = `<div class="modal-backdrop" id="modalBackdrop"><div class="modal${extraClass ? ' ' + extraClass : ''}"><div class="modal-head"><h3>${title}</h3><button class="modal-close" id="modalClose">×</button></div><div class="modal-body">${body}</div></div></div>`;
     $('modalClose').onclick = closeModal;
@@ -7373,6 +7517,11 @@ $('unitRows').onclick = e => {
     if (row) openUnitAddressForm(stops.find(function(s) { return s.id === row.dataset.unit; }));
 };
 $('selectedList').onclick = e => {
+    const rowEdit = e.target.closest('[data-stop-edit]');
+    if (rowEdit && !e.target.closest('[data-remove]')) {
+        openStopEditor(rowEdit.dataset.stopEdit);
+        return;
+    }
     const edit = e.target.closest('[data-fiscal-edit]');
     if (edit) {
         const stop = stops.find(function(s) { return s.id === edit.dataset.fiscalEdit; });
@@ -7416,6 +7565,17 @@ document.addEventListener('change', e => {
             persistRoute();
         }
     }
+});
+$('selectedList').addEventListener('keydown', function(e) {
+    if ((e.key === 'Enter' || e.key === ' ') && e.target.matches('[data-stop-edit]')) {
+        e.preventDefault();
+        openStopEditor(e.target.dataset.stopEdit);
+    }
+});
+/* Paradas do roteiro calculado (painel de resultado) também abrem o editor. */
+$('result').addEventListener('click', function(e) {
+    const ev = e.target.closest('[data-stop-edit]');
+    if (ev && !e.target.closest('a, button')) openStopEditor(ev.dataset.stopEdit);
 });
 $('saveRouteBtn').onclick = function() { saveCurrentRoute(editingRoute ? 'replace' : 'new'); };
 $('editSaveNewBtn').onclick = function() { saveCurrentRoute('new'); };
