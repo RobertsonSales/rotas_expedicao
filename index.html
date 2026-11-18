@@ -3429,6 +3429,11 @@ body.landing-lock {
 .nu-dup .link { padding: 0; font-size: 10.5px; text-decoration: underline }
 .dark .nu-dup { background: #3a3220; border-color: #6b5a24; color: #f3d77a }
 
+/* v11 · progresso do salvamento */
+.progress-meta { display: flex; justify-content: space-between; margin-top: 8px; font-size: 11px; color: var(--soft, #6d7e80); font-variant-numeric: tabular-nums }
+.progress-meta b { color: var(--teal, #0d8c78) }
+.progress-hint { display: block; margin-top: 10px; font-size: 11px; line-height: 1.4; color: #9a6a00 }
+.progress-hint:empty { display: none }
 /* v10 · permanência configurável por unidade */
 .selected { grid-template-columns: minmax(0, 1fr); overflow-x: hidden }
 .selected .stop { min-width: 0; row-gap: 6px }
@@ -4037,16 +4042,27 @@ function routeToSheetPayload(item) {
     };
 }
 
+/* Cópia em memória do histórico local: evita reler e converter o JSON do
+   localStorage a cada desenho do Histórico/Métricas (era o que travava a
+   tela no salvamento quando o histórico local ficava grande). */
+let localHistoryCache = null;
+window.addEventListener('storage', function(e) { if (e.key === LOCAL_HISTORY_KEY) localHistoryCache = null; });
 function getLocalHistory() {
-    try {
-        return JSON.parse(localStorage.getItem(LOCAL_HISTORY_KEY) || '[]');
-    } catch (e) {
-        return [];
+    if (!localHistoryCache) {
+        try {
+            const parsed = JSON.parse(localStorage.getItem(LOCAL_HISTORY_KEY) || '[]');
+            localHistoryCache = Array.isArray(parsed) ? parsed : [];
+        } catch (e) {
+            localHistoryCache = [];
+        }
     }
+    return localHistoryCache.slice();
 }
 
 function setLocalHistory(list) {
-    return saveJSON(LOCAL_HISTORY_KEY, list);
+    const ok = saveJSON(LOCAL_HISTORY_KEY, list);
+    localHistoryCache = ok ? list.slice() : null;
+    return ok;
 }
 
 function updateLocalItem(id, patch) {
@@ -4085,7 +4101,8 @@ async function pushRouteToSheets(item) {
                 return { ok: true, id: twin.sheetId, linked: true };
             }
         }
-        const res = await sheetsCall('salvarRota', routeToSheetPayload(item), { timeout: 45000 });
+        /* 60 s: um pouco acima do limite da função /api/rotas (55 s), para receber a resposta dela em vez de desistir antes. */
+        const res = await sheetsCall('salvarRota', routeToSheetPayload(item), { timeout: 60000 });
         updateLocalItem(item.id, { sheetId: res.id, sync: 'ok', syncError: '', replaceId: '' });
         if (remoteHistoryLoaded) {
             remoteHistory = remoteHistory.filter(function(x) { return x.sheetId !== res.id; });
@@ -4104,12 +4121,22 @@ async function syncPendingRoutes(opts) {
     const pending = getLocalHistory().filter(function(x) { return !x.sheetId && (!opts.onlyNew || x.sync === 'pendente'); });
     if (!pending.length) return { sent: 0, failed: 0 };
     let sent = 0, failed = 0, lastError = '';
-    for (const item of pending.slice().reverse()) {
-        const r = await pushRouteToSheets(item);
-        if (r.ok) sent++;
-        else { failed++; lastError = r.error; }
+    const queue = pending.slice().reverse();
+    try {
+        for (let i = 0; i < queue.length; i++) {
+            if (!opts.silent) {
+                showProgress('Enviando rota ' + (i + 1) + ' de ' + queue.length + ' ao Google Sheets…' + (failed ? ' (' + failed + ' com falha)' : ''), 5 + Math.round(i / queue.length * 90), 'Enviando rotas pendentes');
+                startProgressClock(5 + Math.round(i / queue.length * 90), 5 + Math.round((i + 0.9) / queue.length * 90), 20, 'O Google Sheets está respondendo mais devagar que o normal. Não feche nem recarregue a página.');
+            }
+            const r = await pushRouteToSheets(queue[i]);
+            if (r.ok) sent++;
+            else { failed++; lastError = r.error; }
+        }
+        if (!opts.silent) { stopProgressClock(); showProgress('Atualizando o Histórico…', 98); await nextPaint(); }
+        refreshHistoryViews();
+    } finally {
+        if (!opts.silent) hideProgress();
     }
-    refreshHistoryViews();
     if (!opts.silent) alert(sent + ' rota(s) enviada(s) ao Google Sheets' + (failed ? ' · ' + failed + ' não enviada(s): ' + lastError : '') + '.');
     return { sent: sent, failed: failed };
 }
@@ -4608,9 +4635,27 @@ async function saveCurrentRoute(mode) {
     btn.disabled = true;
     btn.textContent = '… Salvando';
     if ($('editSaveNewBtn')) $('editSaveNewBtn').disabled = true;
+    const nStops = route.ordered.length;
+    const title = replacing ? 'Atualizando rota ' + editingLabel() : 'Salvando rota';
+    const onStep = function(stage) {
+        if (stage === 'check') {
+            showProgress('Etapa 1 de 4 · Conferindo paradas e documentos fiscais…', 8, title);
+        } else if (stage === 'local') {
+            showProgress('Etapa 2 de 4 · Guardando cópia de segurança neste navegador…', 18);
+        } else if (stage === 'send') {
+            showProgress('Etapa 3 de 4 · Gravando a rota e ' + nStops + (nStops === 1 ? ' parada' : ' paradas') + ' no Google Sheets…', 25);
+            startProgressClock(25, 90, 20, 'O Google Sheets está respondendo mais devagar que o normal. Não feche nem recarregue a página: a cópia de segurança já está guardada neste navegador.');
+        } else if (stage === 'refresh') {
+            stopProgressClock();
+            showProgress('Etapa 4 de 4 · Atualizando o Histórico…', 96);
+        }
+    };
+    let saved = null;
     try {
         const replaceInfo = replacing ? Object.assign({}, editingRoute) : null;
-        const saved = await saveHistory(replaceInfo);
+        saved = await saveHistory(replaceInfo, onStep);
+        if (saved.ok) showProgress(saved.synced ? 'Concluído.' : 'Concluído com pendência de envio.', 100);
+        hideProgress();
         if (!saved.ok) {
             if (!saved.handled) alert('Não foi possível salvar a rota no Histórico. Verifique os dados fiscais e o espaço disponível no navegador.');
             return;
@@ -4627,6 +4672,7 @@ async function saveCurrentRoute(mode) {
         if (saved.synced) alert(replacing ? 'Rota ' + saved.id + ' atualizada no Google Sheets.' : 'Rota salva no Google Sheets (' + saved.id + ').');
         else alert('A rota ficou guardada neste navegador, mas ainda não foi enviada ao Google Sheets (' + (saved.error || 'sem conexão') + '). Ela será ' + (replacing ? 'atualizada' : 'enviada') + ' automaticamente quando a aplicação for reaberta com conexão, ou pelo botão “Enviar ao Google Sheets” no Histórico.');
     } finally {
+        hideProgress();
         btn.disabled = false;
         if ($('editSaveNewBtn')) $('editSaveNewBtn').disabled = false;
         renderEditBanner();
@@ -6028,19 +6074,56 @@ function driverValue() {
     return ($('driverName') && $('driverName').value.trim()) || $('driver').value;
 }
 
-function showProgress(message, percent) {
+let progressClock = null;
+function showProgress(message, percent, title) {
     if (!$('progressRoot')) {
         const root = document.createElement('div');
         root.id = 'progressRoot';
-        root.innerHTML = '<div class="progress-backdrop"><div class="progress-card"><div class="progress-ring"></div><h3 id="progressTitle">Calculando rota</h3><p id="progressMessage">Preparando pontos e estimando deslocamentos…</p><div class="progress-bar"><i id="progressBar"></i></div></div></div>';
+        root.innerHTML = '<div class="progress-backdrop"><div class="progress-card" role="status" aria-live="polite"><div class="progress-ring"></div><h3 id="progressTitle">Calculando rota</h3><p id="progressMessage">Preparando pontos e estimando deslocamentos…</p><div class="progress-bar"><i id="progressBar"></i></div><div class="progress-meta"><b id="progressPct"></b><span id="progressElapsed"></span></div><small id="progressHint" class="progress-hint"></small></div></div>';
         document.body.appendChild(root);
     }
+    if (title) $('progressTitle').textContent = title;
     if (message) $('progressMessage').textContent = message;
-    if (percent) $('progressBar').style.width = percent + '%';
+    if (percent) {
+        $('progressBar').style.width = percent + '%';
+        $('progressPct').textContent = Math.round(percent) + '%';
+    }
+}
+
+/* Contador de tempo decorrido + avanço gradual da barra durante uma espera
+   cujo fim não se conhece (resposta do Google Sheets). A barra se aproxima
+   de "teto" sem nunca alcançá-lo; o passo seguinte a leva adiante. */
+function startProgressClock(from, ceiling, hintAfterSec, hintText) {
+    stopProgressClock();
+    const t0 = Date.now();
+    let pct = from;
+    const tick = function() {
+        if (!$('progressRoot')) return stopProgressClock();
+        const sec = Math.floor((Date.now() - t0) / 1000);
+        $('progressElapsed').textContent = 'Tempo decorrido: ' + (sec < 60 ? sec + ' s' : Math.floor(sec / 60) + ' min ' + String(sec % 60).padStart(2, '0') + ' s');
+        pct = pct + (ceiling - pct) * 0.06;
+        $('progressBar').style.width = pct.toFixed(1) + '%';
+        $('progressPct').textContent = Math.floor(pct) + '%';
+        if (hintText && sec >= hintAfterSec) $('progressHint').textContent = hintText;
+    };
+    tick();
+    progressClock = setInterval(tick, 1000);
+}
+
+function stopProgressClock() {
+    if (progressClock) clearInterval(progressClock);
+    progressClock = null;
 }
 
 function hideProgress() {
+    stopProgressClock();
     if ($('progressRoot')) $('progressRoot').remove();
+}
+
+/* Devolve o controle ao navegador para que o painel de progresso seja
+   desenhado antes de um trecho de processamento síncrono. */
+function nextPaint() {
+    return new Promise(function(resolve) { requestAnimationFrame(function() { setTimeout(resolve, 0); }); });
 }
 async function calc() {
     if (!bases.length) {
@@ -6787,10 +6870,13 @@ function hasDuplicateRoute(item, includeEditing) {
     });
 }
 
-async function saveHistory(replaceInfo) {
+async function saveHistory(replaceInfo, onStep) {
     if (!route || !Array.isArray(route.ordered) || !route.ordered.length) return { ok: false };
+    const step = typeof onStep === 'function' ? onStep : function() {};
     let item;
     try {
+        step('check');
+        await nextPaint();
         /* A seleção pode ter recebido dados fiscais depois do último cálculo.
            Reassocia cada parada calculada ao cadastro atual antes de gravar. */
         const ordered = route.ordered.map(function(it) {
@@ -6834,6 +6920,8 @@ async function saveHistory(replaceInfo) {
             end: route.end
         };
         if (replaceInfo && replaceInfo.sheetId) item.replaceId = replaceInfo.sheetId;
+        step('local');
+        await nextPaint();
         /* Cópia local: rotas ainda não enviadas nunca são descartadas; das já
            enviadas ficam só as mais recentes (uso offline). Numa substituição,
            a versão anterior (e qualquer edição pendente dela) sai da lista. */
@@ -6843,13 +6931,20 @@ async function saveHistory(replaceInfo) {
                 !(replaceInfo.sheetId && (x.sheetId === replaceInfo.sheetId || x.replaceId === replaceInfo.sheetId));
         });
         const pend = list.filter(function(x) { return !x.sheetId; });
-        const synced = list.filter(function(x) { return x.sheetId && Date.now() - Number(x.id || 0) < 7776000000; }).slice(0, 40);
+        /* Nas cópias já gravadas na planilha o traçado do mapa (geometry) é
+           descartado: ele é refeito ao reabrir e era o que mais inchava o
+           armazenamento local, deixando cada leitura/gravação lenta. */
+        const synced = list.filter(function(x) { return x.sheetId && Date.now() - Number(x.id || 0) < 7776000000; }).slice(0, 40)
+            .map(function(x) { return x.geometry ? Object.assign({}, x, { geometry: null }) : x; });
         if (!setLocalHistory([item].concat(pend, synced))) return { ok: false };
     } catch (e) {
         console.error('GRUPO LABMEDIC - não foi possível salvar a rota no histórico.', e);
         return { ok: false };
     }
+    step('send', item);
     const r = await pushRouteToSheets(item);
+    step('refresh', item);
+    await nextPaint();
     refreshHistoryViews();
     return { ok: true, synced: r.ok, id: r.id, error: r.error };
 }
