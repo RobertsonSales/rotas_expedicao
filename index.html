@@ -3429,6 +3429,11 @@ body.landing-lock {
 .nu-dup .link { padding: 0; font-size: 10.5px; text-decoration: underline }
 .dark .nu-dup { background: #3a3220; border-color: #6b5a24; color: #f3d77a }
 
+/* v10 · permanência configurável por unidade */
+.dwell-wrap { display: inline-flex; align-items: center; gap: 3px; margin: 0; font-size: 9px; font-weight: 700; color: var(--soft, #7a8a8c); white-space: nowrap }
+.dwell-wrap .dwell { width: 52px; margin: 0; padding: 4px 5px; border: 1px solid #dce6e3; border-radius: 6px; font-size: 10px; font-weight: 800; text-align: right; background: #fff; color: inherit }
+.dwell-wrap .dwell:focus { outline: 2px solid #0d8c78; outline-offset: 0; border-color: #0d8c78 }
+.dark .dwell-wrap .dwell { background: #1a3a45; border-color: #2e5564; color: #e6f0ee }
 /* v6 · várias NF-e por parada */
 .docs-form .docs-head, .docs-form .doc-row { display: grid; grid-template-columns: 1.25fr 1fr 1fr 26px; gap: 8px; align-items: center }
 .docs-form .docs-head { color: var(--soft); font-size: 10px; font-weight: 800; margin-bottom: 2px }
@@ -3501,9 +3506,9 @@ body.landing-lock {
 <main class="main"><header class="top"><div><div class="eyebrow">Centro de controle / <span id="crumb">Planejamento de rotas de entrega</span></div><h1 id="pageTitle">Planejamento de rotas</h1></div><div style="display:flex;align-items:center;gap:10px"><button class="theme-btn" id="themeBtn" title="Alternar tema">☾</button><div class="status sheets-pill pending" id="sheetsPill" title="Conectando ao Google Sheets…"><i></i><span id="sheetsPillTxt">Google Sheets · conectando…</span></div><div class="status"><i></i>API oficial Google</div></div></header>
 <section id="planPage"><section class="hero"><div><div class="eyebrow" style="color:#71d8bc">✦ Uso da API oficial do Google Maps</div><h2>Previsibilidade de rotas em poucos cliques<br><em>Monitore o trajeto dos condutores</em></h3><p>Você pode salvar as rotas diariamente, ganhando assim uma importante ferramenta de rastreabilidade histórica. </p></div><div class="hero-art"><div class="orbit o1"></div><div class="orbit o2"></div><div class="route-line"></div><div class="node n1">⌖</div><div class="node n2">⌖</div><div class="node n3">⌖</div></div></section>
 <section class="summary"><div class="card"><div class="ico">▣</div><div><span>Unidades no planejamento</span><b id="sumStops">5<small> / 8</small></b></div></div><div class="card"><div class="ico">◷</div><div><span>Tempo de trânsito estimado</span><b id="sumTravel">—</b></div><span class="trend" id="sumTravelSub">aguardando rota</span></div><div class="card"><div class="ico">◔</div><div><span>Urgências críticas</span><b id="sumCritical">4</b></div><span class="trend" id="sumCriticalSub">2 super · 2 alta</span></div><div class="card"><div class="ico">♙</div><div><span>Condutor responsável</span><b style="font-size:14px" id="sumDriver">Reginaldo Braga</b></div><span class="trend">dia 28</span></div></section>
-<div class="grid"><section><div class="section"><div><div class="over">01 · Configuração</div><h3>Monte a rota</h3></div><button class="link" id="clearBtn">Limpar seleção ×</button></div><div class="card form"><div class="edit-banner" id="editBanner" hidden><div class="edit-txt"><b>✎ Editando rota salva</b><span id="editLabel"></span><small>Salvar substitui esta rota no Google Sheets, mantendo o mesmo código.</small></div><div class="edit-actions"><button type="button" class="outline" id="editSaveNewBtn" title="Mantém a rota original e grava esta como uma nova rota">Salvar como nova</button><button type="button" class="link" id="editExitBtn" title="Encerra a edição; a rota na tela continua, e o próximo salvamento cria uma rota nova">Sair da edição</button></div></div><label>Condutor<select id="driver"><option>Reginaldo Braga</option><option>Marcelo Medeiros</option><option>Vendedor</option><option>Técnico</option><option>Coletor da cliente</option><option>Transportadora</option></select><input id="driverName" type="text" value="Reginaldo Braga" placeholder="Nome utilizado nos documentos" style="margin-top:7px"></label><div class="two"><label>Data da operação<input id="date" type="date" value=""></label><label>Saída prevista<input id="departure" type="time" value="08:00"></label></div><label>Base de partida<select id="baseSelect"></select></label><div class="base-tools"><button type="button" class="link" id="baseNewBtn" title="Cadastrar uma nova base de partida no Google Sheets">＋ Nova base</button><button type="button" class="link" id="baseEditBtn" title="Editar a base selecionada no Google Sheets">✎ Editar base</button></div><div class="base"><div class="base-icon">⌖</div><div><b id="baseName"></b><small id="baseAddr"></small></div><span class="ok">✓</span></div><div class="divider"></div><div class="labelrow"><label>Paradas da rota <span id="selectedLabel">5 selecionadas</span></label><button id="addPoint">＋ Adicionar ponto</button></div><div class="selected" id="selectedList"></div><div class="options"><label class="switchline"><input id="returnBase" type="checkbox" checked><span class="switch"></span>Retornar à base ao final</label><label>Trânsito<select id="traffic"><option value="estimated">Estimado por faixa horária</option><option value="off">Sem ajuste de trânsito</option></select></label></div><button class="primary" id="calcBtn" title="Calcular a melhor rota com a seleção atual">⌁ Calcular melhor rota <span id="calcBtnIcon">↑</span></button><div class="recalc-notice" id="recalcNotice">⚠ A seleção ou configuração mudou. Recalcule a rota antes de salvá-la ou exportá-la.</div><div class="foot">✓ O cálculo considera distância, janela de saída, tempo de atendimento e urgência.</div></div></section>
+<div class="grid"><section><div class="section"><div><div class="over">01 · Configuração</div><h3>Monte a rota</h3></div><button class="link" id="clearBtn">Limpar seleção ×</button></div><div class="card form"><div class="edit-banner" id="editBanner" hidden><div class="edit-txt"><b>✎ Editando rota salva</b><span id="editLabel"></span><small>Salvar substitui esta rota no Google Sheets, mantendo o mesmo código.</small></div><div class="edit-actions"><button type="button" class="outline" id="editSaveNewBtn" title="Mantém a rota original e grava esta como uma nova rota">Salvar como nova</button><button type="button" class="link" id="editExitBtn" title="Encerra a edição; a rota na tela continua, e o próximo salvamento cria uma rota nova">Sair da edição</button></div></div><label>Condutor<select id="driver"><option>Reginaldo Braga</option><option>Marcelo Medeiros</option><option>Vendedor</option><option>Técnico</option><option>Coletor da cliente</option><option>Transportadora</option></select><input id="driverName" type="text" value="Reginaldo Braga" placeholder="Nome utilizado nos documentos" style="margin-top:7px"></label><div class="two"><label>Data da operação<input id="date" type="date" value=""></label><label>Saída prevista<input id="departure" type="time" value="08:00"></label></div><label>Base de partida<select id="baseSelect"></select></label><div class="base-tools"><button type="button" class="link" id="baseNewBtn" title="Cadastrar uma nova base de partida no Google Sheets">＋ Nova base</button><button type="button" class="link" id="baseEditBtn" title="Editar a base selecionada no Google Sheets">✎ Editar base</button></div><div class="base"><div class="base-icon">⌖</div><div><b id="baseName"></b><small id="baseAddr"></small></div><span class="ok">✓</span></div><div class="divider"></div><div class="labelrow"><label>Paradas da rota <span id="selectedLabel">5 selecionadas</span></label><button id="addPoint">＋ Adicionar ponto</button></div><div class="selected" id="selectedList"></div><div class="options"><label class="switchline"><input id="returnBase" type="checkbox" checked><span class="switch"></span>Retornar à base ao final</label><label>Trânsito<select id="traffic"><option value="estimated">Estimado por faixa horária</option><option value="off">Sem ajuste de trânsito</option></select></label></div><button class="primary" id="calcBtn" title="Calcular a melhor rota com a seleção atual">⌁ Calcular melhor rota <span id="calcBtnIcon">↑</span></button><div class="recalc-notice" id="recalcNotice">⚠ A seleção ou configuração mudou. Recalcule a rota antes de salvá-la ou exportá-la.</div><div class="foot">✓ O cálculo considera distância, janela de saída, a permanência definida para cada unidade e a urgência.</div></div></section>
 <section><div class="section"><div><div class="over">02 · Visualização</div><h3 id="mapTitle">Mapa operacional</h3></div><div class="map-actions"><button class="outline" id="driverRoutesBtn" title="Ver todas as rotas deste condutor no formato do roteiro PDF">▤ Rotas do condutor</button><button class="outline" id="gmapsOpenBtn" title="Abrir a rota selecionada e otimizada no Google Maps, em uma nova aba">🗺 Google Maps</button><button class="outline" id="saveRouteBtn">▣ Salvar Rota</button><button class="outline" id="recalcBtn">↻ Recalcular</button></div></div><div class="card map"><div class="mapcanvas" id="mapCanvas"><div id="fallbackMap" class="fallback-map"><div class="road r1"></div><div class="road r2"></div><div class="road r3"></div><span class="maplabel l1">ZONA NORTE</span><span class="maplabel l2">CENTRO EXPANDIDO</span><span class="maplabel l3">ZONA SUL</span><svg class="route" id="routeSvg" viewBox="0 0 100 100" preserveAspectRatio="none"></svg></div><div id="gmap" class="gmap-container" style="display:none"></div><div class="zoom-controls" id="mapZoomCtrls" aria-label="Controles de zoom do mapa do painel" data-target="panel"><button class="zoom-btn" data-zoom="in" title="Aumentar zoom">＋</button><button class="zoom-btn" data-zoom="out" title="Diminuir zoom">－</button><button class="zoom-btn" data-zoom="reset" title="Ajustar à área">⌖</button></div><div class="float"><i id="gmapsDot" class="gdot off"></i><span id="gmapsLabel">Google Maps não configurado</span><br><small id="mapSub">pré-visualização da seleção</small></div></div><div class="legend"><span><i class="dot db"></i>Base</span><span><i class="dot dg"></i>Rota planejada</span><span><i class="dot do"></i>Urgência</span><small id="mapLegendNote">⌁ Rota real via Google Maps (ou estimativa local por distância e horário, sem chave)</small></div></div><div class="card result" id="result"><div class="empty"><div class="circle">⌁</div><h3>A rota aparecerá aqui</h3><p>Selecione as unidades, defina a urgência e clique em <b>Calcular melhor rota</b>.</p></div></div></section></div>
-<section class="units" id="unitsSection"><div class="section"><div><div class="over">03 · Unidades disponíveis</div><h3>Escolha os pontos de ligação</h3></div><div class="filters" id="smartSearch"><input id="search" placeholder="🔎  Busca inteligente · unidade, cliente, endereço ou código"><button type="button" class="outline unit-new-btn" id="unitNewBtn" title="Cadastrar uma unidade que ainda não existe no Google Sheets">＋ Nova unidade</button><button class="link units-toggle" id="unitsToggleBtn" type="button" aria-expanded="false" aria-controls="unitsBody" title="Expandir a lista completa de unidades"><span class="ut-ico" aria-hidden="true">▾</span><span class="ut-txt">Mostrar unidades</span></button></div></div><div class="geo-filter" id="geoFilter"><div class="gf-title"><span class="gf-ico" aria-hidden="true">⌖</span><div><b>Marcar por localidade</b><small>Filtre por estado e cidade e marque de uma vez todas as unidades exibidas.</small></div></div><label>Estado<select id="filterUF"><option value="">Todos os estados</option></select></label><label>Cidade<select id="filterCity"><option value="">Todas as cidades</option></select></label><div class="gf-actions"><button class="outline" id="markFiltered" type="button">✓ Marcar filtradas</button><button class="outline" id="unmarkFiltered" type="button">✕ Desmarcar</button><button class="link" id="clearGeoFilter" type="button">Limpar filtro</button></div><div class="gf-info" id="geoInfo"></div></div><div class="card table units-body" id="unitsBody"><div class="thead"><span id="tableCount">5 de 8</span><span>Unidade de saúde</span><span>Município</span><span>Urgência</span><span>Atendimento</span><span>Ação</span></div><div id="unitRows"></div></div></section><div class="footer"><span id="dataSourceFoot">… conectando ao Google Sheets</span><span id="dataUpdated">Cadastro: aguardando leitura</span></div></section>
+<section class="units" id="unitsSection"><div class="section"><div><div class="over">03 · Unidades disponíveis</div><h3>Escolha os pontos de ligação</h3></div><div class="filters" id="smartSearch"><input id="search" placeholder="🔎  Busca inteligente · unidade, cliente, endereço ou código"><button type="button" class="outline unit-new-btn" id="unitNewBtn" title="Cadastrar uma unidade que ainda não existe no Google Sheets">＋ Nova unidade</button><button class="link units-toggle" id="unitsToggleBtn" type="button" aria-expanded="false" aria-controls="unitsBody" title="Expandir a lista completa de unidades"><span class="ut-ico" aria-hidden="true">▾</span><span class="ut-txt">Mostrar unidades</span></button></div></div><div class="geo-filter" id="geoFilter"><div class="gf-title"><span class="gf-ico" aria-hidden="true">⌖</span><div><b>Marcar por localidade</b><small>Filtre por estado e cidade e marque de uma vez todas as unidades exibidas.</small></div></div><label>Estado<select id="filterUF"><option value="">Todos os estados</option></select></label><label>Cidade<select id="filterCity"><option value="">Todas as cidades</option></select></label><div class="gf-actions"><button class="outline" id="markFiltered" type="button">✓ Marcar filtradas</button><button class="outline" id="unmarkFiltered" type="button">✕ Desmarcar</button><button class="link" id="clearGeoFilter" type="button">Limpar filtro</button></div><div class="gf-info" id="geoInfo"></div></div><div class="card table units-body" id="unitsBody"><div class="thead"><span id="tableCount">5 de 8</span><span>Unidade de saúde</span><span>Município</span><span>Urgência</span><span>Permanência</span><span>Ação</span></div><div id="unitRows"></div></div></section><div class="footer"><span id="dataSourceFoot">… conectando ao Google Sheets</span><span id="dataUpdated">Cadastro: aguardando leitura</span></div></section>
 <section id="historyPage" class="history-page" style="display:none"><div class="historyhead"><div><div class="over">Registro de operações</div><h2>Histórico de planejamentos</h2><p>Rotas salvas no Google Sheets, compartilhadas entre todos os usuários. Reabra, exporte ou exclua.</p></div><div style="display:flex;align-items:end;gap:7px;flex-wrap:wrap"><label class="muted">De<input id="historyFrom" type="date" aria-label="Filtrar histórico a partir de" style="display:block;margin-top:4px;padding:7px;border:1px solid var(--line);border-radius:7px;background:var(--card);color:var(--ink)"></label><label class="muted">Até<input id="historyTo" type="date" aria-label="Filtrar histórico até" style="display:block;margin-top:4px;padding:7px;border:1px solid var(--line);border-radius:7px;background:var(--card);color:var(--ink)"></label><button class="outline" id="refreshHistoryBtn" title="Recarregar as rotas do Google Sheets">↻ Atualizar</button><button class="outline" id="syncPendingBtn" style="display:none">⇪ Enviar ao Google Sheets</button><button class="outline" id="exportHistoryBtn">⇩ Exportar histórico</button></div></div><div class="card" id="historyList"><div class="history-empty">Nenhuma rota calculada ainda. Calcule uma rota para que ela apareça aqui.</div></div><div class="notice" id="historyNotice">△ Conectando ao Google Sheets…</div></section>
 <section id="metricsPage" class="metrics-page" style="display:none">
   <div class="metrics-head"><div><div class="over">Inteligência operacional</div><h2>Análise de Métricas</h2><p>Indicadores consolidados a partir das rotas salvas no Google Sheets.</p></div><div class="metrics-actions"><button class="outline" id="metricsRefresh">↻ Atualizar</button><button class="primary" id="metricsPdf" style="width:auto;margin-top:0">▤ Visualizar PDF A4</button></div></div>
@@ -3756,6 +3761,10 @@ function unitFromSheet(u, previous) {
             stop.urgency = previous.urgency;
             stop.urgencyEdited = true;
         }
+        if (previous.serviceEdited) {
+            stop.service = dwellOf(previous);
+            stop.serviceEdited = true;
+        }
         if (!stop.coordSaved && previous.geoProvider === 'google' && hasValidCoordinates(previous) && key(previous.address) === key(stop.address)) {
             ['lat', 'lng', 'geoReady', 'geoSource', 'geoProvider', 'geoFallback', 'geoQuery', 'googleFormattedAddress', 'googlePlaceId'].forEach(function(k) { stop[k] = previous[k]; });
         }
@@ -3898,7 +3907,7 @@ function itemFromSheet(r) {
             city: norm(p.municipio) || 'Sem cidade',
             state: normalizeUF(p.uf),
             urgency: urgency[urg] ? urg : 'Média',
-            service: FIXED_DELIVERY_MINUTES,
+            service: normalizeServiceMinutes(p.atendMin !== undefined && p.atendMin !== '' ? p.atendMin : r.tempoUnidade),
             docs: docsFromParada(p),
             lat: ok ? lat : null,
             lng: ok ? lng : null
@@ -3920,7 +3929,7 @@ function itemFromSheet(r) {
     if (hasReturn) legs.push({ from: '', to: norm(r.base), km: Number(r.kmRetorno) || 0, m: Number(r.retornoMin) || 0, l: norm(r.fonte), arrival: end });
     const km = Number(r.km) || 0,
         travel = Number(r.deslocMin) || 0,
-        service = Number(r.atendMin) || ordered.length * FIXED_DELIVERY_MINUTES;
+        service = Number(r.atendMin) || totalDwell(ordered);
     return {
         id: norm(r.id),
         sheetId: norm(r.id),
@@ -3977,7 +3986,7 @@ function routeToSheetPayload(item) {
             km: round1(pick(item.km, meta.km)),
             deslocMin: Math.round(Number(pick(item.travel, meta.travel)) || 0),
             atendMin: Math.round(Number(pick(item.service, meta.service)) || 0),
-            tempoUnidade: FIXED_DELIVERY_MINUTES,
+            tempoUnidade: ordered.length ? Math.round(totalDwell(ordered) / ordered.length) : DEFAULT_DELIVERY_MINUTES, /* média por unidade */
             retorno: ret ? 'Sim' : 'Não',
             kmRetorno: ret ? round1(ret.km) : '',
             retornoMin: ret ? Math.round(Number(ret.m) || 0) : '',
@@ -4002,7 +4011,7 @@ function routeToSheetPayload(item) {
                 uf: s.state || '',
                 urgencia: s.urgency,
                 chegada: Number.isFinite(Number(leg.arrival)) ? clock(Number(leg.arrival)) : '',
-                atendMin: FIXED_DELIVERY_MINUTES,
+                atendMin: dwellOf(s),
                 trechoKm: round1(leg.km),
                 deslocMin: Math.round(Number(leg.m) || 0),
                 fonteTrecho: leg.l || '',
@@ -4862,12 +4871,25 @@ function docsSummaryText(stop) {
 
 /* Mudança de versão invalida rotas persistidas que ainda possam conter
    coordenadas determinísticas criadas pelo importador. */
-const ROUTE_ENGINE_VERSION = 'road-routing-v9-dwell-45min';
-const DWELL_MINUTES = 45;
-const FIXED_DELIVERY_MINUTES = 45; /* tempo médio de permanência do condutor em cada unidade */
+const ROUTE_ENGINE_VERSION = 'road-routing-v10-dwell-configuravel';
+/* Tempo de permanência do condutor em cada unidade: o operador define o
+   valor por parada (campo "Permanência"). 45 min é apenas o valor sugerido
+   para unidades que ainda não tiveram o tempo ajustado. */
+const DEFAULT_DELIVERY_MINUTES = 45;
+const MAX_DELIVERY_MINUTES = 720;
+const DWELL_MINUTES = DEFAULT_DELIVERY_MINUTES;
+const FIXED_DELIVERY_MINUTES = DEFAULT_DELIVERY_MINUTES; /* mantido por compatibilidade: valor padrão */
 function normalizeServiceMinutes(value) {
-    /* O tempo informado na planilha é deliberadamente ignorado. */
-    return FIXED_DELIVERY_MINUTES;
+    const n = Number(value);
+    if (value === '' || value === null || value === undefined || !Number.isFinite(n) || n < 0) return DEFAULT_DELIVERY_MINUTES;
+    return Math.min(MAX_DELIVERY_MINUTES, Math.round(n));
+}
+/* Permanência efetiva de uma parada (minutos). */
+function dwellOf(s) {
+    return normalizeServiceMinutes(s ? s.service : undefined);
+}
+function totalDwell(list) {
+    return (list || []).reduce(function(a, s) { return a + dwellOf(s); }, 0);
 }
 const $ = id => document.getElementById(id),
     baseFallback = () => ({
@@ -5893,7 +5915,7 @@ function renderSelected() {
     const arr = stops.filter(s => selected.has(s.id));
     $('selectedList').innerHTML = arr.length ? arr.map((s, i) => {
         const fiscal = ensureFiscalData(s);
-        return `<div class="stop"><div class="num">${i+1}</div><div class="stop-main"><b>${escHtml(s.name)}</b><small>${escHtml(s.city)} · ${escHtml(s.address)}</small><small class="stop-docs">${escHtml(docsSummaryText(s))}</small></div><select data-u="${s.id}" class="urg"><option ${s.urgency==='Super'?'selected':''}>Super</option><option ${s.urgency==='Alta'?'selected':''}>Alta</option><option ${s.urgency==='Média'?'selected':''}>Média</option><option ${s.urgency==='Baixa'?'selected':''}>Baixa</option></select><button class="link" data-fiscal-edit="${s.id}" title="Incluir ou alterar as NF-e desta parada">${fiscal.count > 1 ? fiscal.count + ' NF-e' : 'NF-e'} ✎</button><button class="trash" data-remove="${s.id}" title="Remover da rota">×</button></div>`;
+        return `<div class="stop"><div class="num">${i+1}</div><div class="stop-main"><b>${escHtml(s.name)}</b><small>${escHtml(s.city)} · ${escHtml(s.address)}</small><small class="stop-docs">${escHtml(docsSummaryText(s))}</small></div><select data-u="${s.id}" class="urg"><option ${s.urgency==='Super'?'selected':''}>Super</option><option ${s.urgency==='Alta'?'selected':''}>Alta</option><option ${s.urgency==='Média'?'selected':''}>Média</option><option ${s.urgency==='Baixa'?'selected':''}>Baixa</option></select><label class="dwell-wrap" title="Tempo de permanência do condutor nesta unidade (minutos)">⏱<input class="dwell" type="number" min="0" max="${MAX_DELIVERY_MINUTES}" step="5" inputmode="numeric" data-dwell="${escHtml(s.id)}" value="${dwellOf(s)}" aria-label="Permanência em minutos"><span>min</span></label><button class="link" data-fiscal-edit="${s.id}" title="Incluir ou alterar as NF-e desta parada">${fiscal.count > 1 ? fiscal.count + ' NF-e' : 'NF-e'} ✎</button><button class="trash" data-remove="${s.id}" title="Remover da rota">×</button></div>`;
     }).join('') : `<div style="padding:20px;text-align:center;color:#9da9aa;border:1px dashed #dce6e3;border-radius:9px">Adicione unidades abaixo para montar esta rota.</div>`;
 }
 
@@ -5912,7 +5934,7 @@ function renderUnits() {
     $('tableCount').textContent = list.length + ' de ' + stops.length;
     updateGeoInfo();
     $('unitRows').innerHTML = list.map(function(s) {
-        return `<div class="unit ${selected.has(s.id)?'chosen':''}${s.situacao==='Revisar'?' unit-review':''}" data-unit="${escHtml(s.id)}"${s.situacao==='Revisar'?' title="Endereço a revisar: clique na linha para corrigir"':''}><button class="check ${selected.has(s.id)?'on':''}" data-toggle="${s.id}">${selected.has(s.id)?'✓':''}</button><div class="unitname"><b>${s.name}${s.geoFallback?'<em class="geo-fb" title="Endereço não localizado no Google Maps: usando a Latitude/Longitude da planilha">📍</em>':''}${s.situacao==='Revisar'?'<button type="button" class="unit-fix" data-fix="'+escHtml(s.id)+'" title="Endereço incompleto no cadastro: corrigir agora">✎ Corrigir endereço</button>':''}</b><small>${s.client} · ${s.address}</small></div><span class="muted">${s.city}${s.state?' · '+s.state:''}</span><select class="urg" data-u="${s.id}" style="color:${urgency[s.urgency].c};background:${urgency[s.urgency].bg}"><option ${s.urgency==='Super'?'selected':''}>Super</option><option ${s.urgency==='Alta'?'selected':''}>Alta</option><option ${s.urgency==='Média'?'selected':''}>Média</option><option ${s.urgency==='Baixa'?'selected':''}>Baixa</option></select><span class="muted">${FIXED_DELIVERY_MINUTES} min</span><button class="${selected.has(s.id)?'included':'add'}" data-toggle="${s.id}">${selected.has(s.id)?'✓ Incluída':'＋ Adicionar'}</button></div>`
+        return `<div class="unit ${selected.has(s.id)?'chosen':''}${s.situacao==='Revisar'?' unit-review':''}" data-unit="${escHtml(s.id)}"${s.situacao==='Revisar'?' title="Endereço a revisar: clique na linha para corrigir"':''}><button class="check ${selected.has(s.id)?'on':''}" data-toggle="${s.id}">${selected.has(s.id)?'✓':''}</button><div class="unitname"><b>${s.name}${s.geoFallback?'<em class="geo-fb" title="Endereço não localizado no Google Maps: usando a Latitude/Longitude da planilha">📍</em>':''}${s.situacao==='Revisar'?'<button type="button" class="unit-fix" data-fix="'+escHtml(s.id)+'" title="Endereço incompleto no cadastro: corrigir agora">✎ Corrigir endereço</button>':''}</b><small>${s.client} · ${s.address}</small></div><span class="muted">${s.city}${s.state?' · '+s.state:''}</span><select class="urg" data-u="${s.id}" style="color:${urgency[s.urgency].c};background:${urgency[s.urgency].bg}"><option ${s.urgency==='Super'?'selected':''}>Super</option><option ${s.urgency==='Alta'?'selected':''}>Alta</option><option ${s.urgency==='Média'?'selected':''}>Média</option><option ${s.urgency==='Baixa'?'selected':''}>Baixa</option></select><label class="dwell-wrap" title="Tempo de permanência do condutor nesta unidade (minutos)"><input class="dwell" type="number" min="0" max="${MAX_DELIVERY_MINUTES}" step="5" inputmode="numeric" data-dwell="${escHtml(s.id)}" value="${dwellOf(s)}" aria-label="Permanência em minutos"><span>min</span></label><button class="${selected.has(s.id)?'included':'add'}" data-toggle="${s.id}">${selected.has(s.id)?'✓ Incluída':'＋ Adicionar'}</button></div>`
     }).join('') || ('<div class="units-empty">Nenhuma unidade encontrada para a busca atual.' + (norm($('search').value) ? '<button type="button" class="outline" data-new-unit="1">＋ Cadastrar “' + escHtml(norm($('search').value)) + '” como nova unidade</button>' : '') + '</div>');
 }
 
@@ -6080,10 +6102,11 @@ async function calc() {
                 l: z.l,
                 arrival: t + z.m
             });
-            /* Após cada entrega o condutor permanece 45 minutos no ponto.
-               Esse intervalo entra no horário da próxima chegada e no
-               tempo total do roteiro, sem alterar a duração do trecho viário. */
-            t += z.m + FIXED_DELIVERY_MINUTES;
+            /* Após cada entrega o condutor permanece no ponto pelo tempo
+               definido pelo operador para esta unidade. Esse intervalo entra
+               no horário da próxima chegada e no tempo total do roteiro, sem
+               alterar a duração do trecho viário. */
+            t += z.m + dwellOf(s);
             prev = s;
         });
         if (returnToBase) {
@@ -6105,7 +6128,7 @@ async function calc() {
             legs,
             km: legs.reduce((a, x) => a + x.km, 0),
             travel: legs.reduce((a, x) => a + x.m, 0),
-            service: ordered.reduce((a) => a + FIXED_DELIVERY_MINUTES, 0),
+            service: totalDwell(ordered),
             end: t
         };
         setRouteNeedsRecalc(false);
@@ -6127,7 +6150,7 @@ async function calc() {
                    atendimento, permanência e deslocamento. */
                 arrivalClock += leg.m;
                 leg.arrival = arrivalClock;
-                if (i < route.ordered.length) arrivalClock += FIXED_DELIVERY_MINUTES;
+                if (i < route.ordered.length) arrivalClock += dwellOf(route.ordered[i]);
             });
             route.end = arrivalClock;
         }
@@ -6535,7 +6558,7 @@ function renderResult() {
     const base = bases.find(b => b.id === $('baseSelect').value) || bases[0] || baseFallback();
     const hasReturn = !!$('returnBase').checked && route.legs.length > route.ordered.length,
         finalEvent = hasReturn ? `<div class="event last"><div class="marker" style="background:#fff;color:#193346;border-color:#193346">⌖</div><div class="event-body"><div><b>Retorno à base</b><small>${base.name}</small></div><div class="etime"><strong>${clock(route.end)}</strong><small>chegada prevista · ${fmt(route.legs[route.ordered.length].m)} de retorno</small></div></div></div>` : `<div class="event last"><div class="marker" style="background:#fff;color:#193346;border-color:#193346">✓</div><div class="event-body"><div><b>Encerramento da rota</b><small>Última unidade visitada</small></div><div class="etime"><strong>${clock(route.end)}</strong><small>sem retorno à base</small></div></div></div>`;
-    $('result').innerHTML = `<div class="resulthead"><div><div class="over">Resumo da rota · ${$('date').value.split('-').reverse().join('/')}</div><h3>${driverValue()} <span>· ${base.name.split('·')[0]}</span></h3></div><div class="result-actions"><button class="export" id="pdfBtn">▤ PDF</button><button class="export" id="xlsxBtn">▧ Excel</button></div></div><div class="kpis"><div><span>Distância total</span><b>${route.km.toFixed(1)} <small>km</small></b></div><div><span>Deslocamento</span><b>${fmt(route.travel)}</b></div><div><span>Atendimento padrão</span><b>${fmt(route.service)}</b></div><div><span>${hasReturn ? 'Retorno à base' : 'Encerramento'}</span><b>${clock(route.end)}</b></div></div><div class="timeline">${route.ordered.map((s,i)=>`<div class="event"><div class="marker" style="background:${urgency[s.urgency].c}">${i+1}</div><div class="event-body"><div><b>${s.name}</b><small class="route-address">${s.address}</small><small>${s.city} · ${FIXED_DELIVERY_MINUTES} min de atendimento padrão</small></div><div class="etime"><strong>${clock(route.legs[i].arrival)}</strong><small>${fmt(route.legs[i].m)} · ${route.legs[i].l}</small></div></div></div>`).join('')}${finalEvent}</div>`;
+    $('result').innerHTML = `<div class="resulthead"><div><div class="over">Resumo da rota · ${$('date').value.split('-').reverse().join('/')}</div><h3>${driverValue()} <span>· ${base.name.split('·')[0]}</span></h3></div><div class="result-actions"><button class="export" id="pdfBtn">▤ PDF</button><button class="export" id="xlsxBtn">▧ Excel</button></div></div><div class="kpis"><div><span>Distância total</span><b>${route.km.toFixed(1)} <small>km</small></b></div><div><span>Deslocamento</span><b>${fmt(route.travel)}</b></div><div><span>Permanência nas unidades</span><b>${fmt(route.service)}</b></div><div><span>${hasReturn ? 'Retorno à base' : 'Encerramento'}</span><b>${clock(route.end)}</b></div></div><div class="timeline">${route.ordered.map((s,i)=>`<div class="event"><div class="marker" style="background:${urgency[s.urgency].c}">${i+1}</div><div class="event-body"><div><b>${s.name}</b><small class="route-address">${s.address}</small><small>${s.city} · ${dwellOf(s)} min de permanência</small></div><div class="etime"><strong>${clock(route.legs[i].arrival)}</strong><small>${fmt(route.legs[i].m)} · ${route.legs[i].l}</small></div></div></div>`).join('')}${finalEvent}</div>`;
     $('pdfBtn').onclick = () => printHistory(currentRouteItem());
     $('xlsxBtn').onclick = () => exportExcel()
 }
@@ -6564,18 +6587,18 @@ function buildRouteSheets(data, wb, suffix) {
             ['Unidades visitadas', meta.stops],
             ['Distância total (km)', +Number(meta.km).toFixed(1)],
             ['Deslocamento', fmt(meta.travel)],
-            ['Atendimento padrão', fmt(meta.service)],
-            ['Tempo fixo por unidade', FIXED_DELIVERY_MINUTES + ' min'],
+            ['Permanência total nas unidades', fmt(meta.service)],
+            ['Permanência média por unidade', (ordered.length ? Math.round(totalDwell(ordered) / ordered.length) : 0) + ' min'],
             ['Retorno à base', meta.end]
         ],
         agenda = [
             ['AGENDA OTIMIZADA DE VISITAS', '', '', '', '', '', '', '', '', '', '', '', '', ''],
-            ['Ordem', 'Unidade', 'Endereço utilizado', 'Município', 'Urgência', 'Chegada prevista', 'Atendimento padrão', 'Trecho (km)', 'Deslocamento', 'Trânsito', 'Cliente', 'Nº documento fiscal', 'Data de emissão', 'Valor do documento']
+            ['Ordem', 'Unidade', 'Endereço utilizado', 'Município', 'Urgência', 'Chegada prevista', 'Permanência', 'Trecho (km)', 'Deslocamento', 'Trânsito', 'Cliente', 'Nº documento fiscal', 'Data de emissão', 'Valor do documento']
         ];
     ordered.forEach(function(s, i) {
         const leg = legs[i] || {};
         const fiscal = ensureFiscalData(s);
-        agenda.push([i + 1, s.name, s.address, s.city, s.urgency, clock(leg.arrival), fmt(FIXED_DELIVERY_MINUTES), +Number(leg.km || 0).toFixed(1), fmt(leg.m || 0), leg.l || '', s.client, fiscal.number || '', docsOf(s).map(function(d) { return fiscalDateBR(d.issueDate); }).join('; '), fiscal.amount === '' ? '' : Number(fiscal.amount)]);
+        agenda.push([i + 1, s.name, s.address, s.city, s.urgency, clock(leg.arrival), fmt(dwellOf(s)), +Number(leg.km || 0).toFixed(1), fmt(leg.m || 0), leg.l || '', s.client, fiscal.number || '', docsOf(s).map(function(d) { return fiscalDateBR(d.issueDate); }).join('; '), fiscal.amount === '' ? '' : Number(fiscal.amount)]);
     });
     const returnLeg = legs[ordered.length];
     if (returnLeg) {
@@ -6858,11 +6881,11 @@ function printHistory(item) {
     const rows = item.ordered.map(function(s, i) {
         const leg = item.legs[i] || {};
         const fiscal = ensureFiscalData(s);
-        return `<tr><td>${i+1}</td><td><strong>${escHtml(s.name)}</strong><br><small>${escHtml(s.address)}</small></td><td>${s.urgency}</td><td>${clock(leg.arrival)}</td><td>${Number(leg.km || 0).toFixed(1)} km</td><td>${fmt(leg.m || 0)}</td><td>${fmt(FIXED_DELIVERY_MINUTES)}<br><small>tempo padrão por entrega</small></td>${docCellsHtml(s, escHtml).map(function(c) { return '<td class="fx">' + c + '</td>'; }).join('')}</tr>`
+        return `<tr><td>${i+1}</td><td><strong>${escHtml(s.name)}</strong><br><small>${escHtml(s.address)}</small></td><td>${s.urgency}</td><td>${clock(leg.arrival)}</td><td>${Number(leg.km || 0).toFixed(1)} km</td><td>${fmt(leg.m || 0)}</td><td>${fmt(dwellOf(s))}<br><small>permanência definida</small></td>${docCellsHtml(s, escHtml).map(function(c) { return '<td class="fx">' + c + '</td>'; }).join('')}</tr>`
     }).join('') + (item.legs[item.ordered.length] ? `<tr style="font-weight:700;background:#eff8f4"><td>↩</td><td><strong>Retorno à base</strong><br><small>${item.meta.base}</small></td><td>—</td><td>${clock(item.legs[item.ordered.length].arrival)}</td><td>${Number(item.legs[item.ordered.length].km || 0).toFixed(1)} km</td><td>${fmt(item.legs[item.ordered.length].m || 0)}</td><td>Chegada à base: ${clock(item.end)}</td><td colspan="3"></td></tr>` : '');
     const w = window.open('', '_blank');
     if (!w) return alert('Permita pop-ups para gerar o PDF.');
-    w.document.write(`<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>GRUPO LABMEDIC - Roteiro</title><style>@page{size:A4 landscape;margin:10mm}body{font-family:Arial;color:#183345;padding:18px}.toolbar{display:flex;gap:8px;margin-bottom:16px}.toolbar button{border:0;border-radius:6px;padding:9px 13px;background:#0d806d;color:#fff;cursor:pointer}.toolbar button.alt{background:#193345}h1{margin:0;color:#0d806d}h2{font-size:15px;margin-top:28px;border-bottom:2px solid #0d806d;padding-bottom:8px}.sub{color:#6d7e80;font-size:12px;margin:6px 0 22px}.meta{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.box{background:#eff8f4;padding:12px;border-radius:7px}.box small{display:block;color:#718184;font-size:10px}.box b{display:block;margin-top:4px;font-size:13px}table{width:100%;border-collapse:collapse;margin-top:12px;font-size:11px}th{text-align:left;background:#193345;color:white;padding:9px}td{padding:9px;border-bottom:1px solid #dce8e3}table.agenda{table-layout:fixed}table.agenda td{word-break:break-word}table.agenda .fx{text-align:center;white-space:nowrap;font-variant-numeric:tabular-nums}table.agenda td.fx{overflow:hidden;text-overflow:ellipsis}small{color:#758789}@media print{button{display:none}}.unit-photo{width:100%;height:150px;object-fit:cover;border-radius:10px;background:var(--mint);display:block;margin-bottom:12px}.map-details{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin:12px 0}.map-detail{padding:9px;border:1px solid var(--line);border-radius:8px;background:var(--card)}.map-detail small{display:block;color:var(--soft);font-size:9px}.map-detail b{display:block;color:var(--ink);margin-top:3px}.maps-frame{width:100%;height:220px;border:1px solid var(--line);border-radius:10px;margin-top:12px;background:var(--mint)}.progress-backdrop{position:fixed;inset:0;background:rgba(8,27,38,.58);backdrop-filter:blur(5px);z-index:100;display:grid;place-items:center}.progress-card{width:min(390px,calc(100vw - 36px));background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:18px;padding:25px;box-shadow:0 22px 60px rgba(0,0,0,.25);text-align:center}.progress-ring{width:62px;height:62px;border:5px solid var(--line);border-top-color:var(--teal);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 15px}@keyframes spin{to{transform:rotate(360deg)}}.progress-bar{height:7px;background:var(--line);border-radius:99px;overflow:hidden;margin-top:16px}.progress-bar i{display:block;height:100%;width:18%;background:linear-gradient(90deg,var(--teal),#70dfbf);border-radius:inherit;transition:width .3s ease}@page{size:A4 landscape;margin:10mm}</style></head><body><div class="toolbar"><button onclick="window.print()">▤ Imprimir / Salvar como PDF</button><button class="alt" onclick="downloadReport()">⇩ Baixar relatório</button></div><h1>GRUPO LABMEDIC - Planejamento de Rotas</h1><div class="sub">Roteiro profissional de visitação · ${fiscalDateBR(item.meta.date)}</div><div class="meta"><div class="box"><small>Condutor</small><b>${item.meta.driver}</b></div><div class="box"><small>Base de partida</small><b>${item.meta.base}</b></div><div class="box"><small>Resumo</small><b>${item.meta.stops} paradas · ${Number(item.meta.km).toFixed(1)} km</b></div></div><h2>Agenda otimizada</h2><table class="agenda"><colgroup><col style="width:3%"><col style="width:27%"><col style="width:7%"><col style="width:6%"><col style="width:7%"><col style="width:8%"><col style="width:9%"><col style="width:11%"><col style="width:11%"><col style="width:11%"></colgroup><thead><tr><th>#</th><th>Unidade</th><th>Urgência</th><th>Chegada</th><th>Km do trecho</th><th>Deslocamento</th><th>Atendimento padrão</th><th class="fx">NF-e</th><th class="fx">Emissão</th><th class="fx">Valor (R$)</th></tr></thead><tbody>${rows}</tbody></table><p style="margin-top:24px;color:#718184;font-size:10px">A coluna “Km do trecho” indica a quilometragem entre a origem e o destino de cada linha. Cada parada considera exatamente ${FIXED_DELIVERY_MINUTES} minutos de atendimento padrão, independentemente de colunas de duração na planilha. A última linha mostra o retorno à base · Documento gerado localmente pelo GRUPO LABMEDIC - Planejamento de Rotas.</p><script>function downloadReport(){const blob=new Blob([document.documentElement.outerHTML],{type:"text/html;charset=utf-8"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="GRUPO LABMEDIC - Planejamento de Rotas.html";a.click();setTimeout(function(){URL.revokeObjectURL(a.href)},500)}window.onload=function(){setTimeout(function(){window.print()},350)}</body></html>`);
+    w.document.write(`<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>GRUPO LABMEDIC - Roteiro</title><style>@page{size:A4 landscape;margin:10mm}body{font-family:Arial;color:#183345;padding:18px}.toolbar{display:flex;gap:8px;margin-bottom:16px}.toolbar button{border:0;border-radius:6px;padding:9px 13px;background:#0d806d;color:#fff;cursor:pointer}.toolbar button.alt{background:#193345}h1{margin:0;color:#0d806d}h2{font-size:15px;margin-top:28px;border-bottom:2px solid #0d806d;padding-bottom:8px}.sub{color:#6d7e80;font-size:12px;margin:6px 0 22px}.meta{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.box{background:#eff8f4;padding:12px;border-radius:7px}.box small{display:block;color:#718184;font-size:10px}.box b{display:block;margin-top:4px;font-size:13px}table{width:100%;border-collapse:collapse;margin-top:12px;font-size:11px}th{text-align:left;background:#193345;color:white;padding:9px}td{padding:9px;border-bottom:1px solid #dce8e3}table.agenda{table-layout:fixed}table.agenda td{word-break:break-word}table.agenda .fx{text-align:center;white-space:nowrap;font-variant-numeric:tabular-nums}table.agenda td.fx{overflow:hidden;text-overflow:ellipsis}small{color:#758789}@media print{button{display:none}}.unit-photo{width:100%;height:150px;object-fit:cover;border-radius:10px;background:var(--mint);display:block;margin-bottom:12px}.map-details{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin:12px 0}.map-detail{padding:9px;border:1px solid var(--line);border-radius:8px;background:var(--card)}.map-detail small{display:block;color:var(--soft);font-size:9px}.map-detail b{display:block;color:var(--ink);margin-top:3px}.maps-frame{width:100%;height:220px;border:1px solid var(--line);border-radius:10px;margin-top:12px;background:var(--mint)}.progress-backdrop{position:fixed;inset:0;background:rgba(8,27,38,.58);backdrop-filter:blur(5px);z-index:100;display:grid;place-items:center}.progress-card{width:min(390px,calc(100vw - 36px));background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:18px;padding:25px;box-shadow:0 22px 60px rgba(0,0,0,.25);text-align:center}.progress-ring{width:62px;height:62px;border:5px solid var(--line);border-top-color:var(--teal);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 15px}@keyframes spin{to{transform:rotate(360deg)}}.progress-bar{height:7px;background:var(--line);border-radius:99px;overflow:hidden;margin-top:16px}.progress-bar i{display:block;height:100%;width:18%;background:linear-gradient(90deg,var(--teal),#70dfbf);border-radius:inherit;transition:width .3s ease}@page{size:A4 landscape;margin:10mm}</style></head><body><div class="toolbar"><button onclick="window.print()">▤ Imprimir / Salvar como PDF</button><button class="alt" onclick="downloadReport()">⇩ Baixar relatório</button></div><h1>GRUPO LABMEDIC - Planejamento de Rotas</h1><div class="sub">Roteiro profissional de visitação · ${fiscalDateBR(item.meta.date)}</div><div class="meta"><div class="box"><small>Condutor</small><b>${item.meta.driver}</b></div><div class="box"><small>Base de partida</small><b>${item.meta.base}</b></div><div class="box"><small>Resumo</small><b>${item.meta.stops} paradas · ${Number(item.meta.km).toFixed(1)} km</b></div></div><h2>Agenda otimizada</h2><table class="agenda"><colgroup><col style="width:3%"><col style="width:27%"><col style="width:7%"><col style="width:6%"><col style="width:7%"><col style="width:8%"><col style="width:9%"><col style="width:11%"><col style="width:11%"><col style="width:11%"></colgroup><thead><tr><th>#</th><th>Unidade</th><th>Urgência</th><th>Chegada</th><th>Km do trecho</th><th>Deslocamento</th><th>Permanência</th><th class="fx">NF-e</th><th class="fx">Emissão</th><th class="fx">Valor (R$)</th></tr></thead><tbody>${rows}</tbody></table><p style="margin-top:24px;color:#718184;font-size:10px">A coluna “Km do trecho” indica a quilometragem entre a origem e o destino de cada linha. A coluna “Permanência” indica o tempo que o condutor fica em cada unidade, definido pelo operador no planejamento, e já está somada aos horários de chegada. A última linha mostra o retorno à base · Documento gerado localmente pelo GRUPO LABMEDIC - Planejamento de Rotas.</p><script>function downloadReport(){const blob=new Blob([document.documentElement.outerHTML],{type:"text/html;charset=utf-8"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="GRUPO LABMEDIC - Planejamento de Rotas.html";a.click();setTimeout(function(){URL.revokeObjectURL(a.href)},500)}window.onload=function(){setTimeout(function(){window.print()},350)}</body></html>`);
     w.document.close();
 }
 
@@ -6873,6 +6896,8 @@ function reopenHistory(item) {
             current.docs = docsOf(s);
             ensureFiscalData(current);
             if (urgency[s.urgency]) current.urgency = s.urgency;
+            current.service = dwellOf(s);
+            current.serviceEdited = true;
             if (!hasValidCoordinates(current) && hasValidCoordinates(s) && s.geoSource) {
                 ['lat', 'lng', 'geoReady', 'geoSource', 'geoProvider', 'geoFallback', 'geoQuery'].forEach(function(k) { current[k] = s[k]; });
             }
@@ -7211,6 +7236,24 @@ $('selectedList').onclick = e => {
     if (b) toggle(b.dataset.remove)
 };
 document.addEventListener('change', e => {
+    if (e.target.matches('.dwell')) {
+        const s = stops.find(x => String(x.id) === String(e.target.dataset.dwell));
+        if (s) {
+            const raw = String(e.target.value).trim();
+            const v = raw === '' ? DEFAULT_DELIVERY_MINUTES : normalizeServiceMinutes(raw);
+            if (v !== dwellOf(s) || !s.serviceEdited) {
+                s.service = v;
+                s.serviceEdited = true;
+                if (route && Array.isArray(route.ordered) && route.ordered.some(x => String(x.id) === String(s.id))) invalidateRoute();
+                render();
+                persistDataset();
+                persistRoute();
+            } else {
+                e.target.value = v;
+            }
+        }
+        return;
+    }
     if (e.target.matches('.urg')) {
         const s = stops.find(x => x.id === e.target.dataset.u);
         if (s) {
@@ -7726,13 +7769,13 @@ function driverRoutesSheet(item) {
         ordered = item.ordered || [],
         rows = ordered.map(function(s, i) {
             const leg = legs[i] || {};
-            return '<tr><td>' + (i + 1) + '</td><td><strong>' + escHtml(s.name) + '</strong><br><small>' + escHtml(s.address) + '</small></td><td>' + escHtml(s.urgency) + '</td><td>' + clock(leg.arrival) + '</td><td>' + Number(leg.km || 0).toFixed(1) + ' km</td><td>' + fmt(leg.m || 0) + '</td><td>' + fmt(FIXED_DELIVERY_MINUTES) + '<br><small>tempo padrão</small></td></tr>';
+            return '<tr><td>' + (i + 1) + '</td><td><strong>' + escHtml(s.name) + '</strong><br><small>' + escHtml(s.address) + '</small></td><td>' + escHtml(s.urgency) + '</td><td>' + clock(leg.arrival) + '</td><td>' + Number(leg.km || 0).toFixed(1) + ' km</td><td>' + fmt(leg.m || 0) + '</td><td>' + fmt(dwellOf(s)) + '<br><small>permanência</small></td></tr>';
         }).join(''),
         ret = legs[ordered.length],
         retRow = ret ? '<tr class="rs-return"><td>↩</td><td><strong>Retorno à base</strong><br><small>' + escHtml(item.meta.base) + '</small></td><td>—</td><td>' + clock(ret.arrival) + '</td><td>' + Number(ret.km || 0).toFixed(1) + ' km</td><td>' + fmt(ret.m || 0) + '</td><td>Chegada à base: ' + clock(item.end) + '</td></tr>' : '';
     return '<div class="rs-sheet"><div class="rs-sheet-head"><div><h4>GRUPO LABMEDIC - Roteiro de Entregas</h4><small>' + escHtml(item.meta.date || '') + ' · saída ' + escHtml(item.meta.departure || '') + '</small></div><span class="rs-tag">' + escHtml(item.sourceTag || 'Roteiro') + '</span></div>' +
         '<div class="rs-meta"><div class="rs-box"><small>Condutor</small><b>' + escHtml(item.meta.driver) + '</b></div><div class="rs-box"><small>Base de partida</small><b>' + escHtml(item.meta.base) + '</b></div><div class="rs-box"><small>Resumo</small><b>' + item.meta.stops + ' paradas · ' + Number(item.meta.km).toFixed(1) + ' km</b></div></div>' +
-        '<div class="rs-tablewrap"><table><thead><tr><th>#</th><th>Unidade</th><th>Urgência</th><th>Chegada</th><th>Km do trecho</th><th>Deslocamento</th><th>Atendimento padrão</th></tr></thead><tbody>' + rows + retRow + '</tbody></table></div></div>';
+        '<div class="rs-tablewrap"><table><thead><tr><th>#</th><th>Unidade</th><th>Urgência</th><th>Chegada</th><th>Km do trecho</th><th>Deslocamento</th><th>Permanência</th></tr></thead><tbody>' + rows + retRow + '</tbody></table></div></div>';
 }
 
 function openDriverRoutes() {
