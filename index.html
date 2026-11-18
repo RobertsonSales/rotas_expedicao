@@ -3430,6 +3430,10 @@ body.landing-lock {
 .dark .nu-dup { background: #3a3220; border-color: #6b5a24; color: #f3d77a }
 
 /* v11 · progresso do salvamento */
+.progress-done { width: 62px; height: 62px; margin: 0 auto 15px; border-radius: 50%; display: grid; place-items: center; font-size: 30px; font-weight: 800; color: #fff }
+.progress-done.is-ok { background: var(--teal, #0d8c78) }
+.progress-done.is-warn { background: #d99a00 }
+.progress-ok { margin-top: 16px; min-width: 120px }
 .progress-meta { display: flex; justify-content: space-between; margin-top: 8px; font-size: 11px; color: var(--soft, #6d7e80); font-variant-numeric: tabular-nums }
 .progress-meta b { color: var(--teal, #0d8c78) }
 .progress-hint { display: block; margin-top: 10px; font-size: 11px; line-height: 1.4; color: #9a6a00 }
@@ -4134,10 +4138,10 @@ async function syncPendingRoutes(opts) {
         }
         if (!opts.silent) { stopProgressClock(); showProgress('Atualizando o Histórico…', 98); await nextPaint(); }
         refreshHistoryViews();
+        if (!opts.silent) await finishProgress(failed ? 'warn' : 'ok', failed ? 'Envio parcial' : 'Rotas enviadas', sent + ' rota(s) enviada(s) ao Google Sheets' + (failed ? ' · ' + failed + ' não enviada(s): ' + lastError : '') + '.');
     } finally {
         if (!opts.silent) hideProgress();
     }
-    if (!opts.silent) alert(sent + ' rota(s) enviada(s) ao Google Sheets' + (failed ? ' · ' + failed + ' não enviada(s): ' + lastError : '') + '.');
     return { sent: sent, failed: failed };
 }
 
@@ -4654,9 +4658,8 @@ async function saveCurrentRoute(mode) {
     try {
         const replaceInfo = replacing ? Object.assign({}, editingRoute) : null;
         saved = await saveHistory(replaceInfo, onStep);
-        if (saved.ok) showProgress(saved.synced ? 'Concluído.' : 'Concluído com pendência de envio.', 100);
-        hideProgress();
         if (!saved.ok) {
+            hideProgress();
             if (!saved.handled) alert('Não foi possível salvar a rota no Histórico. Verifique os dados fiscais e o espaço disponível no navegador.');
             return;
         }
@@ -4669,8 +4672,11 @@ async function saveCurrentRoute(mode) {
         }
         ensureHistoryFilterShows($('date').value);
         renderHistory();
-        if (saved.synced) alert(replacing ? 'Rota ' + saved.id + ' atualizada no Google Sheets.' : 'Rota salva no Google Sheets (' + saved.id + ').');
-        else alert('A rota ficou guardada neste navegador, mas ainda não foi enviada ao Google Sheets (' + (saved.error || 'sem conexão') + '). Ela será ' + (replacing ? 'atualizada' : 'enviada') + ' automaticamente quando a aplicação for reaberta com conexão, ou pelo botão “Enviar ao Google Sheets” no Histórico.');
+        /* O resultado aparece no próprio painel de progresso (com o tempo
+           total), que só fecha quando o operador confirma em OK. */
+        if (saved.synced) await finishProgress('ok', replacing ? 'Rota atualizada' : 'Rota salva',
+            (replacing ? 'Rota ' + saved.id + ' atualizada no Google Sheets' : 'Rota salva no Google Sheets com o código ' + saved.id) + ' · ' + nStops + (nStops === 1 ? ' parada' : ' paradas') + ', com as permanências definidas.');
+        else await finishProgress('warn', 'Envio pendente', 'A rota ficou guardada neste navegador, mas ainda não foi enviada ao Google Sheets (' + (saved.error || 'sem conexão') + '). Ela será ' + (replacing ? 'atualizada' : 'enviada') + ' automaticamente quando a aplicação for reaberta com conexão, ou pelo botão “Enviar ao Google Sheets” no Histórico.');
     } finally {
         hideProgress();
         btn.disabled = false;
@@ -6075,8 +6081,10 @@ function driverValue() {
 }
 
 let progressClock = null;
+let progressStartedAt = 0;
 function showProgress(message, percent, title) {
     if (!$('progressRoot')) {
+        progressStartedAt = Date.now();
         const root = document.createElement('div');
         root.id = 'progressRoot';
         root.innerHTML = '<div class="progress-backdrop"><div class="progress-card" role="status" aria-live="polite"><div class="progress-ring"></div><h3 id="progressTitle">Calculando rota</h3><p id="progressMessage">Preparando pontos e estimando deslocamentos…</p><div class="progress-bar"><i id="progressBar"></i></div><div class="progress-meta"><b id="progressPct"></b><span id="progressElapsed"></span></div><small id="progressHint" class="progress-hint"></small></div></div>';
@@ -6113,6 +6121,44 @@ function startProgressClock(from, ceiling, hintAfterSec, hintText) {
 function stopProgressClock() {
     if (progressClock) clearInterval(progressClock);
     progressClock = null;
+}
+
+function fmtElapsed(ms) {
+    const sec = Math.max(0, Math.round(ms / 1000));
+    return sec < 60 ? sec + ' s' : Math.floor(sec / 60) + ' min ' + String(sec % 60).padStart(2, '0') + ' s';
+}
+
+/* Encerra o painel de progresso mostrando o resultado (✓ ou ⚠), 100% e o
+   tempo total. O painel fica visível no mínimo ~1,2 s — mesmo quando o
+   Google Sheets responde muito rápido — e só fecha no botão OK. */
+async function finishProgress(kind, title, message) {
+    if (!$('progressRoot')) showProgress(message, 100, title);
+    const minVisible = 1200 - (Date.now() - progressStartedAt);
+    if (minVisible > 0) await new Promise(function(r) { setTimeout(r, minVisible); });
+    stopProgressClock();
+    const total = Date.now() - progressStartedAt;
+    const card = document.querySelector('#progressRoot .progress-card');
+    if (!card) return;
+    const ring = card.querySelector('.progress-ring');
+    if (ring) ring.outerHTML = '<div class="progress-done ' + (kind === 'ok' ? 'is-ok' : 'is-warn') + '">' + (kind === 'ok' ? '✓' : '!') + '</div>';
+    $('progressTitle').textContent = title;
+    $('progressMessage').textContent = message;
+    $('progressBar').style.width = '100%';
+    $('progressPct').textContent = kind === 'ok' ? '100%' : 'pendente';
+    $('progressElapsed').textContent = 'Tempo total: ' + fmtElapsed(total);
+    $('progressHint').textContent = '';
+    return new Promise(function(resolve) {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'primary progress-ok';
+        b.textContent = 'OK';
+        card.appendChild(b);
+        const close = function() { document.removeEventListener('keydown', onKey); hideProgress(); resolve(); };
+        const onKey = function(e) { if (e.key === 'Enter' || e.key === 'Escape') { e.preventDefault(); close(); } };
+        b.onclick = close;
+        document.addEventListener('keydown', onKey);
+        b.focus();
+    });
 }
 
 function hideProgress() {
